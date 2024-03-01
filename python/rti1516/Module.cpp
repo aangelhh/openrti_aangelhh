@@ -7006,6 +7006,9 @@ static PyModuleDef_Slot rti1516_moduledef_slots[] = {
 #ifdef Py_mod_exec
         { Py_mod_exec, (void*)exec_module },
 #endif
+#ifdef Py_mod_multiple_interpreters
+        { Py_mod_multiple_interpreters, Py_MOD_PER_INTERPRETER_GIL_SUPPORTED },
+#endif
         { 0/*id*/, NULL/*value*/ }
 };
 #endif
