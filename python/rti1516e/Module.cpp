@@ -2797,9 +2797,11 @@ PyRTIambassador_connect(PyRTIambassadorObject *self, PyObject *args)
     theCallbackModel = rti1516e::HLA_EVOKED;
 
   std::wstring localSettingsDesignator;
-  if (!PyObject_GetString(localSettingsDesignator, arg3)) {
-    PyErr_SetString(PyExc_TypeError, "localSettingsDesignator needs to be a string!");
-    return 0;
+  if (arg3) {
+    if (!PyObject_GetString(localSettingsDesignator, arg3)) {
+      PyErr_SetString(PyExc_TypeError, "localSettingsDesignator needs to be a string!");
+      return 0;
+    }
   }
 
   try {
