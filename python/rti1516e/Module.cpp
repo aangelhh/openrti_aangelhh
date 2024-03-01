@@ -306,6 +306,31 @@ PyObject_GetDouble(double& value, PyObject* o)
   return true;
 }
 
+static bool
+PyObject_GetCallbackModel(rti1516e::CallbackModel& callbackModel, PyObject* o)
+{
+  long value;
+  if (PyObject_GetInt(value, o)) {
+    if (value == rti1516e::HLA_IMMEDIATE)
+      callbackModel = rti1516e::HLA_IMMEDIATE;
+    else
+      callbackModel = rti1516e::HLA_EVOKED;
+
+    return true;
+  } else {
+    std::wstring string;
+    if (PyObject_GetString(string, o)) {
+      if (string == L"HLA_IMMEDIATE")
+        callbackModel = rti1516e::HLA_IMMEDIATE;
+      else
+        callbackModel = rti1516e::HLA_EVOKED;
+
+      return true;
+    }
+  }
+  return false;
+}
+
 static PyObject*
 PyObject_NewTransportationType(const rti1516e::TransportationType& transportationType)
 {
@@ -2783,18 +2808,11 @@ PyRTIambassador_connect(PyRTIambassadorObject *self, PyObject *args)
   if (!PyArg_UnpackTuple(args, "connect", 2, 3, &arg1, &arg2, &arg3))
     return 0;
 
-  std::wstring callbackModelString;
-  if (!PyObject_GetString(callbackModelString, arg2)) {
+  rti1516e::CallbackModel theCallbackModel;
+  if (!PyObject_GetCallbackModel(theCallbackModel, arg2)) {
     PyErr_SetString(PyExc_TypeError, "callbackModel needs to be a string!");
     return 0;
   }
-  rti1516e::CallbackModel theCallbackModel;
-  if (callbackModelString == L"HLA_IMMEDIATE")
-    theCallbackModel = rti1516e::HLA_IMMEDIATE;
-  else if (callbackModelString == L"HLA_EVOKED")
-    theCallbackModel = rti1516e::HLA_EVOKED;
-  else
-    theCallbackModel = rti1516e::HLA_EVOKED;
 
   std::wstring localSettingsDesignator;
   if (arg3) {
@@ -7384,6 +7402,10 @@ INITFUNCNAME(void)
 
   Py_IncRef((PyObject*)&PyRTIambassadorType);
   PyModule_AddObject(module, "RTIambassador", (PyObject*)&PyRTIambassadorType);
+
+  // enum CallbackModel
+  PyModule_AddIntConstant(module, "HLA_IMMEDIATE", rti1516e::HLA_IMMEDIATE);
+  PyModule_AddIntConstant(module, "HLA_EVOKED", rti1516e::HLA_EVOKED);
 
   // enum OrderType
   PyModule_AddIntConstant(module, "RECEIVE", rti1516e::RECEIVE);
