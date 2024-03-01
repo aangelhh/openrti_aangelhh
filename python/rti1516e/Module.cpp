@@ -737,7 +737,7 @@ PyObject_GetRangeBounds(rti1516e::RangeBounds& rangeBounds, PyObject* o)
   };                                                                    \
                                                                         \
   static PyTypeObject Py ## HandleKind ## Type = {                      \
-    PyVarObject_HEAD_INIT(NULL, 0)                                      \
+    PyVarObject_HEAD_INIT(&PyType_Type, 0)                              \
     # HandleKind ,                      /* tp_name */                   \
     sizeof(Py##HandleKind),             /* tp_basicsize */              \
     0,                                  /* tp_itemsize */               \
@@ -7284,7 +7284,7 @@ PyRTIambassadorObject_clear(PyRTIambassadorObject *o)
 }
 
 static PyTypeObject PyRTIambassadorType = {
-  PyVarObject_HEAD_INIT(NULL, 0)
+  PyVarObject_HEAD_INIT(&PyType_Type, 0)
   "RTIambassador",                  /* tp_name */
   sizeof(PyRTIambassadorObject),    /* tp_basicsize */
   0,                                /* tp_itemsize */
