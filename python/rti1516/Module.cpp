@@ -6644,10 +6644,331 @@ static int PyModule_AddRTIambassadorType(PyObject* m)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// building blocks for module initialization
 
 static PyMethodDef rti1516_methods[] = {
     {NULL, NULL}
 };
+
+static int
+type_ready(void)
+{
+#define RTI_EXCEPTION(ExceptionKind)                                          \
+  if (Py ## ExceptionKind ## Type_Ready() < 0)                                \
+    return -1
+
+  RTI_EXCEPTION(Exception);
+  RTI_EXCEPTION(AsynchronousDeliveryAlreadyDisabled);
+  RTI_EXCEPTION(AsynchronousDeliveryAlreadyEnabled);
+  RTI_EXCEPTION(AttributeAcquisitionWasNotCanceled);
+  RTI_EXCEPTION(AttributeAcquisitionWasNotRequested);
+  RTI_EXCEPTION(AttributeAlreadyBeingAcquired);
+  RTI_EXCEPTION(AttributeAlreadyBeingDivested);
+  RTI_EXCEPTION(AttributeAlreadyOwned);
+  RTI_EXCEPTION(AttributeDivestitureWasNotRequested);
+  RTI_EXCEPTION(AttributeNotDefined);
+  RTI_EXCEPTION(AttributeNotOwned);
+  RTI_EXCEPTION(AttributeNotPublished);
+  RTI_EXCEPTION(AttributeNotRecognized);
+  RTI_EXCEPTION(AttributeNotSubscribed);
+  RTI_EXCEPTION(AttributeRelevanceAdvisorySwitchIsOff);
+  RTI_EXCEPTION(AttributeRelevanceAdvisorySwitchIsOn);
+  RTI_EXCEPTION(AttributeScopeAdvisorySwitchIsOff);
+  RTI_EXCEPTION(AttributeScopeAdvisorySwitchIsOn);
+  RTI_EXCEPTION(BadInitializationParameter);
+  RTI_EXCEPTION(CouldNotCreateLogicalTimeFactory);
+  RTI_EXCEPTION(CouldNotDecode);
+  RTI_EXCEPTION(CouldNotDiscover);
+  RTI_EXCEPTION(CouldNotEncode);
+  RTI_EXCEPTION(CouldNotOpenFDD);
+  RTI_EXCEPTION(CouldNotInitiateRestore);
+  RTI_EXCEPTION(DeletePrivilegeNotHeld);
+  RTI_EXCEPTION(RequestForTimeConstrainedPending);
+  RTI_EXCEPTION(NoRequestToEnableTimeConstrainedWasPending);
+  RTI_EXCEPTION(RequestForTimeRegulationPending);
+  RTI_EXCEPTION(NoRequestToEnableTimeRegulationWasPending);
+  RTI_EXCEPTION(ErrorReadingFDD);
+  RTI_EXCEPTION(FederateAlreadyExecutionMember);
+  RTI_EXCEPTION(FederateHasNotBegunSave);
+  RTI_EXCEPTION(FederateInternalError);
+  RTI_EXCEPTION(FederateNotExecutionMember);
+  RTI_EXCEPTION(FederateOwnsAttributes);
+  RTI_EXCEPTION(FederateServiceInvocationsAreBeingReportedViaMOM);
+  RTI_EXCEPTION(FederateUnableToUseTime);
+  RTI_EXCEPTION(FederatesCurrentlyJoined);
+  RTI_EXCEPTION(FederationExecutionAlreadyExists);
+  RTI_EXCEPTION(FederationExecutionDoesNotExist);
+  RTI_EXCEPTION(IllegalName);
+  RTI_EXCEPTION(IllegalTimeArithmetic);
+  RTI_EXCEPTION(InteractionClassNotDefined);
+  RTI_EXCEPTION(InteractionClassNotPublished);
+  RTI_EXCEPTION(InteractionClassNotRecognized);
+  RTI_EXCEPTION(InteractionClassNotSubscribed);
+  RTI_EXCEPTION(InteractionParameterNotDefined);
+  RTI_EXCEPTION(InteractionParameterNotRecognized);
+  RTI_EXCEPTION(InteractionRelevanceAdvisorySwitchIsOff);
+  RTI_EXCEPTION(InteractionRelevanceAdvisorySwitchIsOn);
+  RTI_EXCEPTION(InTimeAdvancingState);
+  RTI_EXCEPTION(InvalidAttributeHandle);
+  RTI_EXCEPTION(InvalidDimensionHandle);
+  RTI_EXCEPTION(InvalidFederateHandle);
+  RTI_EXCEPTION(InvalidInteractionClassHandle);
+  RTI_EXCEPTION(InvalidLogicalTime);
+  RTI_EXCEPTION(InvalidLogicalTimeInterval);
+  RTI_EXCEPTION(InvalidLookahead);
+  RTI_EXCEPTION(InvalidObjectClassHandle);
+  RTI_EXCEPTION(InvalidOrderName);
+  RTI_EXCEPTION(InvalidOrderType);
+  RTI_EXCEPTION(InvalidParameterHandle);
+  RTI_EXCEPTION(InvalidRangeBound);
+  RTI_EXCEPTION(InvalidRegion);
+  RTI_EXCEPTION(InvalidRegionContext);
+  RTI_EXCEPTION(InvalidRetractionHandle);
+  RTI_EXCEPTION(InvalidServiceGroup);
+  RTI_EXCEPTION(InvalidTransportationName);
+  RTI_EXCEPTION(InvalidTransportationType);
+  RTI_EXCEPTION(JoinedFederateIsNotInTimeAdvancingState);
+  RTI_EXCEPTION(LogicalTimeAlreadyPassed);
+  RTI_EXCEPTION(MessageCanNoLongerBeRetracted);
+  RTI_EXCEPTION(NameNotFound);
+  RTI_EXCEPTION(NoAcquisitionPending);
+  RTI_EXCEPTION(ObjectClassNotDefined);
+  RTI_EXCEPTION(ObjectClassNotKnown);
+  RTI_EXCEPTION(ObjectClassNotPublished);
+  RTI_EXCEPTION(ObjectClassRelevanceAdvisorySwitchIsOff);
+  RTI_EXCEPTION(ObjectClassRelevanceAdvisorySwitchIsOn);
+  RTI_EXCEPTION(ObjectInstanceNameInUse);
+  RTI_EXCEPTION(ObjectInstanceNameNotReserved);
+  RTI_EXCEPTION(ObjectInstanceNotKnown);
+  RTI_EXCEPTION(OwnershipAcquisitionPending);
+  RTI_EXCEPTION(RTIinternalError);
+  RTI_EXCEPTION(RegionDoesNotContainSpecifiedDimension);
+  RTI_EXCEPTION(RegionInUseForUpdateOrSubscription);
+  RTI_EXCEPTION(RegionNotCreatedByThisFederate);
+  RTI_EXCEPTION(RestoreInProgress);
+  RTI_EXCEPTION(RestoreNotRequested);
+  RTI_EXCEPTION(SaveInProgress);
+  RTI_EXCEPTION(SaveNotInitiated);
+  RTI_EXCEPTION(SpecifiedSaveLabelDoesNotExist);
+  RTI_EXCEPTION(SynchronizationPointLabelNotAnnounced);
+  RTI_EXCEPTION(TimeConstrainedAlreadyEnabled);
+  RTI_EXCEPTION(TimeConstrainedIsNotEnabled);
+  RTI_EXCEPTION(TimeRegulationAlreadyEnabled);
+  RTI_EXCEPTION(TimeRegulationIsNotEnabled);
+  RTI_EXCEPTION(UnableToPerformSave);
+  RTI_EXCEPTION(UnknownName);
+  RTI_EXCEPTION(InternalError);
+#undef RTI_EXCEPTION
+
+#define RTI_HANDLE(HandleKind)                                             \
+  if (Py ## HandleKind ## Type_Ready() < 0)                                \
+    return -1
+
+  RTI_HANDLE(FederateHandle);
+  RTI_HANDLE(ObjectClassHandle);
+  RTI_HANDLE(InteractionClassHandle);
+  RTI_HANDLE(ObjectInstanceHandle);
+  RTI_HANDLE(AttributeHandle);
+  RTI_HANDLE(ParameterHandle);
+  RTI_HANDLE(DimensionHandle);
+  RTI_HANDLE(RegionHandle);
+  RTI_HANDLE(MessageRetractionHandle);
+#undef RTI_HANDLE
+
+  if (PyRTIambassadorType_Ready() < 0)
+    return -1;
+
+  return 0;
+}
+
+static int exec_module(PyObject *m)
+{
+#define RTI_EXCEPTION(ExceptionKind)                                          \
+  if (PyModule_Add ## ExceptionKind ## Type(m) < 0)                           \
+    return -1
+
+  RTI_EXCEPTION(Exception);
+  RTI_EXCEPTION(AsynchronousDeliveryAlreadyDisabled);
+  RTI_EXCEPTION(AsynchronousDeliveryAlreadyEnabled);
+  RTI_EXCEPTION(AttributeAcquisitionWasNotCanceled);
+  RTI_EXCEPTION(AttributeAcquisitionWasNotRequested);
+  RTI_EXCEPTION(AttributeAlreadyBeingAcquired);
+  RTI_EXCEPTION(AttributeAlreadyBeingDivested);
+  RTI_EXCEPTION(AttributeAlreadyOwned);
+  RTI_EXCEPTION(AttributeDivestitureWasNotRequested);
+  RTI_EXCEPTION(AttributeNotDefined);
+  RTI_EXCEPTION(AttributeNotOwned);
+  RTI_EXCEPTION(AttributeNotPublished);
+  RTI_EXCEPTION(AttributeNotRecognized);
+  RTI_EXCEPTION(AttributeNotSubscribed);
+  RTI_EXCEPTION(AttributeRelevanceAdvisorySwitchIsOff);
+  RTI_EXCEPTION(AttributeRelevanceAdvisorySwitchIsOn);
+  RTI_EXCEPTION(AttributeScopeAdvisorySwitchIsOff);
+  RTI_EXCEPTION(AttributeScopeAdvisorySwitchIsOn);
+  RTI_EXCEPTION(BadInitializationParameter);
+  RTI_EXCEPTION(CouldNotCreateLogicalTimeFactory);
+  RTI_EXCEPTION(CouldNotDecode);
+  RTI_EXCEPTION(CouldNotDiscover);
+  RTI_EXCEPTION(CouldNotEncode);
+  RTI_EXCEPTION(CouldNotOpenFDD);
+  RTI_EXCEPTION(CouldNotInitiateRestore);
+  RTI_EXCEPTION(DeletePrivilegeNotHeld);
+  RTI_EXCEPTION(RequestForTimeConstrainedPending);
+  RTI_EXCEPTION(NoRequestToEnableTimeConstrainedWasPending);
+  RTI_EXCEPTION(RequestForTimeRegulationPending);
+  RTI_EXCEPTION(NoRequestToEnableTimeRegulationWasPending);
+  RTI_EXCEPTION(ErrorReadingFDD);
+  RTI_EXCEPTION(FederateAlreadyExecutionMember);
+  RTI_EXCEPTION(FederateHasNotBegunSave);
+  RTI_EXCEPTION(FederateInternalError);
+  RTI_EXCEPTION(FederateNotExecutionMember);
+  RTI_EXCEPTION(FederateOwnsAttributes);
+  RTI_EXCEPTION(FederateServiceInvocationsAreBeingReportedViaMOM);
+  RTI_EXCEPTION(FederateUnableToUseTime);
+  RTI_EXCEPTION(FederatesCurrentlyJoined);
+  RTI_EXCEPTION(FederationExecutionAlreadyExists);
+  RTI_EXCEPTION(FederationExecutionDoesNotExist);
+  RTI_EXCEPTION(IllegalName);
+  RTI_EXCEPTION(IllegalTimeArithmetic);
+  RTI_EXCEPTION(InteractionClassNotDefined);
+  RTI_EXCEPTION(InteractionClassNotPublished);
+  RTI_EXCEPTION(InteractionClassNotRecognized);
+  RTI_EXCEPTION(InteractionClassNotSubscribed);
+  RTI_EXCEPTION(InteractionParameterNotDefined);
+  RTI_EXCEPTION(InteractionParameterNotRecognized);
+  RTI_EXCEPTION(InteractionRelevanceAdvisorySwitchIsOff);
+  RTI_EXCEPTION(InteractionRelevanceAdvisorySwitchIsOn);
+  RTI_EXCEPTION(InTimeAdvancingState);
+  RTI_EXCEPTION(InvalidAttributeHandle);
+  RTI_EXCEPTION(InvalidDimensionHandle);
+  RTI_EXCEPTION(InvalidFederateHandle);
+  RTI_EXCEPTION(InvalidInteractionClassHandle);
+  RTI_EXCEPTION(InvalidLogicalTime);
+  RTI_EXCEPTION(InvalidLogicalTimeInterval);
+  RTI_EXCEPTION(InvalidLookahead);
+  RTI_EXCEPTION(InvalidObjectClassHandle);
+  RTI_EXCEPTION(InvalidOrderName);
+  RTI_EXCEPTION(InvalidOrderType);
+  RTI_EXCEPTION(InvalidParameterHandle);
+  RTI_EXCEPTION(InvalidRangeBound);
+  RTI_EXCEPTION(InvalidRegion);
+  RTI_EXCEPTION(InvalidRegionContext);
+  RTI_EXCEPTION(InvalidRetractionHandle);
+  RTI_EXCEPTION(InvalidServiceGroup);
+  RTI_EXCEPTION(InvalidTransportationName);
+  RTI_EXCEPTION(InvalidTransportationType);
+  RTI_EXCEPTION(JoinedFederateIsNotInTimeAdvancingState);
+  RTI_EXCEPTION(LogicalTimeAlreadyPassed);
+  RTI_EXCEPTION(MessageCanNoLongerBeRetracted);
+  RTI_EXCEPTION(NameNotFound);
+  RTI_EXCEPTION(NoAcquisitionPending);
+  RTI_EXCEPTION(ObjectClassNotDefined);
+  RTI_EXCEPTION(ObjectClassNotKnown);
+  RTI_EXCEPTION(ObjectClassNotPublished);
+  RTI_EXCEPTION(ObjectClassRelevanceAdvisorySwitchIsOff);
+  RTI_EXCEPTION(ObjectClassRelevanceAdvisorySwitchIsOn);
+  RTI_EXCEPTION(ObjectInstanceNameInUse);
+  RTI_EXCEPTION(ObjectInstanceNameNotReserved);
+  RTI_EXCEPTION(ObjectInstanceNotKnown);
+  RTI_EXCEPTION(OwnershipAcquisitionPending);
+  RTI_EXCEPTION(RTIinternalError);
+  RTI_EXCEPTION(RegionDoesNotContainSpecifiedDimension);
+  RTI_EXCEPTION(RegionInUseForUpdateOrSubscription);
+  RTI_EXCEPTION(RegionNotCreatedByThisFederate);
+  RTI_EXCEPTION(RestoreInProgress);
+  RTI_EXCEPTION(RestoreNotRequested);
+  RTI_EXCEPTION(SaveInProgress);
+  RTI_EXCEPTION(SaveNotInitiated);
+  RTI_EXCEPTION(SpecifiedSaveLabelDoesNotExist);
+  RTI_EXCEPTION(SynchronizationPointLabelNotAnnounced);
+  RTI_EXCEPTION(TimeConstrainedAlreadyEnabled);
+  RTI_EXCEPTION(TimeConstrainedIsNotEnabled);
+  RTI_EXCEPTION(TimeRegulationAlreadyEnabled);
+  RTI_EXCEPTION(TimeRegulationIsNotEnabled);
+  RTI_EXCEPTION(UnableToPerformSave);
+  RTI_EXCEPTION(UnknownName);
+  RTI_EXCEPTION(InternalError);
+#undef RTI_EXCEPTION
+
+#define RTI_HANDLE(HandleKind)                                             \
+  if (PyModule_Add ## HandleKind ## Type(m) < 0)                           \
+    return -1
+
+  RTI_HANDLE(FederateHandle);
+  RTI_HANDLE(ObjectClassHandle);
+  RTI_HANDLE(InteractionClassHandle);
+  RTI_HANDLE(ObjectInstanceHandle);
+  RTI_HANDLE(AttributeHandle);
+  RTI_HANDLE(ParameterHandle);
+  RTI_HANDLE(DimensionHandle);
+  RTI_HANDLE(RegionHandle);
+  RTI_HANDLE(MessageRetractionHandle);
+#undef RTI_HANDLE
+
+  if (PyModule_AddRTIambassadorType(m) < 0)
+    return -1;
+
+  // enum OrderType
+  PyModule_AddIntConstant(m, "RECEIVE", rti1516::RECEIVE);
+  PyModule_AddIntConstant(m, "TIMESTAMP", rti1516::TIMESTAMP);
+
+  // enum ResignAction
+  PyModule_AddIntConstant(m, "UNCONDITIONALLY_DIVEST_ATTRIBUTES", rti1516::UNCONDITIONALLY_DIVEST_ATTRIBUTES);
+  PyModule_AddIntConstant(m, "DELETE_OBJECTS", rti1516::DELETE_OBJECTS);
+  PyModule_AddIntConstant(m, "CANCEL_PENDING_OWNERSHIP_ACQUISITIONS", rti1516::CANCEL_PENDING_OWNERSHIP_ACQUISITIONS);
+  PyModule_AddIntConstant(m, "DELETE_OBJECTS_THEN_DIVEST", rti1516::DELETE_OBJECTS_THEN_DIVEST);
+  PyModule_AddIntConstant(m, "CANCEL_THEN_DELETE_THEN_DIVEST", rti1516::CANCEL_THEN_DELETE_THEN_DIVEST);
+  PyModule_AddIntConstant(m, "NO_ACTION", rti1516::NO_ACTION);
+
+  // enum RestoreFailureReason
+  PyModule_AddIntConstant(m, "RTI_UNABLE_TO_RESTORE", rti1516::RTI_UNABLE_TO_RESTORE);
+  PyModule_AddIntConstant(m, "FEDERATE_REPORTED_FAILURE_DURING_RESTORE", rti1516::FEDERATE_REPORTED_FAILURE_DURING_RESTORE);
+  PyModule_AddIntConstant(m, "FEDERATE_RESIGNED_DURING_RESTORE", rti1516::FEDERATE_RESIGNED_DURING_RESTORE);
+  PyModule_AddIntConstant(m, "RTI_DETECTED_FAILURE_DURING_RESTORE", rti1516::RTI_DETECTED_FAILURE_DURING_RESTORE);
+
+  // enum RestoreStatus
+  PyModule_AddIntConstant(m, "NO_RESTORE_IN_PROGRESS", rti1516::NO_RESTORE_IN_PROGRESS);
+  PyModule_AddIntConstant(m, "FEDERATE_RESTORE_REQUEST_PENDING", rti1516::FEDERATE_RESTORE_REQUEST_PENDING);
+  PyModule_AddIntConstant(m, "FEDERATE_WAITING_FOR_RESTORE_TO_BEGIN", rti1516::FEDERATE_WAITING_FOR_RESTORE_TO_BEGIN);
+  PyModule_AddIntConstant(m, "FEDERATE_PREPARED_TO_RESTORE", rti1516::FEDERATE_PREPARED_TO_RESTORE);
+  PyModule_AddIntConstant(m, "FEDERATE_RESTORING", rti1516::FEDERATE_RESTORING);
+  PyModule_AddIntConstant(m, "FEDERATE_WAITING_FOR_FEDERATION_TO_RESTORE", rti1516::FEDERATE_WAITING_FOR_FEDERATION_TO_RESTORE);
+
+  // enum SaveFailureReason
+  PyModule_AddIntConstant(m, "RTI_UNABLE_TO_SAVE", rti1516::RTI_UNABLE_TO_SAVE);
+  PyModule_AddIntConstant(m, "FEDERATE_REPORTED_FAILURE_DURING_SAVE", rti1516::FEDERATE_REPORTED_FAILURE_DURING_SAVE);
+  PyModule_AddIntConstant(m, "FEDERATE_RESIGNED_DURING_SAVE", rti1516::FEDERATE_RESIGNED_DURING_SAVE);
+  PyModule_AddIntConstant(m, "RTI_DETECTED_FAILURE_DURING_SAVE", rti1516::RTI_DETECTED_FAILURE_DURING_SAVE);
+  PyModule_AddIntConstant(m, "SAVE_TIME_CANNOT_BE_HONORED", rti1516::SAVE_TIME_CANNOT_BE_HONORED);
+
+  // enum SaveStatus
+  PyModule_AddIntConstant(m, "NO_SAVE_IN_PROGRESS", rti1516::NO_SAVE_IN_PROGRESS);
+  PyModule_AddIntConstant(m, "FEDERATE_INSTRUCTED_TO_SAVE", rti1516::FEDERATE_INSTRUCTED_TO_SAVE);
+  PyModule_AddIntConstant(m, "FEDERATE_SAVING", rti1516::FEDERATE_SAVING);
+  PyModule_AddIntConstant(m, "FEDERATE_WAITING_FOR_FEDERATION_TO_SAVE", rti1516::FEDERATE_WAITING_FOR_FEDERATION_TO_SAVE);
+
+  // enum ServiceGroupIndicator
+  PyModule_AddIntConstant(m, "FEDERATION_MANAGEMENT", rti1516::FEDERATION_MANAGEMENT);
+  PyModule_AddIntConstant(m, "DECLARATION_MANAGEMENT", rti1516::DECLARATION_MANAGEMENT);
+  PyModule_AddIntConstant(m, "OBJECT_MANAGEMENT", rti1516::OBJECT_MANAGEMENT);
+  PyModule_AddIntConstant(m, "OWNERSHIP_MANAGEMENT", rti1516::OWNERSHIP_MANAGEMENT);
+  PyModule_AddIntConstant(m, "TIME_MANAGEMENT", rti1516::TIME_MANAGEMENT);
+  PyModule_AddIntConstant(m, "DATA_DISTRIBUTION_MANAGEMENT", rti1516::DATA_DISTRIBUTION_MANAGEMENT);
+  PyModule_AddIntConstant(m, "SUPPORT_SERVICES", rti1516::SUPPORT_SERVICES);
+
+  // enum SynchronizationFailureReason
+  PyModule_AddIntConstant(m, "SYNCHRONIZATION_POINT_LABEL_NOT_UNIQUE", rti1516::SYNCHRONIZATION_POINT_LABEL_NOT_UNIQUE);
+  PyModule_AddIntConstant(m, "SYNCHRONIZATION_SET_MEMBER_NOT_JOINED", rti1516::SYNCHRONIZATION_SET_MEMBER_NOT_JOINED);
+  PyModule_AddIntConstant(m, "FEDERATE_RESIGNED_DURING_SYNCHRONIZATION", rti1516::FEDERATE_RESIGNED_DURING_SYNCHRONIZATION);
+  PyModule_AddIntConstant(m, "RTI_DETECTED_FAILURE_DURING_SYNCHRONIZATION", rti1516::RTI_DETECTED_FAILURE_DURING_SYNCHRONIZATION);
+  PyModule_AddIntConstant(m, "SYNCHRONIZATION_TIME_CANNOT_BE_HONORED", rti1516::SYNCHRONIZATION_TIME_CANNOT_BE_HONORED);
+
+  // enum TransportationType
+  PyModule_AddIntConstant(m, "RELIABLE", rti1516::RELIABLE);
+  PyModule_AddIntConstant(m, "BEST_EFFORT", rti1516::BEST_EFFORT);
+
+  return 0;
+}
 
 #if 3 <= PY_MAJOR_VERSION
 
@@ -6673,25 +6994,7 @@ static struct PyModuleDef moduledef = {
 PyMODINIT_FUNC
 INITFUNCNAME(void)
 {
-  if (PyFederateHandleType_Ready() < 0)
-    INITERROR;
-  if (PyObjectClassHandleType_Ready() < 0)
-    INITERROR;
-  if (PyInteractionClassHandleType_Ready() < 0)
-    INITERROR;
-  if (PyObjectInstanceHandleType_Ready() < 0)
-    INITERROR;
-  if (PyAttributeHandleType_Ready() < 0)
-    INITERROR;
-  if (PyParameterHandleType_Ready() < 0)
-    INITERROR;
-  if (PyDimensionHandleType_Ready() < 0)
-    INITERROR;
-  if (PyRegionHandleType_Ready() < 0)
-    INITERROR;
-  if (PyMessageRetractionHandleType_Ready() < 0)
-    INITERROR;
-  if (PyRTIambassadorType_Ready() < 0)
+  if (type_ready() < 0)
     INITERROR;
 
 #if PY_MAJOR_VERSION >= 3
@@ -6700,187 +7003,8 @@ INITFUNCNAME(void)
   PyObject* module = Py_InitModule3("rti1516", rti1516_methods, "rti1516 RTI/HLA backend implementation.");
 #endif
 
-  PyModule_AddFederateHandleType(module);
-  PyModule_AddObjectClassHandleType(module);
-  PyModule_AddObjectInstanceHandleType(module);
-  PyModule_AddInteractionClassHandleType(module);
-  PyModule_AddAttributeHandleType(module);
-  PyModule_AddParameterHandleType(module);
-  PyModule_AddDimensionHandleType(module);
-  PyModule_AddRegionHandleType(module);
-  PyModule_AddMessageRetractionHandleType(module);
-
-  PyModule_AddRTIambassadorType(module);
-
-  // enum OrderType
-  PyModule_AddIntConstant(module, "RECEIVE", rti1516::RECEIVE);
-  PyModule_AddIntConstant(module, "TIMESTAMP", rti1516::TIMESTAMP);
-
-  // enum ResignAction
-  PyModule_AddIntConstant(module, "UNCONDITIONALLY_DIVEST_ATTRIBUTES", rti1516::UNCONDITIONALLY_DIVEST_ATTRIBUTES);
-  PyModule_AddIntConstant(module, "DELETE_OBJECTS", rti1516::DELETE_OBJECTS);
-  PyModule_AddIntConstant(module, "CANCEL_PENDING_OWNERSHIP_ACQUISITIONS", rti1516::CANCEL_PENDING_OWNERSHIP_ACQUISITIONS);
-  PyModule_AddIntConstant(module, "DELETE_OBJECTS_THEN_DIVEST", rti1516::DELETE_OBJECTS_THEN_DIVEST);
-  PyModule_AddIntConstant(module, "CANCEL_THEN_DELETE_THEN_DIVEST", rti1516::CANCEL_THEN_DELETE_THEN_DIVEST);
-  PyModule_AddIntConstant(module, "NO_ACTION", rti1516::NO_ACTION);
-
-  // enum RestoreFailureReason
-  PyModule_AddIntConstant(module, "RTI_UNABLE_TO_RESTORE", rti1516::RTI_UNABLE_TO_RESTORE);
-  PyModule_AddIntConstant(module, "FEDERATE_REPORTED_FAILURE_DURING_RESTORE", rti1516::FEDERATE_REPORTED_FAILURE_DURING_RESTORE);
-  PyModule_AddIntConstant(module, "FEDERATE_RESIGNED_DURING_RESTORE", rti1516::FEDERATE_RESIGNED_DURING_RESTORE);
-  PyModule_AddIntConstant(module, "RTI_DETECTED_FAILURE_DURING_RESTORE", rti1516::RTI_DETECTED_FAILURE_DURING_RESTORE);
-
-  // enum RestoreStatus
-  PyModule_AddIntConstant(module, "NO_RESTORE_IN_PROGRESS", rti1516::NO_RESTORE_IN_PROGRESS);
-  PyModule_AddIntConstant(module, "FEDERATE_RESTORE_REQUEST_PENDING", rti1516::FEDERATE_RESTORE_REQUEST_PENDING);
-  PyModule_AddIntConstant(module, "FEDERATE_WAITING_FOR_RESTORE_TO_BEGIN", rti1516::FEDERATE_WAITING_FOR_RESTORE_TO_BEGIN);
-  PyModule_AddIntConstant(module, "FEDERATE_PREPARED_TO_RESTORE", rti1516::FEDERATE_PREPARED_TO_RESTORE);
-  PyModule_AddIntConstant(module, "FEDERATE_RESTORING", rti1516::FEDERATE_RESTORING);
-  PyModule_AddIntConstant(module, "FEDERATE_WAITING_FOR_FEDERATION_TO_RESTORE", rti1516::FEDERATE_WAITING_FOR_FEDERATION_TO_RESTORE);
-
-  // enum SaveFailureReason
-  PyModule_AddIntConstant(module, "RTI_UNABLE_TO_SAVE", rti1516::RTI_UNABLE_TO_SAVE);
-  PyModule_AddIntConstant(module, "FEDERATE_REPORTED_FAILURE_DURING_SAVE", rti1516::FEDERATE_REPORTED_FAILURE_DURING_SAVE);
-  PyModule_AddIntConstant(module, "FEDERATE_RESIGNED_DURING_SAVE", rti1516::FEDERATE_RESIGNED_DURING_SAVE);
-  PyModule_AddIntConstant(module, "RTI_DETECTED_FAILURE_DURING_SAVE", rti1516::RTI_DETECTED_FAILURE_DURING_SAVE);
-  PyModule_AddIntConstant(module, "SAVE_TIME_CANNOT_BE_HONORED", rti1516::SAVE_TIME_CANNOT_BE_HONORED);
-
-  // enum SaveStatus
-  PyModule_AddIntConstant(module, "NO_SAVE_IN_PROGRESS", rti1516::NO_SAVE_IN_PROGRESS);
-  PyModule_AddIntConstant(module, "FEDERATE_INSTRUCTED_TO_SAVE", rti1516::FEDERATE_INSTRUCTED_TO_SAVE);
-  PyModule_AddIntConstant(module, "FEDERATE_SAVING", rti1516::FEDERATE_SAVING);
-  PyModule_AddIntConstant(module, "FEDERATE_WAITING_FOR_FEDERATION_TO_SAVE", rti1516::FEDERATE_WAITING_FOR_FEDERATION_TO_SAVE);
-
-  // enum ServiceGroupIndicator
-  PyModule_AddIntConstant(module, "FEDERATION_MANAGEMENT", rti1516::FEDERATION_MANAGEMENT);
-  PyModule_AddIntConstant(module, "DECLARATION_MANAGEMENT", rti1516::DECLARATION_MANAGEMENT);
-  PyModule_AddIntConstant(module, "OBJECT_MANAGEMENT", rti1516::OBJECT_MANAGEMENT);
-  PyModule_AddIntConstant(module, "OWNERSHIP_MANAGEMENT", rti1516::OWNERSHIP_MANAGEMENT);
-  PyModule_AddIntConstant(module, "TIME_MANAGEMENT", rti1516::TIME_MANAGEMENT);
-  PyModule_AddIntConstant(module, "DATA_DISTRIBUTION_MANAGEMENT", rti1516::DATA_DISTRIBUTION_MANAGEMENT);
-  PyModule_AddIntConstant(module, "SUPPORT_SERVICES", rti1516::SUPPORT_SERVICES);
-
-  // enum SynchronizationFailureReason
-  PyModule_AddIntConstant(module, "SYNCHRONIZATION_POINT_LABEL_NOT_UNIQUE", rti1516::SYNCHRONIZATION_POINT_LABEL_NOT_UNIQUE);
-  PyModule_AddIntConstant(module, "SYNCHRONIZATION_SET_MEMBER_NOT_JOINED", rti1516::SYNCHRONIZATION_SET_MEMBER_NOT_JOINED);
-  PyModule_AddIntConstant(module, "FEDERATE_RESIGNED_DURING_SYNCHRONIZATION", rti1516::FEDERATE_RESIGNED_DURING_SYNCHRONIZATION);
-  PyModule_AddIntConstant(module, "RTI_DETECTED_FAILURE_DURING_SYNCHRONIZATION", rti1516::RTI_DETECTED_FAILURE_DURING_SYNCHRONIZATION);
-  PyModule_AddIntConstant(module, "SYNCHRONIZATION_TIME_CANNOT_BE_HONORED", rti1516::SYNCHRONIZATION_TIME_CANNOT_BE_HONORED);
-
-  // enum TransportationType
-  PyModule_AddIntConstant(module, "RELIABLE", rti1516::RELIABLE);
-  PyModule_AddIntConstant(module, "BEST_EFFORT", rti1516::BEST_EFFORT);
-
-  if (PyExceptionType_Ready() < 0)
+  if (exec_module(module) < 0)
     INITERROR;
-  PyModule_AddExceptionType(module);
-
-#define RTI_EXCEPTION(ExceptionKind)                                          \
-  if (Py ## ExceptionKind ## Type_Ready() < 0)                                \
-    INITERROR;                                                                \
-  PyModule_Add ## ExceptionKind ## Type(module);
-
-  RTI_EXCEPTION(AsynchronousDeliveryAlreadyDisabled)
-  RTI_EXCEPTION(AsynchronousDeliveryAlreadyEnabled)
-  RTI_EXCEPTION(AttributeAcquisitionWasNotCanceled)
-  RTI_EXCEPTION(AttributeAcquisitionWasNotRequested)
-  RTI_EXCEPTION(AttributeAlreadyBeingAcquired)
-  RTI_EXCEPTION(AttributeAlreadyBeingDivested)
-  RTI_EXCEPTION(AttributeAlreadyOwned)
-  RTI_EXCEPTION(AttributeDivestitureWasNotRequested)
-  RTI_EXCEPTION(AttributeNotDefined)
-  RTI_EXCEPTION(AttributeNotOwned)
-  RTI_EXCEPTION(AttributeNotPublished)
-  RTI_EXCEPTION(AttributeNotRecognized)
-  RTI_EXCEPTION(AttributeNotSubscribed)
-  RTI_EXCEPTION(AttributeRelevanceAdvisorySwitchIsOff)
-  RTI_EXCEPTION(AttributeRelevanceAdvisorySwitchIsOn)
-  RTI_EXCEPTION(AttributeScopeAdvisorySwitchIsOff)
-  RTI_EXCEPTION(AttributeScopeAdvisorySwitchIsOn)
-  RTI_EXCEPTION(BadInitializationParameter)
-  RTI_EXCEPTION(CouldNotCreateLogicalTimeFactory)
-  RTI_EXCEPTION(CouldNotDecode)
-  RTI_EXCEPTION(CouldNotDiscover)
-  RTI_EXCEPTION(CouldNotEncode)
-  RTI_EXCEPTION(CouldNotOpenFDD)
-  RTI_EXCEPTION(CouldNotInitiateRestore)
-  RTI_EXCEPTION(DeletePrivilegeNotHeld)
-  RTI_EXCEPTION(RequestForTimeConstrainedPending)
-  RTI_EXCEPTION(NoRequestToEnableTimeConstrainedWasPending)
-  RTI_EXCEPTION(RequestForTimeRegulationPending)
-  RTI_EXCEPTION(NoRequestToEnableTimeRegulationWasPending)
-  RTI_EXCEPTION(ErrorReadingFDD)
-  RTI_EXCEPTION(FederateAlreadyExecutionMember)
-  RTI_EXCEPTION(FederateHasNotBegunSave)
-  RTI_EXCEPTION(FederateInternalError)
-  RTI_EXCEPTION(FederateNotExecutionMember)
-  RTI_EXCEPTION(FederateOwnsAttributes)
-  RTI_EXCEPTION(FederateServiceInvocationsAreBeingReportedViaMOM)
-  RTI_EXCEPTION(FederateUnableToUseTime)
-  RTI_EXCEPTION(FederatesCurrentlyJoined)
-  RTI_EXCEPTION(FederationExecutionAlreadyExists)
-  RTI_EXCEPTION(FederationExecutionDoesNotExist)
-  RTI_EXCEPTION(IllegalName)
-  RTI_EXCEPTION(IllegalTimeArithmetic)
-  RTI_EXCEPTION(InteractionClassNotDefined)
-  RTI_EXCEPTION(InteractionClassNotPublished)
-  RTI_EXCEPTION(InteractionClassNotRecognized)
-  RTI_EXCEPTION(InteractionClassNotSubscribed)
-  RTI_EXCEPTION(InteractionParameterNotDefined)
-  RTI_EXCEPTION(InteractionParameterNotRecognized)
-  RTI_EXCEPTION(InteractionRelevanceAdvisorySwitchIsOff)
-  RTI_EXCEPTION(InteractionRelevanceAdvisorySwitchIsOn)
-  RTI_EXCEPTION(InTimeAdvancingState)
-  RTI_EXCEPTION(InvalidAttributeHandle)
-  RTI_EXCEPTION(InvalidDimensionHandle)
-  RTI_EXCEPTION(InvalidFederateHandle)
-  RTI_EXCEPTION(InvalidInteractionClassHandle)
-  RTI_EXCEPTION(InvalidLogicalTime)
-  RTI_EXCEPTION(InvalidLogicalTimeInterval)
-  RTI_EXCEPTION(InvalidLookahead)
-  RTI_EXCEPTION(InvalidObjectClassHandle)
-  RTI_EXCEPTION(InvalidOrderName)
-  RTI_EXCEPTION(InvalidOrderType)
-  RTI_EXCEPTION(InvalidParameterHandle)
-  RTI_EXCEPTION(InvalidRangeBound)
-  RTI_EXCEPTION(InvalidRegion)
-  RTI_EXCEPTION(InvalidRegionContext)
-  RTI_EXCEPTION(InvalidRetractionHandle)
-  RTI_EXCEPTION(InvalidServiceGroup)
-  RTI_EXCEPTION(InvalidTransportationName)
-  RTI_EXCEPTION(InvalidTransportationType)
-  RTI_EXCEPTION(JoinedFederateIsNotInTimeAdvancingState)
-  RTI_EXCEPTION(LogicalTimeAlreadyPassed)
-  RTI_EXCEPTION(MessageCanNoLongerBeRetracted)
-  RTI_EXCEPTION(NameNotFound)
-  RTI_EXCEPTION(NoAcquisitionPending)
-  RTI_EXCEPTION(ObjectClassNotDefined)
-  RTI_EXCEPTION(ObjectClassNotKnown)
-  RTI_EXCEPTION(ObjectClassNotPublished)
-  RTI_EXCEPTION(ObjectClassRelevanceAdvisorySwitchIsOff)
-  RTI_EXCEPTION(ObjectClassRelevanceAdvisorySwitchIsOn)
-  RTI_EXCEPTION(ObjectInstanceNameInUse)
-  RTI_EXCEPTION(ObjectInstanceNameNotReserved)
-  RTI_EXCEPTION(ObjectInstanceNotKnown)
-  RTI_EXCEPTION(OwnershipAcquisitionPending)
-  RTI_EXCEPTION(RTIinternalError)
-  RTI_EXCEPTION(RegionDoesNotContainSpecifiedDimension)
-  RTI_EXCEPTION(RegionInUseForUpdateOrSubscription)
-  RTI_EXCEPTION(RegionNotCreatedByThisFederate)
-  RTI_EXCEPTION(RestoreInProgress)
-  RTI_EXCEPTION(RestoreNotRequested)
-  RTI_EXCEPTION(SaveInProgress)
-  RTI_EXCEPTION(SaveNotInitiated)
-  RTI_EXCEPTION(SpecifiedSaveLabelDoesNotExist)
-  RTI_EXCEPTION(SynchronizationPointLabelNotAnnounced)
-  RTI_EXCEPTION(TimeConstrainedAlreadyEnabled)
-  RTI_EXCEPTION(TimeConstrainedIsNotEnabled)
-  RTI_EXCEPTION(TimeRegulationAlreadyEnabled)
-  RTI_EXCEPTION(TimeRegulationIsNotEnabled)
-  RTI_EXCEPTION(UnableToPerformSave)
-  RTI_EXCEPTION(UnknownName)
-  RTI_EXCEPTION(InternalError)
-#undef RTI_EXCEPTION
 
 #if PY_MAJOR_VERSION >= 3
   return module;
