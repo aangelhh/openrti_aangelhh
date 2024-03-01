@@ -41,50 +41,6 @@ static int PyModule_AddTypeObject(PyObject* m, const char* name, PyTypeObject* t
   return PyModule_AddObject(m, name, (PyObject*)type);
 }
 
-class PySharedPtr {
-public:
-  PySharedPtr(void) : _ptr(0)
-  {}
-  PySharedPtr(const PySharedPtr& p) : _ptr(0)
-  { assign(_ptr); }
-  ~PySharedPtr(void)
-  { put(); }
-
-  PySharedPtr& operator=(const PySharedPtr& p)
-  { assign(p.get()); return *this; }
-
-  PyObject* operator->(void) const
-  { return _ptr; }
-
-  PyObject& operator*(void) const
-  { return *_ptr; }
-
-  PyObject* get() const
-  { return _ptr; }
-
-  bool valid(void) const
-  { return 0 != _ptr; }
-
-  void clear()
-  { put(); }
-
-  PySharedPtr& setBorrowedRef(PyObject* p)
-  { assign(p); return *this; }
-  PySharedPtr& setNewRef(PyObject* p)
-  { assignNonRef(p); return *this; }
-
-private:
-  void assign(PyObject* p)
-  { if (p) Py_IncRef(p); put(); _ptr = p; }
-  void assignNonRef(PyObject* p)
-  { put(); _ptr = p; }
-  void put(void)
-  { if (!_ptr) return; Py_DecRef(_ptr); _ptr = 0; }
-
-  // The reference itself.
-  PyObject* _ptr;
-};
-
 static PyObject*
 PyObject_NewString(const std::wstring& string)
 {
@@ -491,6 +447,145 @@ PyObject_GetRangeBounds(rti1516::RangeBounds& rangeBounds, PyObject* o)
   rangeBounds.setUpperBound(value);
   return true;
 }
+
+#define IMPLEMENT_EXCEPTION_CLASS(ExceptionBase, ExceptionKind)               \
+  static PyTypeObject Py ## ExceptionKind ## Type = {                         \
+    PyVarObject_HEAD_INIT(&PyType_Type, 0)                                    \
+    "rti1516." # ExceptionKind,                                               \
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                        \
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,                                 \
+    PyDoc_STR(#ExceptionKind), 0, 0, 0, 0, 0, 0, 0, 0, 0,                     \
+    ExceptionBase, 0,                                                         \
+  };                                                                          \
+  static int PyErr_SetException(const rti1516:: ExceptionKind & e)            \
+  {                                                                           \
+    PyErr_SetObject((PyObject*)&Py ## ExceptionKind ## Type,                  \
+                    PyObject_NewString(e.what()));                            \
+    return 0;                                                                 \
+  }                                                                           \
+  static int PyErr_Set ## ExceptionKind(const char* what)                     \
+  {                                                                           \
+    PyErr_SetString((PyObject*)&Py ## ExceptionKind ## Type, what);           \
+    return 0;                                                                 \
+  }                                                                           \
+  static int Py ## ExceptionKind ## Type_Ready()                              \
+  {                                                                           \
+    return PyTypeObject_Ready(&Py ## ExceptionKind ## Type);                  \
+  }                                                                           \
+  static int PyModule_Add ## ExceptionKind ## Type(PyObject* m)               \
+  {                                                                           \
+    return PyModule_AddTypeObject(m, # ExceptionKind,                         \
+                                      &Py ## ExceptionKind ## Type);          \
+  }                                                                           \
+
+IMPLEMENT_EXCEPTION_CLASS((PyTypeObject*)PyExc_Exception, Exception);
+
+#define RTI_EXCEPTION(ExceptionKind)                                          \
+  IMPLEMENT_EXCEPTION_CLASS(&PyExceptionType, ExceptionKind);
+
+  RTI_EXCEPTION(AsynchronousDeliveryAlreadyDisabled)
+  RTI_EXCEPTION(AsynchronousDeliveryAlreadyEnabled)
+  RTI_EXCEPTION(AttributeAcquisitionWasNotCanceled)
+  RTI_EXCEPTION(AttributeAcquisitionWasNotRequested)
+  RTI_EXCEPTION(AttributeAlreadyBeingAcquired)
+  RTI_EXCEPTION(AttributeAlreadyBeingDivested)
+  RTI_EXCEPTION(AttributeAlreadyOwned)
+  RTI_EXCEPTION(AttributeDivestitureWasNotRequested)
+  RTI_EXCEPTION(AttributeNotDefined)
+  RTI_EXCEPTION(AttributeNotOwned)
+  RTI_EXCEPTION(AttributeNotPublished)
+  RTI_EXCEPTION(AttributeNotRecognized)
+  RTI_EXCEPTION(AttributeNotSubscribed)
+  RTI_EXCEPTION(AttributeRelevanceAdvisorySwitchIsOff)
+  RTI_EXCEPTION(AttributeRelevanceAdvisorySwitchIsOn)
+  RTI_EXCEPTION(AttributeScopeAdvisorySwitchIsOff)
+  RTI_EXCEPTION(AttributeScopeAdvisorySwitchIsOn)
+  RTI_EXCEPTION(BadInitializationParameter)
+  RTI_EXCEPTION(CouldNotCreateLogicalTimeFactory)
+  RTI_EXCEPTION(CouldNotDecode)
+  RTI_EXCEPTION(CouldNotDiscover)
+  RTI_EXCEPTION(CouldNotEncode)
+  RTI_EXCEPTION(CouldNotOpenFDD)
+  RTI_EXCEPTION(CouldNotInitiateRestore)
+  RTI_EXCEPTION(DeletePrivilegeNotHeld)
+  RTI_EXCEPTION(RequestForTimeConstrainedPending)
+  RTI_EXCEPTION(NoRequestToEnableTimeConstrainedWasPending)
+  RTI_EXCEPTION(RequestForTimeRegulationPending)
+  RTI_EXCEPTION(NoRequestToEnableTimeRegulationWasPending)
+  RTI_EXCEPTION(ErrorReadingFDD)
+  RTI_EXCEPTION(FederateAlreadyExecutionMember)
+  RTI_EXCEPTION(FederateHasNotBegunSave)
+  RTI_EXCEPTION(FederateInternalError)
+  RTI_EXCEPTION(FederateNotExecutionMember)
+  RTI_EXCEPTION(FederateOwnsAttributes)
+  RTI_EXCEPTION(FederateServiceInvocationsAreBeingReportedViaMOM)
+  RTI_EXCEPTION(FederateUnableToUseTime)
+  RTI_EXCEPTION(FederatesCurrentlyJoined)
+  RTI_EXCEPTION(FederationExecutionAlreadyExists)
+  RTI_EXCEPTION(FederationExecutionDoesNotExist)
+  RTI_EXCEPTION(IllegalName)
+  RTI_EXCEPTION(IllegalTimeArithmetic)
+  RTI_EXCEPTION(InteractionClassNotDefined)
+  RTI_EXCEPTION(InteractionClassNotPublished)
+  RTI_EXCEPTION(InteractionClassNotRecognized)
+  RTI_EXCEPTION(InteractionClassNotSubscribed)
+  RTI_EXCEPTION(InteractionParameterNotDefined)
+  RTI_EXCEPTION(InteractionParameterNotRecognized)
+  RTI_EXCEPTION(InteractionRelevanceAdvisorySwitchIsOff)
+  RTI_EXCEPTION(InteractionRelevanceAdvisorySwitchIsOn)
+  RTI_EXCEPTION(InTimeAdvancingState)
+  RTI_EXCEPTION(InvalidAttributeHandle)
+  RTI_EXCEPTION(InvalidDimensionHandle)
+  RTI_EXCEPTION(InvalidFederateHandle)
+  RTI_EXCEPTION(InvalidInteractionClassHandle)
+  RTI_EXCEPTION(InvalidLogicalTime)
+  RTI_EXCEPTION(InvalidLogicalTimeInterval)
+  RTI_EXCEPTION(InvalidLookahead)
+  RTI_EXCEPTION(InvalidObjectClassHandle)
+  RTI_EXCEPTION(InvalidOrderName)
+  RTI_EXCEPTION(InvalidOrderType)
+  RTI_EXCEPTION(InvalidParameterHandle)
+  RTI_EXCEPTION(InvalidRangeBound)
+  RTI_EXCEPTION(InvalidRegion)
+  RTI_EXCEPTION(InvalidRegionContext)
+  RTI_EXCEPTION(InvalidRetractionHandle)
+  RTI_EXCEPTION(InvalidServiceGroup)
+  RTI_EXCEPTION(InvalidTransportationName)
+  RTI_EXCEPTION(InvalidTransportationType)
+  RTI_EXCEPTION(JoinedFederateIsNotInTimeAdvancingState)
+  RTI_EXCEPTION(LogicalTimeAlreadyPassed)
+  RTI_EXCEPTION(MessageCanNoLongerBeRetracted)
+  RTI_EXCEPTION(NameNotFound)
+  RTI_EXCEPTION(NoAcquisitionPending)
+  RTI_EXCEPTION(ObjectClassNotDefined)
+  RTI_EXCEPTION(ObjectClassNotKnown)
+  RTI_EXCEPTION(ObjectClassNotPublished)
+  RTI_EXCEPTION(ObjectClassRelevanceAdvisorySwitchIsOff)
+  RTI_EXCEPTION(ObjectClassRelevanceAdvisorySwitchIsOn)
+  RTI_EXCEPTION(ObjectInstanceNameInUse)
+  RTI_EXCEPTION(ObjectInstanceNameNotReserved)
+  RTI_EXCEPTION(ObjectInstanceNotKnown)
+  RTI_EXCEPTION(OwnershipAcquisitionPending)
+  RTI_EXCEPTION(RTIinternalError)
+  RTI_EXCEPTION(RegionDoesNotContainSpecifiedDimension)
+  RTI_EXCEPTION(RegionInUseForUpdateOrSubscription)
+  RTI_EXCEPTION(RegionNotCreatedByThisFederate)
+  RTI_EXCEPTION(RestoreInProgress)
+  RTI_EXCEPTION(RestoreNotRequested)
+  RTI_EXCEPTION(SaveInProgress)
+  RTI_EXCEPTION(SaveNotInitiated)
+  RTI_EXCEPTION(SpecifiedSaveLabelDoesNotExist)
+  RTI_EXCEPTION(SynchronizationPointLabelNotAnnounced)
+  RTI_EXCEPTION(TimeConstrainedAlreadyEnabled)
+  RTI_EXCEPTION(TimeConstrainedIsNotEnabled)
+  RTI_EXCEPTION(TimeRegulationAlreadyEnabled)
+  RTI_EXCEPTION(TimeRegulationIsNotEnabled)
+  RTI_EXCEPTION(UnableToPerformSave)
+  RTI_EXCEPTION(UnknownName)
+  RTI_EXCEPTION(InternalError)
+#undef RTI_EXCEPTION
+#undef IMPLEMENT_EXCEPTION_CLASS
+
 
 #define IMPLEMENT_HANDLE_CLASS(HandleKind)                              \
                                                                         \
@@ -994,112 +1089,10 @@ PyObject_GetAttributeHandleSetRegionHandleSetPairVector(rti1516::AttributeHandle
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static PySharedPtr PyRTI1516Exception;
-static PySharedPtr PyRTI1516AsynchronousDeliveryAlreadyDisabled;
-static PySharedPtr PyRTI1516AsynchronousDeliveryAlreadyEnabled;
-static PySharedPtr PyRTI1516AttributeAcquisitionWasNotCanceled;
-static PySharedPtr PyRTI1516AttributeAcquisitionWasNotRequested;
-static PySharedPtr PyRTI1516AttributeAlreadyBeingAcquired;
-static PySharedPtr PyRTI1516AttributeAlreadyBeingDivested;
-static PySharedPtr PyRTI1516AttributeAlreadyOwned;
-static PySharedPtr PyRTI1516AttributeDivestitureWasNotRequested;
-static PySharedPtr PyRTI1516AttributeNotDefined;
-static PySharedPtr PyRTI1516AttributeNotOwned;
-static PySharedPtr PyRTI1516AttributeNotPublished;
-static PySharedPtr PyRTI1516AttributeNotRecognized;
-static PySharedPtr PyRTI1516AttributeNotSubscribed;
-static PySharedPtr PyRTI1516AttributeRelevanceAdvisorySwitchIsOff;
-static PySharedPtr PyRTI1516AttributeRelevanceAdvisorySwitchIsOn;
-static PySharedPtr PyRTI1516AttributeScopeAdvisorySwitchIsOff;
-static PySharedPtr PyRTI1516AttributeScopeAdvisorySwitchIsOn;
-static PySharedPtr PyRTI1516BadInitializationParameter;
-static PySharedPtr PyRTI1516CouldNotCreateLogicalTimeFactory;
-static PySharedPtr PyRTI1516CouldNotDecode;
-static PySharedPtr PyRTI1516CouldNotDiscover;
-static PySharedPtr PyRTI1516CouldNotEncode;
-static PySharedPtr PyRTI1516CouldNotOpenFDD;
-static PySharedPtr PyRTI1516CouldNotInitiateRestore;
-static PySharedPtr PyRTI1516DeletePrivilegeNotHeld;
-static PySharedPtr PyRTI1516RequestForTimeConstrainedPending;
-static PySharedPtr PyRTI1516NoRequestToEnableTimeConstrainedWasPending;
-static PySharedPtr PyRTI1516RequestForTimeRegulationPending;
-static PySharedPtr PyRTI1516NoRequestToEnableTimeRegulationWasPending;
-static PySharedPtr PyRTI1516ErrorReadingFDD;
-static PySharedPtr PyRTI1516FederateAlreadyExecutionMember;
-static PySharedPtr PyRTI1516FederateHasNotBegunSave;
-static PySharedPtr PyRTI1516FederateInternalError;
-static PySharedPtr PyRTI1516FederateNotExecutionMember;
-static PySharedPtr PyRTI1516FederateOwnsAttributes;
-static PySharedPtr PyRTI1516FederateServiceInvocationsAreBeingReportedViaMOM;
-static PySharedPtr PyRTI1516FederateUnableToUseTime;
-static PySharedPtr PyRTI1516FederatesCurrentlyJoined;
-static PySharedPtr PyRTI1516FederationExecutionAlreadyExists;
-static PySharedPtr PyRTI1516FederationExecutionDoesNotExist;
-static PySharedPtr PyRTI1516IllegalName;
-static PySharedPtr PyRTI1516IllegalTimeArithmetic;
-static PySharedPtr PyRTI1516InteractionClassNotDefined;
-static PySharedPtr PyRTI1516InteractionClassNotPublished;
-static PySharedPtr PyRTI1516InteractionClassNotRecognized;
-static PySharedPtr PyRTI1516InteractionClassNotSubscribed;
-static PySharedPtr PyRTI1516InteractionParameterNotDefined;
-static PySharedPtr PyRTI1516InteractionParameterNotRecognized;
-static PySharedPtr PyRTI1516InteractionRelevanceAdvisorySwitchIsOff;
-static PySharedPtr PyRTI1516InteractionRelevanceAdvisorySwitchIsOn;
-static PySharedPtr PyRTI1516InTimeAdvancingState;
-static PySharedPtr PyRTI1516InvalidAttributeHandle;
-static PySharedPtr PyRTI1516InvalidDimensionHandle;
-static PySharedPtr PyRTI1516InvalidFederateHandle;
-static PySharedPtr PyRTI1516InvalidInteractionClassHandle;
-static PySharedPtr PyRTI1516InvalidLogicalTime;
-static PySharedPtr PyRTI1516InvalidLogicalTimeInterval;
-static PySharedPtr PyRTI1516InvalidLookahead;
-static PySharedPtr PyRTI1516InvalidObjectClassHandle;
-static PySharedPtr PyRTI1516InvalidOrderName;
-static PySharedPtr PyRTI1516InvalidOrderType;
-static PySharedPtr PyRTI1516InvalidParameterHandle;
-static PySharedPtr PyRTI1516InvalidRangeBound;
-static PySharedPtr PyRTI1516InvalidRegion;
-static PySharedPtr PyRTI1516InvalidRegionContext;
-static PySharedPtr PyRTI1516InvalidRetractionHandle;
-static PySharedPtr PyRTI1516InvalidServiceGroup;
-static PySharedPtr PyRTI1516InvalidTransportationName;
-static PySharedPtr PyRTI1516InvalidTransportationType;
-static PySharedPtr PyRTI1516JoinedFederateIsNotInTimeAdvancingState;
-static PySharedPtr PyRTI1516LogicalTimeAlreadyPassed;
-static PySharedPtr PyRTI1516MessageCanNoLongerBeRetracted;
-static PySharedPtr PyRTI1516NameNotFound;
-static PySharedPtr PyRTI1516NoAcquisitionPending;
-static PySharedPtr PyRTI1516ObjectClassNotDefined;
-static PySharedPtr PyRTI1516ObjectClassNotKnown;
-static PySharedPtr PyRTI1516ObjectClassNotPublished;
-static PySharedPtr PyRTI1516ObjectClassRelevanceAdvisorySwitchIsOff;
-static PySharedPtr PyRTI1516ObjectClassRelevanceAdvisorySwitchIsOn;
-static PySharedPtr PyRTI1516ObjectInstanceNameInUse;
-static PySharedPtr PyRTI1516ObjectInstanceNameNotReserved;
-static PySharedPtr PyRTI1516ObjectInstanceNotKnown;
-static PySharedPtr PyRTI1516OwnershipAcquisitionPending;
-static PySharedPtr PyRTI1516RTIinternalError;
-static PySharedPtr PyRTI1516RegionDoesNotContainSpecifiedDimension;
-static PySharedPtr PyRTI1516RegionInUseForUpdateOrSubscription;
-static PySharedPtr PyRTI1516RegionNotCreatedByThisFederate;
-static PySharedPtr PyRTI1516RestoreInProgress;
-static PySharedPtr PyRTI1516RestoreNotRequested;
-static PySharedPtr PyRTI1516SaveInProgress;
-static PySharedPtr PyRTI1516SaveNotInitiated;
-static PySharedPtr PyRTI1516SpecifiedSaveLabelDoesNotExist;
-static PySharedPtr PyRTI1516SynchronizationPointLabelNotAnnounced;
-static PySharedPtr PyRTI1516TimeConstrainedAlreadyEnabled;
-static PySharedPtr PyRTI1516TimeConstrainedIsNotEnabled;
-static PySharedPtr PyRTI1516TimeRegulationAlreadyEnabled;
-static PySharedPtr PyRTI1516TimeRegulationIsNotEnabled;
-static PySharedPtr PyRTI1516UnableToPerformSave;
-static PySharedPtr PyRTI1516UnknownName;
-static PySharedPtr PyRTI1516InternalError;
-
-#define CATCH_C_EXCEPTION(ExceptionKind)                                             \
-  catch(const rti1516:: ExceptionKind& e) {                                          \
-    PyErr_SetObject(PyRTI1516 ## ExceptionKind.get(), PyObject_NewString(e.what())); \
-    return 0;                                                                        \
+#define CATCH_C_EXCEPTION(ExceptionKind)                                      \
+  catch(const rti1516:: ExceptionKind& e) {                                   \
+    PyErr_SetException(e);                                                    \
+    return 0;                                                                 \
   }
 
 static std::wstring PyErr_GetExceptionString()
@@ -1126,7 +1119,8 @@ static std::wstring PyErr_GetExceptionString()
 
 #define CATCH_PYTHON_EXCEPTION(ExceptionKind, exception)                             \
   do {                                                                               \
-    if (PyErr_GivenExceptionMatches(exception, PyRTI1516 ## ExceptionKind.get())) {  \
+    if (PyErr_GivenExceptionMatches(exception,                                       \
+                                    (PyObject*)&Py ## ExceptionKind ## Type)) {      \
       PyErr_Print();                                                                 \
       throw rti1516::ExceptionKind(PyErr_GetExceptionString());                      \
     }                                                                                \
@@ -2819,13 +2813,13 @@ PyRTIambassador_setLogicalTimeFactory(PyRTIambassadorObject *self, PyObject *arg
   // Validate the time factory
   logicalTimeImplementationName = validateLogicalTimeFactory(logicalTimeImplementationName);
   if (logicalTimeImplementationName.empty()) {
-    PyErr_SetString(PyRTI1516CouldNotCreateLogicalTimeFactory.get(), "Given logicalTimeImplementationName does not yield a C++ factory!");
+    PyErr_SetCouldNotCreateLogicalTimeFactory("Given logicalTimeImplementationName does not yield a C++ factory!");
     return 0;
   }
 
   if (logicalTimeImplementationName != L"HLAfloat64Time" &&
       logicalTimeImplementationName != L"HLAinteger64Time") {
-    PyErr_SetString(PyRTI1516CouldNotCreateLogicalTimeFactory.get(), "Unsupported logicalTimeImplementationName!");
+    PyErr_SetCouldNotCreateLogicalTimeFactory("Unsupported logicalTimeImplementationName!");
     return 0;
   }
 
@@ -2872,13 +2866,13 @@ PyRTIambassador_createFederationExecution(PyRTIambassadorObject *self, PyObject 
 
     logicalTimeImplementationName = validateLogicalTimeFactory(logicalTimeImplementationName);
     if (logicalTimeImplementationName.empty()) {
-      PyErr_SetString(PyRTI1516CouldNotCreateLogicalTimeFactory.get(), "Given logicalTimeImplementationName does not yield a C++ factory!");
+      PyErr_SetCouldNotCreateLogicalTimeFactory("Given logicalTimeImplementationName does not yield a C++ factory!");
       return 0;
     }
 
     if (logicalTimeImplementationName != L"HLAfloat64Time" &&
         logicalTimeImplementationName != L"HLAinteger64Time") {
-      PyErr_SetString(PyRTI1516CouldNotCreateLogicalTimeFactory.get(), "Unsupported logicalTimeImplementationName!");
+      PyErr_SetCouldNotCreateLogicalTimeFactory("Unsupported logicalTimeImplementationName!");
       return 0;
     }
   } else {
@@ -6560,7 +6554,7 @@ PyObject_NewRTIambassador(PyTypeObject *type, PyObject *args, PyObject *kwds)
   RTI_UNIQUE_PTR<rti1516::RTIambassador> ambassador;
   ambassador = rti1516::RTIambassadorFactory().createRTIambassador(stringArgs);
   if (!ambassador.get()) {
-    PyErr_SetObject(PyRTI1516RTIinternalError.get(), PyUnicode_FromString("Cannot create RTIambassador!"));
+    PyErr_SetRTIinternalError("Cannot create RTIambassador!");
     return 0;
   }
 
@@ -6777,12 +6771,14 @@ INITFUNCNAME(void)
   PyModule_AddIntConstant(module, "RELIABLE", rti1516::RELIABLE);
   PyModule_AddIntConstant(module, "BEST_EFFORT", rti1516::BEST_EFFORT);
 
-  PyRTI1516Exception.setBorrowedRef(PyErr_NewException((char*)"rti1516.Exception", NULL, NULL));
-  PyModule_AddObject(module, "Exception", PyRTI1516Exception.get());
+  if (PyExceptionType_Ready() < 0)
+    INITERROR;
+  PyModule_AddExceptionType(module);
 
-#define RTI_EXCEPTION(ExceptionKind)                                                                            \
-  PyRTI1516 ## ExceptionKind.setBorrowedRef(PyErr_NewException((char*)"rti1516." # ExceptionKind, PyRTI1516Exception.get(), NULL)); \
-  PyModule_AddObject(module, # ExceptionKind, PyRTI1516 ## ExceptionKind.get());
+#define RTI_EXCEPTION(ExceptionKind)                                          \
+  if (Py ## ExceptionKind ## Type_Ready() < 0)                                \
+    INITERROR;                                                                \
+  PyModule_Add ## ExceptionKind ## Type(module);
 
   RTI_EXCEPTION(AsynchronousDeliveryAlreadyDisabled)
   RTI_EXCEPTION(AsynchronousDeliveryAlreadyEnabled)
