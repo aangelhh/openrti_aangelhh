@@ -7746,43 +7746,70 @@ static int exec_module(PyObject *m)
   return 0;
 }
 
-#if 3 <= PY_MAJOR_VERSION
+#if PY_MAJOR_VERSION < 3
+
+// python 2 initialization
+
+PyMODINIT_FUNC
+initrti1516e(void)
+{
+  if (type_ready() < 0)
+    return;
+
+  PyObject* m = Py_InitModule3("rti1516e", rti1516e_methods, "rti1516e RTI/HLA backend implementation.");
+  if (!m)
+    return;
+
+  exec_module(m);
+}
+
+#else
+
+// python 3 initialization
+
+#ifdef Py_mod_exec
+static PyModuleDef_Slot rti1516e_moduledef_slots[] = {
+#ifdef Py_mod_exec
+        { Py_mod_exec, (void*)exec_module },
+#endif
+        { 0/*id*/, NULL/*value*/ }
+};
+#endif
+
 
 static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
-        "rti1516e",
-        NULL,
-        -1,
-        rti1516e_methods,
-        NULL,
-        NULL,
-        NULL,
-        NULL
+        "rti1516e",               /* m_name */
+        NULL,                     /* m_doc */
+        0,                        /* m_size */
+        rti1516e_methods,         /* m_methods */
+#ifdef Py_mod_exec
+        rti1516e_moduledef_slots, /* m_slots */
+#else
+        NULL,                     /* m_reload */
+#endif
+        NULL,                     /* m_traverse */
+        NULL,                     /* m_clear */
+        NULL                      /* m_free */
 };
 
-# define INITFUNCNAME PyInit_rti1516e
-# define INITERROR return NULL
-#else
-# define INITFUNCNAME initrti1516e
-# define INITERROR return
-#endif
-
 PyMODINIT_FUNC
-INITFUNCNAME(void)
+PyInit_rti1516e(void)
 {
   if (type_ready() < 0)
-    INITERROR;
+    return NULL;
 
-#if PY_MAJOR_VERSION >= 3
-  PyObject* module = PyModule_Create(&moduledef);
+#ifdef Py_mod_exec
+  PyObject *m = PyModuleDef_Init(&moduledef);
 #else
-  PyObject* module = Py_InitModule3("rti1516e", rti1516e_methods, "rti1516e RTI/HLA backend implementation.");
+  PyObject* m = PyModule_Create(&moduledef);
+  if (!m)
+    return NULL;
+
+  exec_module(m);
 #endif
 
-  if (exec_module(module) < 0)
-    INITERROR;
-
-#if PY_MAJOR_VERSION >= 3
-  return module;
-#endif
+  return m;
 }
+
+#endif
