@@ -28,16 +28,26 @@
 #include "RTI/time/HLAinteger64Time.h"
 #include "RTI/time/HLAinteger64Interval.h"
 
+// Immortal objects appeared in 3.12
+#if 0x030C0000 <= PY_VERSION_HEX
+#define USE_IMMORTAL_TYPE_OBJECTS
+#endif
+
 static int PyTypeObject_Ready(PyTypeObject* type)
 {
   if (PyType_Ready(type) < 0)
     return -1;
+#ifdef USE_IMMORTAL_TYPE_OBJECTS
+  Py_SET_REFCNT((PyObject*)type, _Py_IMMORTAL_REFCNT);
+#endif
   return 0;
 }
 
 static int PyModule_AddTypeObject(PyObject* m, const char* name, PyTypeObject* type)
 {
+#ifndef USE_IMMORTAL_TYPE_OBJECTS
   Py_IncRef((PyObject*)type);
+#endif
   return PyModule_AddObject(m, name, (PyObject*)type);
 }
 
