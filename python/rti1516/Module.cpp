@@ -28,6 +28,19 @@
 #include "RTI/HLAinteger64Time.h"
 #include "RTI/HLAinteger64Interval.h"
 
+static int PyTypeObject_Ready(PyTypeObject* type)
+{
+  if (PyType_Ready(type) < 0)
+    return -1;
+  return 0;
+}
+
+static int PyModule_AddTypeObject(PyObject* m, const char* name, PyTypeObject* type)
+{
+  Py_IncRef((PyObject*)type);
+  return PyModule_AddObject(m, name, (PyObject*)type);
+}
+
 class PySharedPtr {
 public:
   PySharedPtr(void) : _ptr(0)
@@ -690,7 +703,18 @@ PyObject_GetRangeBounds(rti1516::RangeBounds& rangeBounds, PyObject* o)
     }                                                                   \
     Py_DecRef(iterator);                                                \
     return true;                                                        \
-  }
+  }                                                                     \
+                                                                        \
+  static int Py ## HandleKind ## Type_Ready()                           \
+  {                                                                     \
+    return PyTypeObject_Ready(&Py ## HandleKind ## Type);               \
+  }                                                                     \
+                                                                        \
+  static int PyModule_Add ## HandleKind ## Type(PyObject* m)            \
+  {                                                                     \
+    return PyModule_AddTypeObject(m, # HandleKind,                      \
+                                  &Py ## HandleKind ## Type);           \
+  }                                                                     \
 
 IMPLEMENT_HANDLE_CLASS(FederateHandle)
 IMPLEMENT_HANDLE_CLASS(ObjectClassHandle)
@@ -6615,6 +6639,16 @@ static PyTypeObject PyRTIambassadorType = {
   PyObject_NewRTIambassador,        /* tp_new */
 };
 
+static int PyRTIambassadorType_Ready()
+{
+  return PyTypeObject_Ready(&PyRTIambassadorType);
+}
+
+static int PyModule_AddRTIambassadorType(PyObject* m)
+{
+  return PyModule_AddTypeObject(m, "RTIambassador", &PyRTIambassadorType);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static PyMethodDef rti1516_methods[] = {
@@ -6645,25 +6679,25 @@ static struct PyModuleDef moduledef = {
 PyMODINIT_FUNC
 INITFUNCNAME(void)
 {
-  if (PyType_Ready(&PyFederateHandleType) < 0)
+  if (PyFederateHandleType_Ready() < 0)
     INITERROR;
-  if (PyType_Ready(&PyObjectClassHandleType) < 0)
+  if (PyObjectClassHandleType_Ready() < 0)
     INITERROR;
-  if (PyType_Ready(&PyInteractionClassHandleType) < 0)
+  if (PyInteractionClassHandleType_Ready() < 0)
     INITERROR;
-  if (PyType_Ready(&PyObjectInstanceHandleType) < 0)
+  if (PyObjectInstanceHandleType_Ready() < 0)
     INITERROR;
-  if (PyType_Ready(&PyAttributeHandleType) < 0)
+  if (PyAttributeHandleType_Ready() < 0)
     INITERROR;
-  if (PyType_Ready(&PyParameterHandleType) < 0)
+  if (PyParameterHandleType_Ready() < 0)
     INITERROR;
-  if (PyType_Ready(&PyDimensionHandleType) < 0)
+  if (PyDimensionHandleType_Ready() < 0)
     INITERROR;
-  if (PyType_Ready(&PyRegionHandleType) < 0)
+  if (PyRegionHandleType_Ready() < 0)
     INITERROR;
-  if (PyType_Ready(&PyMessageRetractionHandleType) < 0)
+  if (PyMessageRetractionHandleType_Ready() < 0)
     INITERROR;
-  if (PyType_Ready(&PyRTIambassadorType) < 0)
+  if (PyRTIambassadorType_Ready() < 0)
     INITERROR;
 
 #if PY_MAJOR_VERSION >= 3
@@ -6672,27 +6706,17 @@ INITFUNCNAME(void)
   PyObject* module = Py_InitModule3("rti1516", rti1516_methods, "rti1516 RTI/HLA backend implementation.");
 #endif
 
-  Py_IncRef((PyObject*)&PyFederateHandleType);
-  PyModule_AddObject(module, "FederateHandle", (PyObject*)&PyFederateHandleType);
-  Py_IncRef((PyObject*)&PyObjectClassHandleType);
-  PyModule_AddObject(module, "ObjectClassHandle", (PyObject*)&PyObjectClassHandleType);
-  Py_IncRef((PyObject*)&PyObjectInstanceHandleType);
-  PyModule_AddObject(module, "ObjectInstanceHandle", (PyObject*)&PyObjectInstanceHandleType);
-  Py_IncRef((PyObject*)&PyInteractionClassHandleType);
-  PyModule_AddObject(module, "InteractionClassHandle", (PyObject*)&PyInteractionClassHandleType);
-  Py_IncRef((PyObject*)&PyAttributeHandleType);
-  PyModule_AddObject(module, "AttributeHandle", (PyObject*)&PyAttributeHandleType);
-  Py_IncRef((PyObject*)&PyParameterHandleType);
-  PyModule_AddObject(module, "ParameterHandle", (PyObject*)&PyParameterHandleType);
-  Py_IncRef((PyObject*)&PyDimensionHandleType);
-  PyModule_AddObject(module, "DimensionHandle", (PyObject*)&PyDimensionHandleType);
-  Py_IncRef((PyObject*)&PyRegionHandleType);
-  PyModule_AddObject(module, "RegionHandle", (PyObject*)&PyRegionHandleType);
-  Py_IncRef((PyObject*)&PyMessageRetractionHandleType);
-  PyModule_AddObject(module, "MessageRetractionHandle", (PyObject*)&PyMessageRetractionHandleType);
+  PyModule_AddFederateHandleType(module);
+  PyModule_AddObjectClassHandleType(module);
+  PyModule_AddObjectInstanceHandleType(module);
+  PyModule_AddInteractionClassHandleType(module);
+  PyModule_AddAttributeHandleType(module);
+  PyModule_AddParameterHandleType(module);
+  PyModule_AddDimensionHandleType(module);
+  PyModule_AddRegionHandleType(module);
+  PyModule_AddMessageRetractionHandleType(module);
 
-  Py_IncRef((PyObject*)&PyRTIambassadorType);
-  PyModule_AddObject(module, "RTIambassador", (PyObject*)&PyRTIambassadorType);
+  PyModule_AddRTIambassadorType(module);
 
   // enum OrderType
   PyModule_AddIntConstant(module, "RECEIVE", rti1516::RECEIVE);
