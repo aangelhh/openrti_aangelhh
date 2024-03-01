@@ -593,7 +593,7 @@ PyObject_GetRangeBounds(rti1516::RangeBounds& rangeBounds, PyObject* o)
     0,                                  /* tp_setattro */               \
     0,                                  /* tp_as_buffer */              \
     Py_TPFLAGS_DEFAULT,                 /* tp_flags */                  \
-    # HandleKind ,                      /* tp_doc */                    \
+    PyDoc_STR( # HandleKind ),          /* tp_doc */                    \
     0,                                  /* tp_traverse */               \
     0,                                  /* tp_clear */                  \
     (richcmpfunc)HandleKind ## _richcmp,/* tp_richcompare */            \
@@ -6568,7 +6568,7 @@ static PyTypeObject PyRTIambassadorType = {
   0,                                /* tp_setattro */
   0,                                /* tp_as_buffer */
   Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_BASETYPE, /* tp_flags */
-  "RTIambassador",                  /* tp_doc */
+  PyDoc_STR("RTIambassador"),       /* tp_doc */
   (traverseproc)PyRTIambassadorObject_traverse, /* tp_traverse */
   (inquiry)PyRTIambassadorObject_clear, /* tp_clear */
   0,                                /* tp_richcompare */
