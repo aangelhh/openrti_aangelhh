@@ -6946,7 +6946,10 @@ PyRTIambassador_decodeObjectInstanceHandle(PyRTIambassadorObject *self, PyObject
     objectInstanceHandle = self->ob_value->decodeObjectInstanceHandle(variableLengthData);
     return PyObject_NewObjectInstanceHandle(objectInstanceHandle);
   }
-  CATCH_C_EXCEPTION(Exception)
+  CATCH_C_EXCEPTION(CouldNotDecode)
+  CATCH_C_EXCEPTION(FederateNotExecutionMember)
+  CATCH_C_EXCEPTION(NotConnected)
+  CATCH_C_EXCEPTION(RTIinternalError)
 }
 
 static PyObject *
