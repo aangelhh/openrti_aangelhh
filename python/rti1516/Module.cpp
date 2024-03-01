@@ -173,6 +173,8 @@ PyObject_GetVariableLengthData(rti1516::VariableLengthData& variableLengthData, 
 static bool
 PyObject_GetInt(long& value, PyObject* o)
 {
+  if (!PyNumber_Check(o))
+    return false;
   PyObject* i = PyNumber_Long(o);
   if (!i)
     return false;
@@ -184,6 +186,8 @@ PyObject_GetInt(long& value, PyObject* o)
 static bool
 PyObject_GetLong(PY_LONG_LONG& value, PyObject* o)
 {
+  if (!PyNumber_Check(o))
+    return false;
   PyObject* i = PyNumber_Long(o);
   if (!i)
     return false;
@@ -195,6 +199,8 @@ PyObject_GetLong(PY_LONG_LONG& value, PyObject* o)
 static bool
 PyObject_GetDouble(double& value, PyObject* o)
 {
+  if (!PyNumber_Check(o))
+    return false;
   PyObject* f = PyNumber_Float(o);
   if (!f)
     return false;
