@@ -1458,13 +1458,6 @@ static PySharedPtr PyRTI1516EInternalError;
     return 0;                                                                        \
   }
 
-#define CATCH_C_EXCEPTION_THREADS(ExceptionKind)                                     \
-  catch(const rti1516e:: ExceptionKind& e) {                                          \
-    PyEval_RestoreThread(_save);                                                     \
-    PyErr_SetObject(PyRTI1516E ## ExceptionKind.get(), PyObject_NewString(e.what())); \
-    return 0;                                                                        \
-  }
-
 static std::wstring PyErr_GetExceptionString()
 {
   PyObject* ptype = 0;
@@ -1504,7 +1497,8 @@ static std::wstring PyErr_GetExceptionString()
 struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
   PyRTI1516EFederateAmbassador(PyObject* federateAmbassador = 0)
     RTI_THROW ((rti1516e::FederateInternalError)) :
-    ob_federateAmbassador(federateAmbassador)
+    ob_federateAmbassador(federateAmbassador),
+    _threadState(NULL)
   {
     if (ob_federateAmbassador)
       Py_IncRef(ob_federateAmbassador);
@@ -1515,6 +1509,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
   {
     if (ob_federateAmbassador)
       Py_DecRef(ob_federateAmbassador);
+    if (_threadState != NULL)
+      PyErr_SetString(PyExc_TypeError, "Imbalance on python thread state.");
   }
 
   void setObject(PyObject* federateAmbassador = 0)
@@ -1528,13 +1524,39 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     ob_federateAmbassador = federateAmbassador;
   }
 
-  struct GILStateScope {
-    GILStateScope() :
-      _gstate(PyGILState_Ensure())
-    { }
-    ~GILStateScope()
-    { PyGILState_Release(_gstate); }
-    PyGILState_STATE _gstate;
+  struct ReleaseGILScope {
+    ReleaseGILScope(PyRTI1516EFederateAmbassador& pyRTI1516EFederateAmbassador) :
+      _pyRTI1516EFederateAmbassador(pyRTI1516EFederateAmbassador)
+    {
+      if (_pyRTI1516EFederateAmbassador._threadState != NULL)
+        throw rti1516e::RTIinternalError(L"Imbalance on python thread state.");
+      _pyRTI1516EFederateAmbassador._threadState = PyEval_SaveThread();
+    }
+    ~ReleaseGILScope()
+    {
+      // if (_pyRTI1516EFederateAmbassador._threadState == NULL)
+      //   throw rti1516e::RTIinternalError(L"Imbalance on python thread state.");
+      PyEval_RestoreThread(_pyRTI1516EFederateAmbassador._threadState);
+      _pyRTI1516EFederateAmbassador._threadState = NULL;
+    }
+    PyRTI1516EFederateAmbassador& _pyRTI1516EFederateAmbassador;
+  };
+  struct AquireGILScope {
+    AquireGILScope(PyRTI1516EFederateAmbassador& pyRTI1516EFederateAmbassador) :
+      _pyRTI1516EFederateAmbassador(pyRTI1516EFederateAmbassador)
+    {
+      if (_pyRTI1516EFederateAmbassador._threadState == NULL)
+        throw rti1516e::FederateInternalError(L"Imbalance on python thread state.");
+      PyEval_RestoreThread(_pyRTI1516EFederateAmbassador._threadState);
+      _pyRTI1516EFederateAmbassador._threadState = NULL;
+    }
+    ~AquireGILScope()
+    {
+      // if (_pyRTI1516EFederateAmbassador._threadState != NULL)
+      //   throw rti1516e::FederateInternalError(L"Imbalance on python thread state.");
+      _pyRTI1516EFederateAmbassador._threadState = PyEval_SaveThread();
+    }
+    PyRTI1516EFederateAmbassador& _pyRTI1516EFederateAmbassador;
   };
 
   virtual void connectionLost(std::wstring const & faultDescription)
@@ -1543,7 +1565,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(faultDescription);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"connectionLost", (char*)"N", arg0);
@@ -1561,7 +1583,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewFederateHandleSaveStatusPairVector(federationExecutionInformationVector);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"reportFederationExecutions", (char*)"N", arg0);
@@ -1579,7 +1601,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(label);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"synchronizationPointRegistrationSucceeded", (char*)"N", arg0);
@@ -1598,7 +1620,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(label);
     PyObject* arg1 = PyLong_FromLong(reason);
@@ -1618,7 +1640,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(label);
     PyObject* arg1 = PyObject_NewVariableLengthData(theUserSuppliedTag);
@@ -1637,7 +1659,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(label);
     PyObject* arg1 = PyObject_NewFederateHandleSet(failedToSyncSet);
@@ -1656,7 +1678,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(label);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"initiateFederateSave", (char*)"N", arg0);
@@ -1674,7 +1696,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(label);
     PyObject* arg1 = PyObject_NewLogicalTime(theTime);
@@ -1693,7 +1715,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"federationSaved", 0);
     if (result) {
@@ -1710,7 +1732,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyLong_FromLong(theSaveFailureReason);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"federationNotSaved", (char*)"N", arg0);
@@ -1728,7 +1750,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewFederateHandleSaveStatusPairVector(theFederateStatusVector);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"federationSaveStatusResponse", (char*)"N", arg0);
@@ -1746,7 +1768,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(label);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"requestFederationRestoreSucceeded", (char*)"N", arg0);
@@ -1764,7 +1786,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(label);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"requestFederationRestoreFailed", (char*)"N", arg0);
@@ -1782,7 +1804,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"federationRestoreBegun", 0);
     if (result) {
@@ -1799,7 +1821,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(label);
     PyObject* arg1 = PyObject_NewString(federateName);
@@ -1819,7 +1841,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"federationRestored", 0);
     if (result) {
@@ -1836,7 +1858,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyLong_FromLong(theRestoreFailureReason);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"federationNotRestored", (char*)"N", arg0);
@@ -1854,7 +1876,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewFederateRestoreStatusVector(theFederateStatusVector);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"federationRestoreStatusResponse", (char*)"N", arg0);
@@ -1872,7 +1894,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectClassHandle(theClass);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"startRegistrationForObjectClass", (char*)"N", arg0);
@@ -1890,7 +1912,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectClassHandle(theClass);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"stopRegistrationForObjectClass", (char*)"N", arg0);
@@ -1908,7 +1930,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewInteractionClassHandle(theHandle);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"turnInteractionsOn", (char*)"N", arg0);
@@ -1926,7 +1948,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewInteractionClassHandle(theHandle);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"turnInteractionsOff", (char*)"N", arg0);
@@ -1944,7 +1966,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(theObjectInstanceName);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"objectInstanceNameReservationSucceeded", (char*)"N", arg0);
@@ -1962,7 +1984,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(theObjectInstanceName);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"objectInstanceNameReservationFailed", (char*)"N", arg0);
@@ -1980,7 +2002,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewStringSet(theObjectInstanceNames);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"multipleObjectInstanceNameReservationSucceeded", (char*)"N", arg0);
@@ -1998,7 +2020,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewStringSet(theObjectInstanceNames);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"multipleObjectInstanceNameReservationFailed", (char*)"N", arg0);
@@ -2017,7 +2039,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewObjectClassHandle(theObjectClass);
@@ -2038,7 +2060,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewObjectClassHandle(theObjectClass);
@@ -2061,7 +2083,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleValueMap(theAttributeValues);
@@ -2090,7 +2112,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleValueMap(theAttributeValues);
@@ -2121,7 +2143,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleValueMap(theAttributeValues);
@@ -2150,7 +2172,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewInteractionClassHandle(theInteraction);
     PyObject* arg1 = PyObject_NewParameterHandleValueMap(theParameterValues);
@@ -2180,7 +2202,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewInteractionClassHandle(theInteraction);
     PyObject* arg1 = PyObject_NewParameterHandleValueMap(theParameterValues);
@@ -2213,7 +2235,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewInteractionClassHandle(theInteraction);
     PyObject* arg1 = PyObject_NewParameterHandleValueMap(theParameterValues);
@@ -2245,7 +2267,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewVariableLengthData(theUserSuppliedTag);
@@ -2276,7 +2298,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewVariableLengthData(theUserSuppliedTag);
@@ -2308,7 +2330,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewVariableLengthData(theUserSuppliedTag);
@@ -2336,7 +2358,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
@@ -2358,7 +2380,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
@@ -2379,7 +2401,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
@@ -2399,7 +2421,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
@@ -2419,7 +2441,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
@@ -2439,7 +2461,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
@@ -2460,7 +2482,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
@@ -2482,7 +2504,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandle(theAttribute);
@@ -2503,7 +2525,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewInteractionClassHandle(theInteraction);
     PyObject* arg1 = PyObject_NewTransportationType(theTransportation);
@@ -2524,7 +2546,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewFederateHandle(federateHandle);
     PyObject* arg1 = PyObject_NewInteractionClassHandle(theInteraction);
@@ -2545,7 +2567,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(offeredAttributes);
@@ -2565,7 +2587,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(releasedAttributes);
@@ -2585,7 +2607,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(securedAttributes);
@@ -2605,7 +2627,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
@@ -2625,7 +2647,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(candidateAttributes);
@@ -2646,7 +2668,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
@@ -2666,7 +2688,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandle(theAttribute);
@@ -2686,7 +2708,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandle(theAttribute);
@@ -2705,7 +2727,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
     PyObject* arg1 = PyObject_NewAttributeHandle(theAttribute);
@@ -2724,7 +2746,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewLogicalTime(theFederateTime);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"timeRegulationEnabled", (char*)"N", arg0);
@@ -2743,7 +2765,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewLogicalTime(theFederateTime);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"timeConstrainedEnabled", (char*)"N", arg0);
@@ -2761,7 +2783,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewLogicalTime(theTime);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"timeAdvanceGrant", (char*)"N", arg0);
@@ -2779,7 +2801,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     if (!ob_federateAmbassador)
       return;
 
-    GILStateScope gilStateScope;
+    AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewMessageRetractionHandle(theHandle);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"requestRetraction", (char*)"N", arg0);
@@ -2792,6 +2814,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
   }
 
   PyObject* ob_federateAmbassador;
+  PyThreadState* _threadState;
 };
 
 struct PyRTIambassadorObject {
@@ -2811,6 +2834,12 @@ PyRTIambassador_connect(PyRTIambassadorObject *self, PyObject *args)
   rti1516e::CallbackModel theCallbackModel;
   if (!PyObject_GetCallbackModel(theCallbackModel, arg2)) {
     PyErr_SetString(PyExc_TypeError, "callbackModel needs to be a string!");
+    return 0;
+  }
+  if (theCallbackModel == rti1516e::HLA_IMMEDIATE) {
+    // For now block this here. This only gets sensible once we have the GIL completely removed
+    // and OpenRTI below supports this callback model.
+    PyErr_SetString(PyRTI1516EUnsupportedCallbackModel.get(), "The HLA_IMMEDIATE callback model is not supported!");
     return 0;
   }
 
@@ -6774,18 +6803,17 @@ PyRTIambassador_evokeCallback(PyRTIambassadorObject *self, PyObject *args)
     return 0;
   }
 
-  PyThreadState *_save;
-  _save = PyEval_SaveThread();
   try {
-
-    bool more = self->ob_value->evokeCallback(approximateMinimumTimeInSeconds);
-
-    PyEval_RestoreThread(_save);
+    bool more = false;
+    {
+      PyRTI1516EFederateAmbassador::ReleaseGILScope releaseGILScope(self->_federateAmbassador);
+      more = self->ob_value->evokeCallback(approximateMinimumTimeInSeconds);
+    }
 
     return PyBool_FromLong(more);
   }
-  CATCH_C_EXCEPTION_THREADS(CallNotAllowedFromWithinCallback)
-  CATCH_C_EXCEPTION_THREADS(RTIinternalError)
+  CATCH_C_EXCEPTION(CallNotAllowedFromWithinCallback)
+  CATCH_C_EXCEPTION(RTIinternalError)
 }
 
 static PyObject *
@@ -6807,19 +6835,18 @@ PyRTIambassador_evokeMultipleCallbacks(PyRTIambassadorObject *self, PyObject *ar
     return 0;
   }
 
-  PyThreadState *_save;
-  _save = PyEval_SaveThread();
   try {
-
-    bool more = self->ob_value->evokeMultipleCallbacks(approximateMinimumTimeInSeconds,
-                                                       approximateMaximumTimeInSeconds);
-
-    PyEval_RestoreThread(_save);
+    bool more = false;
+    {
+      PyRTI1516EFederateAmbassador::ReleaseGILScope releaseGILScope(self->_federateAmbassador);
+      more = self->ob_value->evokeMultipleCallbacks(approximateMinimumTimeInSeconds,
+                                                    approximateMaximumTimeInSeconds);
+    }
 
     return PyBool_FromLong(more);
   }
-  CATCH_C_EXCEPTION_THREADS(CallNotAllowedFromWithinCallback)
-  CATCH_C_EXCEPTION_THREADS(RTIinternalError)
+  CATCH_C_EXCEPTION(CallNotAllowedFromWithinCallback)
+  CATCH_C_EXCEPTION(RTIinternalError)
 }
 
 static PyObject *
