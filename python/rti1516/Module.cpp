@@ -7017,6 +7017,9 @@ static PyModuleDef_Slot rti1516_moduledef_slots[] = {
 #ifdef Py_mod_multiple_interpreters
         { Py_mod_multiple_interpreters, Py_MOD_PER_INTERPRETER_GIL_SUPPORTED },
 #endif
+#if PY_VERSION_HEX >= 0x030D0000
+        { Py_mod_gil, Py_MOD_GIL_NOT_USED },
+#endif
         { 0/*id*/, NULL/*value*/ }
 };
 #endif
