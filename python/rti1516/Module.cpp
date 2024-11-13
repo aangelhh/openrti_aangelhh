@@ -38,14 +38,22 @@ static int PyTypeObject_Ready(PyTypeObject* type)
   if (PyType_Ready(type) < 0)
     return -1;
 #ifdef USE_IMMORTAL_TYPE_OBJECTS
+#if 0x030D0000 <= PY_VERSION_HEX
+  // Starting from 3.13, static type objects shall be immortal
+#else
   Py_SET_REFCNT((PyObject*)type, _Py_IMMORTAL_REFCNT);
+#endif
 #endif
   return 0;
 }
 
 static int PyModule_AddTypeObject(PyObject* m, const char* name, PyTypeObject* type)
 {
-#ifndef USE_IMMORTAL_TYPE_OBJECTS
+#ifdef USE_IMMORTAL_TYPE_OBJECTS
+#ifdef _Py_IsImmortal
+  assert(_Py_IsImmortal(type));
+#endif
+#else
   Py_IncRef((PyObject*)type);
 #endif
   return PyModule_AddObject(m, name, (PyObject*)type);
