@@ -170,6 +170,7 @@ set(OpenRTI_SOURCES
   Options.cpp
   ParenthesesReader.cpp
   ServerModel.cpp
+  ServerModel/Node.cpp
   ServerNode.cpp
   ProtocolSocketEvent.cpp
   RegionSet.cpp

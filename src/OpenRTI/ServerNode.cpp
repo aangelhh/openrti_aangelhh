@@ -24,7 +24,7 @@
 #include "Message.h"
 #include "AbstractMessageSender.h"
 #include "LogStream.h"
-#include "ServerModel.h"
+#include "ServerModel/Node.h"
 #include "ServerOptions.h"
 
 namespace OpenRTI {
@@ -2084,7 +2084,7 @@ public:
     SharedPtr<EnumerateFederationExecutionsResponseMessage> response;
     response = new EnumerateFederationExecutionsResponseMessage;
     response->getFederationExecutionInformationVector().reserve(getFederationHandleFederationMap().size());
-    for (ServerModel::Federation::HandleMap::iterator i = getFederationHandleFederationMap().begin();
+    for (ServerModel::Node::FederationHandleFederationMap::iterator i = getFederationHandleFederationMap().begin();
          i != getFederationHandleFederationMap().end(); ++i) {
       FederationExecutionInformation federationExecutionInformation;
       federationExecutionInformation.setFederationExecutionName(i->getName());
@@ -2491,7 +2491,7 @@ public:
       Log(ServerConnect, Error) << getServerPath() << ": Removing parent connect!" << std::endl;
 
     // Remove that from the federations.
-    for (ServerModel::Federation::HandleMap::iterator i = getFederationHandleFederationMap().begin();
+    for (ServerModel::Node::FederationHandleFederationMap::iterator i = getFederationHandleFederationMap().begin();
          i != getFederationHandleFederationMap().end(); ++i)
       static_cast<FederationServer*>(i.get())->removeConnect(connectHandle);
 
