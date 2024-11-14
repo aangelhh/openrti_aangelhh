@@ -1202,43 +1202,6 @@ private:
   Module& _module;
 };
 
-////////////////////////////////////////////////////////////
-
-class AttributeDefinition;
-
-class OPENRTI_LOCAL ClassAttribute : public HandleListEntity<ClassAttribute, AttributeHandle>,
-                                     public PublishSubscribe /*FIXME*/ {
-public:
-  typedef HandleListEntity<ClassAttribute, AttributeHandle>::HandleMap HandleMap;
-  typedef HandleListEntity<ClassAttribute, AttributeHandle>::FirstList FirstList;
-
-  ClassAttribute(ObjectClass& objectClass, AttributeDefinition& attributeDefinition);
-  ~ClassAttribute();
-
-  const AttributeHandle& getAttributeHandle() const
-  { return HandleListEntity<ClassAttribute, AttributeHandle>::_getHandle(); }
-  void setAttributeHandle(const AttributeHandle& attributeHandle);
-
-  const ObjectClass& getObjectClass() const
-  { return _objectClass; }
-  ObjectClass& getObjectClass()
-  { return _objectClass; }
-
-  const AttributeDefinition& getAttributeDefinition() const
-  { return _attributeDefinition; }
-  AttributeDefinition& getAttributeDefinition()
-  { return _attributeDefinition; }
-
-private:
-  ClassAttribute(const ClassAttribute&);
-  ClassAttribute& operator=(const ClassAttribute&);
-
-  ObjectClass& _objectClass;
-  AttributeDefinition& _attributeDefinition;
-
-  // InstanceAttribute::FirstList _instanceAttributeList;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 

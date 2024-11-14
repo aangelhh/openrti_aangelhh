@@ -710,23 +710,5 @@ AttributeDefinitionModule::~AttributeDefinitionModule()
 {
 }
 
-////////////////////////////////////////////////////////////
-
-ClassAttribute::ClassAttribute(ObjectClass& objectClass, AttributeDefinition& attributeDefinition) :
-  _objectClass(objectClass),
-  _attributeDefinition(attributeDefinition)
-{
-}
-
-ClassAttribute::~ClassAttribute()
-{
-}
-
-void
-ClassAttribute::setAttributeHandle(const AttributeHandle& attributeHandle)
-{
-  HandleListEntity<ClassAttribute, AttributeHandle>::_setHandle(attributeHandle);
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI
