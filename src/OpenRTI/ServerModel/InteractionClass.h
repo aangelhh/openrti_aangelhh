@@ -27,7 +27,7 @@
 #include "InteractionClassModule.h"
 #include "ParameterDefinition.h"
 #include "ParameterDefinitionModule.h"
-#include "ServerModel.h"
+#include "PublishSubscribe.h"
 #include "StringUtils.h"
 #include "Message.h"
 

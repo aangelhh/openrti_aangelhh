@@ -17,24 +17,11 @@
  *
  */
 
-#ifndef OpenRTI_ServerModel_h
-#define OpenRTI_ServerModel_h
+#ifndef OpenRTI_ServerModel_PublishSubscribe_h
+#define OpenRTI_ServerModel_PublishSubscribe_h
 
-#include <list>
-#include <string>
-
-#include "AbstractMessageSender.h"
-#include "Exception.h"
 #include "Handle.h"
-#include "HandleAllocator.h"
-#include "IntrusiveList.h"
-#include "IntrusiveUnorderedMap.h"
-#include "Referenced.h"
 #include "RegionSet.h"
-#include "ServerOptions.h"
-#include "StringUtils.h"
-#include "Types.h"
-#include "LogStream.h"
 
 namespace OpenRTI {
 namespace ServerModel {
@@ -50,10 +37,10 @@ typedef std::pair<PropagationType, ConnectHandle> PropagationTypeConnectHandlePa
 
 class OPENRTI_LOCAL BroadcastConnectHandleSet {
  public:
-  // Returns what to do with the other connects in the server node.
-  // If .first is PropagateBroadcast, tell all but this one that sends this publication about the publication change.
-  // If .first is PropagateSend, tell the connect at .second about the change.
-  // If .first is PropagateNone, nothing has changed for the connects at this server node.
+  /// Returns what to do with the other connects in the server node.
+  /// If .first is PropagateBroadcast, tell all but this one that sends this publication about the publication change.
+  /// If .first is PropagateSend, tell the connect at .second about the change.
+  /// If .first is PropagateNone, nothing has changed for the connects at this server node.
   PropagationTypeConnectHandlePair insert(const ConnectHandle& connectHandle)
   {
     // Mark this connect as publishing
@@ -81,10 +68,10 @@ class OPENRTI_LOCAL BroadcastConnectHandleSet {
     }
   }
 
-  // Returns what to do with the other connects in the server node.
-  // If .first is PropagateBroadcast, tell all but this one that sends this publication about the publication change.
-  // If .first is PropagateSend, tell the connect at .second about the change.
-  // If .first is PropagateNone, nothing has changed for the connects at this server node.
+  /// Returns what to do with the other connects in the server node.
+  /// If .first is PropagateBroadcast, tell all but this one that sends this publication about the publication change.
+  /// If .first is PropagateSend, tell the connect at .second about the change.
+  /// If .first is PropagateNone, nothing has changed for the connects at this server node.
   PropagationTypeConnectHandlePair erase(const ConnectHandle& connectHandle)
   {
     // Did that change something? If not, propagate nothing
@@ -102,14 +89,14 @@ class OPENRTI_LOCAL BroadcastConnectHandleSet {
     }
   }
 
-  // Returns if any existing connect in this server node publishes this
+  /// Returns if any existing connect in this server node publishes this
   bool empty() const
   { return _connectHandleSet.empty(); }
 
-  // Returns if the given connect handle publishes this
+  /// Returns if the given connect handle publishes this
   bool contains(const ConnectHandle& connectHandle) const
   { return _connectHandleSet.find(connectHandle) != _connectHandleSet.end(); }
-  // Returns the subscription type of all connects except the given one
+  /// Returns the subscription type of all connects except the given one
   bool containsMoreThan(const ConnectHandle& connectHandle) const
   {
     size_t size = _connectHandleSet.size();
@@ -130,11 +117,11 @@ class OPENRTI_LOCAL BroadcastConnectHandleSet {
 class OPENRTI_LOCAL PublishSubscribe {
 public:
 
-  // Change publication state of the given connect.
-  // Returns what to do with the other connects in the server node.
-  // If .first is PropagateBroadcast, tell all but this one that sends this publication about the publication change.
-  // If .first is PropagateSend, tell the connect at .second about the change.
-  // If .first is PropagateNone, nothing has changed for the connects at this server node.
+  /// Change publication state of the given connect.
+  /// Returns what to do with the other connects in the server node.
+  /// If .first is PropagateBroadcast, tell all but this one that sends this publication about the publication change.
+  /// If .first is PropagateSend, tell the connect at .second about the change.
+  /// If .first is PropagateNone, nothing has changed for the connects at this server node.
   PropagationTypeConnectHandlePair setPublicationType(const ConnectHandle& connectHandle, PublicationType publicationType)
   {
     if (publicationType == Published) {
@@ -143,7 +130,7 @@ public:
       return _publishedConnects.erase(connectHandle);
     }
   }
-  // Returns if the given connect handle publishes this
+  /// Returns if the given connect handle publishes this
   PublicationType getPublicationType(const ConnectHandle& connectHandle) const
   {
     if (_publishedConnects.contains(connectHandle))
@@ -151,7 +138,7 @@ public:
     else
       return Unpublished;
   }
-  // Returns if any existing connect in this server node publishes this
+  /// Returns if any existing connect in this server node publishes this
   PublicationType getPublicationType() const
   {
     if (_publishedConnects.empty())
@@ -164,11 +151,11 @@ public:
 
   // FIXME currently only passive subscriptions are propagated
 
-  // Change publication state of the given connect.
-  // Returns what to do with the other connects in the server node.
-  // If .first is PropagateBroadcast, tell all but this one that sends this publication about the publication change.
-  // If .first is PropagateSend, tell the connect at .second about the change.
-  // If .first is PropagateNone, nothing has changed for the connects at this server node.
+  /// Change publication state of the given connect.
+  /// Returns what to do with the other connects in the server node.
+  /// If .first is PropagateBroadcast, tell all but this one that sends this publication about the publication change.
+  /// If .first is PropagateSend, tell the connect at .second about the change.
+  /// If .first is PropagateNone, nothing has changed for the connects at this server node.
   PropagationTypeConnectHandlePair setSubscriptionType(const ConnectHandle& connectHandle, SubscriptionType subscriptionType)
   {
     // if (subscriptionType == Subscribed) {
@@ -198,7 +185,7 @@ public:
     else
       return Unsubscribed;
   }
-  // Returns the subscription type of all connects except the given one
+  /// Returns the subscription type of all connects except the given one
   SubscriptionType getSubscriptionTypeToConnect(const ConnectHandle& connectHandle) const
   {
     if (_activeSubscribedConnects.containsMoreThan(connectHandle))
@@ -225,7 +212,7 @@ public:
     OpenRTIAssert(!_subscribedConnects.contains(connectHandle));
   }
 
-  // returns true if something changed
+  /// returns true if something changed
   bool updateCumulativeSubscribedConnectHandleSet(const ConnectHandle& connectHandle, bool subscribe)
   {
     if (subscribe) {
@@ -240,12 +227,12 @@ public:
   ConnectHandleSet _cumulativeSubscribedConnectHandleSet;
 
  private:
-  // All the connects that publish this
+  /// All the connects that publish this
   BroadcastConnectHandleSet _publishedConnects;
 
-  // All the connects that are regionless subscribed at this
-  // Since region subscriptions should not interfere with normal subscriptions, have these two and something for
-  // regions set subscriptions without any active/passive flag
+  /// All the connects that are regionless subscribed at this
+  /// Since region subscriptions should not interfere with normal subscriptions, have these two and something for
+  /// regions set subscriptions without any active/passive flag
   BroadcastConnectHandleSet _subscribedConnects;
   BroadcastConnectHandleSet _activeSubscribedConnects;
 };
@@ -253,4 +240,4 @@ public:
 } // namespace ServerModel
 } // namespace OpenRTI
 
-#endif
+#endif // OpenRTI_ServerModel_PublishSubscribe_h
