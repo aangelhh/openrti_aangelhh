@@ -24,6 +24,7 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "AttributeDefinition.h"
+#include "AttributeDefinitionModule.h"
 #include "ClassAttribute.h"
 #include "Handle.h"
 #include "ServerModel.h"

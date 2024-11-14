@@ -699,16 +699,5 @@ ObjectClassModule::~ObjectClassModule()
 {
 }
 
-////////////////////////////////////////////////////////////
-
-AttributeDefinitionModule::AttributeDefinitionModule(ObjectClass& objectClass, Module& module) :
-  _objectClass(objectClass), _module(module)
-{
-}
-
-AttributeDefinitionModule::~AttributeDefinitionModule()
-{
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI

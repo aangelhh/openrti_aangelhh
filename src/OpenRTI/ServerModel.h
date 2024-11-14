@@ -1175,33 +1175,6 @@ private:
   Module& _module;
 };
 
-////////////////////////////////////////////////////////////
-
-class Module;
-class ObjectClass;
-
-class OPENRTI_LOCAL AttributeDefinitionModule : public ListPair<AttributeDefinitionModule> {
-public:
-  AttributeDefinitionModule(ObjectClass& objectClass, Module& module);
-  ~AttributeDefinitionModule();
-
-  const ObjectClass& getObjectClass() const
-  { return _objectClass; }
-  ObjectClass& getObjectClass()
-  { return _objectClass; }
-  const Module& getModule() const
-  { return _module; }
-  Module& getModule()
-  { return _module; }
-
-private:
-  AttributeDefinitionModule(const AttributeDefinitionModule&);
-  AttributeDefinitionModule& operator=(const AttributeDefinitionModule&);
-
-  ObjectClass& _objectClass;
-  Module& _module;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 
