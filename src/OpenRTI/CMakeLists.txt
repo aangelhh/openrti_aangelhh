@@ -177,6 +177,7 @@ set(OpenRTI_SOURCES
   ServerModel/Federation.cpp
   ServerModel/FederationConnect.cpp
   ServerModel/InteractionClass.cpp
+  ServerModel/InteractionClassModule.cpp
   ServerModel/Module.cpp
   ServerModel/Node.cpp
   ServerModel/NodeConnect.cpp

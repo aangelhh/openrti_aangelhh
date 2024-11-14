@@ -25,6 +25,7 @@
 
 #include "AttributeDefinitionModule.h"
 #include "Handle.h"
+#include "InteractionClassModule.h"
 #include "Message.h"
 #include "ObjectClassModule.h"
 #include "ParameterDefinitionModule.h"

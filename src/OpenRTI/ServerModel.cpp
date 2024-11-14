@@ -471,16 +471,5 @@ UpdateRate::getIsReferencedByAnyModule() const
   return !_updateRateModuleList.empty();
 }
 
-////////////////////////////////////////////////////////////
-
-InteractionClassModule::InteractionClassModule(InteractionClass& interactionClass, Module& module) :
-  _interactionClass(interactionClass), _module(module)
-{
-}
-
-InteractionClassModule::~InteractionClassModule()
-{
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI

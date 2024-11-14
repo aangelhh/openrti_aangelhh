@@ -24,6 +24,7 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "Handle.h"
+#include "InteractionClassModule.h"
 #include "ParameterDefinition.h"
 #include "ParameterDefinitionModule.h"
 #include "ServerModel.h"

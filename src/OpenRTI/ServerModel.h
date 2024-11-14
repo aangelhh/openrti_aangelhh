@@ -896,33 +896,6 @@ private:
   UpdateRateModule::SecondList _updateRateModuleList;
 };
 
-////////////////////////////////////////////////////////////
-
-class InteractionClass;
-class Module;
-
-class OPENRTI_LOCAL InteractionClassModule : public ListPair<InteractionClassModule> {
-public:
-  InteractionClassModule(InteractionClass& interactionClass, Module& module);
-  ~InteractionClassModule();
-
-  const InteractionClass& getInteractionClass() const
-  { return _interactionClass; }
-  InteractionClass& getInteractionClass()
-  { return _interactionClass; }
-  const Module& getModule() const
-  { return _module; }
-  Module& getModule()
-  { return _module; }
-
-private:
-  InteractionClassModule(const InteractionClassModule&);
-  InteractionClassModule& operator=(const InteractionClassModule&);
-
-  InteractionClass& _interactionClass;
-  Module& _module;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 
