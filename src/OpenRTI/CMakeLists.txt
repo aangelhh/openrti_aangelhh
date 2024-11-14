@@ -181,6 +181,7 @@ set(OpenRTI_SOURCES
   ServerModel/NodeConnect.cpp
   ServerModel/ObjectClass.cpp
   ServerModel/ObjectClassModule.cpp
+  ServerModel/ParameterDefinition.cpp
   ServerNode.cpp
   ProtocolSocketEvent.cpp
   RegionSet.cpp

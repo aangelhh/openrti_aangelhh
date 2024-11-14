@@ -511,29 +511,5 @@ ClassParameter::setParameterHandle(const ParameterHandle& parameterHandle)
   HandleListEntity<ClassParameter, ParameterHandle>::_setHandle(parameterHandle);
 }
 
-////////////////////////////////////////////////////////////
-
-ParameterDefinition::ParameterDefinition(InteractionClass& interactionClass) :
-  _interactionClass(interactionClass)
-{
-}
-
-ParameterDefinition::~ParameterDefinition()
-{
-  _classParameterList.clear();
-}
-
-void
-ParameterDefinition::setName(const std::string& name)
-{
-  HandleStringEntity<ParameterDefinition, ParameterHandle>::_setString(name);
-}
-
-void
-ParameterDefinition::setParameterHandle(const ParameterHandle& parameterHandle)
-{
-  HandleStringEntity<ParameterDefinition, ParameterHandle>::_setHandle(parameterHandle);
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI
