@@ -950,41 +950,6 @@ private:
   Module& _module;
 };
 
-////////////////////////////////////////////////////////////
-
-class InteractionClass;
-class ParameterDefinition;
-
-class OPENRTI_LOCAL ClassParameter : public HandleListEntity<ClassParameter, ParameterHandle> {
-public:
-  typedef HandleListEntity<ClassParameter, ParameterHandle>::HandleMap HandleMap;
-  typedef HandleListEntity<ClassParameter, ParameterHandle>::FirstList FirstList;
-
-  ClassParameter(InteractionClass& interactionClass, ParameterDefinition& parameterDefinition);
-  ~ClassParameter();
-
-  const ParameterHandle& getParameterHandle() const
-  { return HandleListEntity<ClassParameter, ParameterHandle>::_getHandle(); }
-  void setParameterHandle(const ParameterHandle& parameterHandle);
-
-  const InteractionClass& getInteractionClass() const
-  { return _interactionClass; }
-  InteractionClass& getInteractionClass()
-  { return _interactionClass; }
-
-  const ParameterDefinition& getParameterDefinition() const
-  { return _parameterDefinition; }
-  ParameterDefinition& getParameterDefinition()
-  { return _parameterDefinition; }
-
-private:
-  ClassParameter(const ClassParameter&);
-  ClassParameter& operator=(const ClassParameter&);
-
-  InteractionClass& _interactionClass;
-  ParameterDefinition& _parameterDefinition;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 

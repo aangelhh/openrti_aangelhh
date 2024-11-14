@@ -493,23 +493,5 @@ ParameterDefinitionModule::~ParameterDefinitionModule()
 {
 }
 
-////////////////////////////////////////////////////////////
-
-ClassParameter::ClassParameter(InteractionClass& interactionClass, ParameterDefinition& parameterDefinition) :
-  _interactionClass(interactionClass),
-  _parameterDefinition(parameterDefinition)
-{
-}
-
-ClassParameter::~ClassParameter()
-{
-}
-
-void
-ClassParameter::setParameterHandle(const ParameterHandle& parameterHandle)
-{
-  HandleListEntity<ClassParameter, ParameterHandle>::_setHandle(parameterHandle);
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI
