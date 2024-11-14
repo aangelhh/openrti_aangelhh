@@ -30,6 +30,7 @@
 #include "ObjectClassModule.h"
 #include "ParameterDefinitionModule.h"
 #include "ServerModel.h"
+#include "UpdateRateModule.h"
 
 namespace OpenRTI {
 namespace ServerModel {

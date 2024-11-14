@@ -824,33 +824,6 @@ private:
   DimensionModule::SecondList _dimensionModuleList;
 };
 
-////////////////////////////////////////////////////////////
-
-class Module;
-class UpdateRate;
-
-class OPENRTI_LOCAL UpdateRateModule : public ListPair<UpdateRateModule> {
-public:
-  UpdateRateModule(UpdateRate& updateRate, Module& module);
-  ~UpdateRateModule();
-
-  const UpdateRate& getUpdateRate() const
-  { return _updateRate; }
-  UpdateRate& getUpdateRate()
-  { return _updateRate; }
-  const Module& getModule() const
-  { return _module; }
-  Module& getModule()
-  { return _module; }
-
-private:
-  UpdateRateModule(const UpdateRateModule&);
-  UpdateRateModule& operator=(const UpdateRateModule&);
-
-  UpdateRate& _updateRate;
-  Module& _module;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 

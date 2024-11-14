@@ -186,6 +186,7 @@ set(OpenRTI_SOURCES
   ServerModel/ParameterDefinition.cpp
   ServerModel/ParameterDefinitionModule.cpp
   ServerModel/UpdateRate.cpp
+  ServerModel/UpdateRateModule.cpp
   ServerNode.cpp
   ProtocolSocketEvent.cpp
   RegionSet.cpp

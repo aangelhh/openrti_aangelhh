@@ -423,16 +423,5 @@ Dimension::getIsReferencedByAnyModule() const
   return !_dimensionModuleList.empty();
 }
 
-////////////////////////////////////////////////////////////
-
-UpdateRateModule::UpdateRateModule(UpdateRate& updateRate, Module& module) :
-  _updateRate(updateRate), _module(module)
-{
-}
-
-UpdateRateModule::~UpdateRateModule()
-{
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI
