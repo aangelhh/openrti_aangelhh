@@ -386,42 +386,5 @@ DimensionModule::~DimensionModule()
 {
 }
 
-////////////////////////////////////////////////////////////
-
-Dimension::Dimension(Federation& federation) :
-  _federation(federation),
-  _upperBound(~Unsigned(0))
-{
-}
-
-Dimension::~Dimension()
-{
-  OpenRTIAssert(_dimensionModuleList.empty());
-}
-
-void
-Dimension::setName(const std::string& name)
-{
-  ModuleEntity<Dimension, DimensionHandle>::_setString(name);
-}
-
-void
-Dimension::setDimensionHandle(const DimensionHandle& dimensionHandle)
-{
-  ModuleEntity<Dimension, DimensionHandle>::_setHandle(dimensionHandle);
-}
-
-void
-Dimension::setUpperBound(const Unsigned& upperBound)
-{
-  _upperBound = upperBound;
-}
-
-bool
-Dimension::getIsReferencedByAnyModule() const
-{
-  return !_dimensionModuleList.empty();
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI

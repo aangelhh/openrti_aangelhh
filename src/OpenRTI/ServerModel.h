@@ -763,67 +763,6 @@ private:
   Module& _module;
 };
 
-////////////////////////////////////////////////////////////
-
-template<typename T, typename H, typename S = std::string>
-class OPENRTI_LOCAL ModuleEntity : public HandleStringEntity<T, H, S> {
-public:
-
-protected:
-  ModuleEntity()
-  { }
-  ModuleEntity(const H& handle, const S& name) :
-    HandleStringEntity<T, H, S>(handle, name)
-  { }
-};
-
-////////////////////////////////////////////////////////////
-
-class Federation;
-
-class OPENRTI_LOCAL Dimension : public ModuleEntity<Dimension, DimensionHandle> {
-public:
-  typedef ModuleEntity<Dimension, DimensionHandle>::HandleMap HandleMap;
-  typedef ModuleEntity<Dimension, DimensionHandle>::StringMap NameMap;
-
-  Dimension(Federation& federation);
-  ~Dimension();
-
-  const Federation& getFederation() const
-  { return _federation; }
-  Federation& getFederation()
-  { return _federation; }
-
-  const std::string& getName() const
-  { return ModuleEntity<Dimension, DimensionHandle>::_getString(); }
-  void setName(const std::string& name);
-
-  const DimensionHandle& getDimensionHandle() const
-  { return ModuleEntity<Dimension, DimensionHandle>::_getHandle(); }
-  void setDimensionHandle(const DimensionHandle& dimensionHandle);
-
-  const Unsigned& getUpperBound() const
-  { return _upperBound; }
-  void setUpperBound(const Unsigned& upperBound);
-
-  bool getIsReferencedByAnyModule() const;
-
-  void insert(DimensionModule& dimensionModule)
-  { _dimensionModuleList.push_back(dimensionModule); }
-
-private:
-  Dimension(const Dimension&);
-  Dimension& operator=(const Dimension&);
-
-  Federation& _federation;
-
-  // The upper bound
-  Unsigned _upperBound;
-
-  // The list of modules referencing this dimension.
-  DimensionModule::SecondList _dimensionModuleList;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 

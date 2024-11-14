@@ -19,6 +19,7 @@
 
 #include "Module.h"
 
+#include "Dimension.h"
 #include "InteractionClass.h"
 #include "ObjectClass.h"
 #include "UpdateRate.h"
