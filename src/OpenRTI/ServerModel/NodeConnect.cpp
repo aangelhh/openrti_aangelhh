@@ -1,0 +1,90 @@
+/* -*-c++-*- OpenRTI - Copyright (C) 2009-2024 Mathias Froehlich
+ *
+ * This file is part of OpenRTI.
+ *
+ * OpenRTI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenRTI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with OpenRTI.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#include "NodeConnect.h"
+
+namespace OpenRTI {
+namespace ServerModel {
+
+NodeConnect::NodeConnect() :
+  _isParentConnect(false)
+{
+}
+
+NodeConnect::~NodeConnect()
+{
+  // We need to make sure that this list got processed before deletion.
+  // FIXME, should be empty at this time
+  _federationConnectList.clear();
+
+  OpenRTIAssert(_federationConnectList.empty());
+}
+
+void
+NodeConnect::setConnectHandle(ConnectHandle const& connectHandle)
+{
+  IntrusiveUnorderedMap<ConnectHandle, NodeConnect>::Hook::setKey(connectHandle);
+}
+
+void
+NodeConnect::setIsParentConnect(bool isParentConnect)
+{
+  _isParentConnect = isParentConnect;
+}
+
+void
+NodeConnect::setName(std::string const& name)
+{
+  _name = name;
+}
+
+void
+NodeConnect::setOptions(StringStringListMap const& options)
+{
+  _options = options;
+
+  StringStringListMap::const_iterator i = options.find("serverName");
+  if (i != options.end() && !i->second.empty())
+    _name = i->second.front();
+  else
+    _name.clear();
+}
+
+const SharedPtr<AbstractMessageSender>&
+NodeConnect::getMessageSender() const
+{
+  return _messageSender;
+}
+
+void
+NodeConnect::setMessageSender(const SharedPtr<AbstractMessageSender>& messageSender)
+{
+  _messageSender = messageSender;
+}
+
+void
+NodeConnect::send(const SharedPtr<const AbstractMessage>& message)
+{
+  if (!_messageSender.valid())
+    return;
+  _messageSender->send(message);
+}
+
+} // namespace ServerModel
+} // namespace OpenRTI

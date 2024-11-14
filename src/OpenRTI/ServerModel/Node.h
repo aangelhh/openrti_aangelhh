@@ -25,7 +25,7 @@
 
 #include "Handle.h"
 #include "HandleAllocator.h"
-#include "ServerModel.h"
+#include "NodeConnect.h"
 #include "ServerOptions.h"
 
 namespace OpenRTI {

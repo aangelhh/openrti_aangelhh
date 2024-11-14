@@ -1869,65 +1869,6 @@ private:
   HandleAllocator<ObjectInstanceHandle> _objectInstanceHandleAllocator;
 };
 
-////////////////////////////////////////////////////////////
-
-class OPENRTI_LOCAL NodeConnect : public IntrusiveUnorderedMap<ConnectHandle, NodeConnect>::Hook {
-public:
-  typedef IntrusiveUnorderedMap<ConnectHandle, NodeConnect> HandleMap;
-
-  NodeConnect();
-  ~NodeConnect();
-
-  /// The connect handle to identify this connect
-  const ConnectHandle& getConnectHandle() const
-  { return HandleMap::Hook::getKey(); }
-  void setConnectHandle(const ConnectHandle& connectHandle);
-
-  /// True if this is the parent connect
-  bool getIsParentConnect() const
-  { return _isParentConnect; }
-  void setIsParentConnect(const bool& isParentConnect);
-
-  /// The connects name - for debugging
-  const std::string& getName() const
-  { return _name; }
-  void setName(const std::string& name);
-
-  /// The message send callback
-  const SharedPtr<AbstractMessageSender>& getMessageSender() const;
-  void setMessageSender(const SharedPtr<AbstractMessageSender>& messageSender);
-
-  /// The string map from the other side of the connect
-  const StringStringListMap& getOptions() const;
-  void setOptions(const StringStringListMap& options);
-
-  /// The federations using this connect
-  FederationConnect::FirstList& getFederationConnectList()
-  { return _federationConnectList; }
-  // FederationConnect* insert(Federation& federation)
-  // { return new FederationConnect(federation, *this); }
-  void insert(FederationConnect& federationConnect)
-  { _federationConnectList.push_back(federationConnect); }
-
-  /// We can actually send messages through a connect
-  void send(const SharedPtr<const AbstractMessage>& message);
-
-private:
-  NodeConnect(const NodeConnect&);
-  NodeConnect& operator=(const NodeConnect&);
-
-  bool _isParentConnect;
-
-  std::string _name;
-
-  SharedPtr<AbstractMessageSender> _messageSender;
-
-  StringStringListMap _options;
-
-  /// Federations using this connect
-  FederationConnect::FirstList _federationConnectList;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 
