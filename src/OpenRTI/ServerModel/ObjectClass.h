@@ -1,0 +1,260 @@
+/* -*-c++-*- OpenRTI - Copyright (C) 2009-2024 Mathias Froehlich
+ *
+ * This file is part of OpenRTI.
+ *
+ * OpenRTI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenRTI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with OpenRTI.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#ifndef OpenRTI_ServerModel_ObjectClass_h
+#define OpenRTI_ServerModel_ObjectClass_h
+
+#include "IntrusiveList.h"
+#include "IntrusiveUnorderedMap.h"
+
+#include "Handle.h"
+#include "ServerModel.h"
+#include "StringUtils.h"
+
+namespace OpenRTI {
+namespace ServerModel {
+
+class AttributeDefinition;
+class ClassAttribute;
+class Federation;
+
+class OPENRTI_LOCAL ObjectClass :
+    public IntrusiveUnorderedMap<ObjectClassHandle, ObjectClass>::Hook,
+    public IntrusiveUnorderedMap<StringVector, ObjectClass>::Hook,
+    public IntrusiveList<ObjectClass, 0>::Hook
+{
+public:
+  typedef IntrusiveUnorderedMap<ObjectClassHandle, ObjectClass> HandleMap;
+  typedef IntrusiveUnorderedMap<StringVector, ObjectClass> NameMap;
+  typedef IntrusiveList<ObjectClass, 0> ChildList;
+
+  ObjectClass(Federation& federation, ObjectClass* parentObjectClass = 0);
+  ~ObjectClass();
+
+  Federation const& getFederation() const
+  { return _federation; }
+  Federation& getFederation()
+  { return _federation; }
+
+  ObjectClassHandle const& getObjectClassHandle() const
+  { return IntrusiveUnorderedMap<ObjectClassHandle, ObjectClass>::Hook::getKey(); }
+  void setObjectClassHandle(ObjectClassHandle const& objectClassHandle);
+
+  StringVector const& getName() const
+  { return IntrusiveUnorderedMap<StringVector, ObjectClass>::Hook::getKey(); }
+  void setName(StringVector const& name);
+
+  ObjectClass const* getParentObjectClass() const
+  { return _parentObjectClass; }
+  ObjectClass* getParentObjectClass()
+  { return _parentObjectClass; }
+  ObjectClassHandle getParentObjectClassHandle() const;
+
+  /// List of ObjectClass instances belonging to this ObjectClass
+  typedef IntrusiveList<ObjectClass, 0> ChildObjectClassList;
+  /// Get the list of ObjectClass instances
+  ChildObjectClassList const& getChildObjectClassList() const
+  { return _childObjectClassList; }
+  ChildObjectClassList& getChildObjectClassList()
+  { return _childObjectClassList; }
+
+  /// The list of Modules referencing this ObjectClass
+  typedef IntrusiveList<ObjectClassModule, 1> ObjectClassModuleList;
+  /// Get the list of ObjectClassModule instances
+  ObjectClassModuleList const& getObjectClassModuleList() const
+  { return _objectClassModuleList; }
+  ObjectClassModuleList& getObjectClassModuleList()
+  { return _objectClassModuleList; }
+  void insert(ObjectClassModule& objectClassModule)
+  { _objectClassModuleList.push_back(objectClassModule); }
+  bool getIsReferencedByAnyModule() const;
+
+  /// UnorderedSet of AttributeDefinition instances indexed by attributeHandle
+  typedef IntrusiveUnorderedMap<AttributeHandle, AttributeDefinition> AttributeHandleAttributeDefinitionMap;
+  /// Get the set of AttributeDefinition instances
+  AttributeHandleAttributeDefinitionMap const& getAttributeHandleAttributeDefinitionMap() const
+  { return _attributeHandleAttributeDefinitionMap; }
+  AttributeHandleAttributeDefinitionMap& getAttributeHandleAttributeDefinitionMap()
+  { return _attributeHandleAttributeDefinitionMap; }
+  /// Get one AttributeDefinition instance matching attributeHandle
+  AttributeDefinition const* getAttributeDefinition(AttributeHandle const& attributeHandle) const;
+  AttributeDefinition* getAttributeDefinition(AttributeHandle const& attributeHandle);
+
+  /// UnorderedSet of AttributeDefinition instances indexed by name
+  typedef IntrusiveUnorderedMap<std::string, AttributeDefinition> AttributeNameAttributeDefinitionMap;
+  /// Get one AttributeDefinition instance matching name
+  AttributeDefinition const* getAttributeDefinition(std::string const& name) const;
+  AttributeDefinition* getAttributeDefinition(std::string const& name);
+
+  void eraseAttributeDefinitions();
+  std::size_t getNumAttributeDefinitions() const;
+  AttributeHandle getFirstUnusedAttributeHandle();
+
+  void insert(AttributeDefinition& attributeDefinition);
+
+  /// The list of Modules referencing this ObjectClass set of AttributeDefinitions
+  typedef IntrusiveList<AttributeDefinitionModule, 1> AttributeDefinitionModuleList;
+  /// Get the list of AttributeDefinitionModule instances
+  AttributeDefinitionModuleList const& getAttributeDefinitionModuleList() const
+  { return _attributeDefinitionModuleList; }
+  AttributeDefinitionModuleList& getAttributeDefinitionModuleList()
+  { return _attributeDefinitionModuleList; }
+  void insert(AttributeDefinitionModule& attributeDefinitionModule)
+  { _attributeDefinitionModuleList.push_back(attributeDefinitionModule); }
+  bool getAreAttributesReferencedByAnyModule() const;
+
+  /// UnorderedSet of ClassAttribute instances indexed by attributeHandle
+  typedef IntrusiveUnorderedMap<AttributeHandle, ClassAttribute> AttributeHandleClassAttributeMap;
+  /// Get the set of ClassAttribute instances
+  AttributeHandleClassAttributeMap const& getAttributeHandleClassAttributeMap() const
+  { return _attributeHandleClassAttributeMap; }
+  AttributeHandleClassAttributeMap& getAttributeHandleClassAttributeMap()
+  { return _attributeHandleClassAttributeMap; }
+  /// Get one ClassAttribute instance matching attributeHandle
+  ClassAttribute const* getClassAttribute(AttributeHandle const& attributeHandle) const;
+  ClassAttribute* getClassAttribute(AttributeHandle const& attributeHandle);
+  ClassAttribute* getPrivilegeToDeleteClassAttribute();
+  void insertClassAttributeFor(AttributeDefinition& attributeDefinition);
+
+  /// List of ObjectInstance instances belonging to this ObjectClass
+  typedef IntrusiveList<ObjectInstance, 0> ObjectInstanceList;
+  /// Get the list of ObjectInstance instances
+  ObjectInstanceList const& getObjectInstanceList() const
+  { return _objectInstanceList; }
+  ObjectInstanceList& getObjectInstanceList()
+  { return _objectInstanceList; }
+  void insert(ObjectInstance& objectInstance);
+
+
+  void removeConnect(ConnectHandle const& connectHandle);
+
+  typedef std::list<ObjectInstance*> ObjectInstanceList2;
+
+  /// since we might end in different depths for different attributes, this is done per attribute
+  void updateCumulativeSubscription(ConnectHandle const& connectHandle, AttributeHandle const& attributeHandle,
+                                    ObjectInstanceList2& objectInstanceList)
+  {
+    bool parentSubscribed = false;
+    if (_parentObjectClass) {
+      ClassAttribute* classAttribute = _parentObjectClass->getClassAttribute(attributeHandle);
+      if (classAttribute)
+        if (0 != classAttribute->_cumulativeSubscribedConnectHandleSet.count(connectHandle))
+          parentSubscribed = true;
+    }
+
+    _updateCumulativeSubscription(connectHandle, attributeHandle, parentSubscribed, objectInstanceList);
+  }
+  void _updateCumulativeSubscription(ConnectHandle const& connectHandle, AttributeHandle const& attributeHandle,
+                                     bool subscribe /*Replace with regionset or something*/, ObjectInstanceList2& objectInstanceList)
+  {
+    ClassAttribute* classAttribute = getClassAttribute(attributeHandle);
+    subscribe |= (Unsubscribed != classAttribute->getSubscriptionType(connectHandle));
+    if (!classAttribute->updateCumulativeSubscribedConnectHandleSet(connectHandle, subscribe))
+      return;
+    // Update the receiving connect handle set
+    for (ChildObjectClassList::iterator i = _childObjectClassList.begin(); i != _childObjectClassList.end(); ++i) {
+      i->_updateCumulativeSubscription(connectHandle, attributeHandle, subscribe, objectInstanceList);
+    }
+    /// FIXME: need to walk the objects and see how the routing for the object changes
+    /// FIXME: store the object instances that are yet unknown to a connect and store these to propagate them into the connect
+    /// Hmm, here is the first good use case for a visitor
+    for (ObjectInstanceList::iterator i = _objectInstanceList.begin(); i != _objectInstanceList.end(); ++i) {
+      InstanceAttribute* instanceAttribute = i->getInstanceAttribute(attributeHandle);
+      if (!instanceAttribute)
+        continue;
+
+      // Don't add the owner to the list of connect handles that receive this attribute
+      if (instanceAttribute->getOwnerConnectHandle() == connectHandle)
+        continue;
+
+      if (subscribe) {
+        // Insert the connect handle into the receiving connects
+        if (!instanceAttribute->_receivingConnects.insert(connectHandle).second)
+          continue;
+
+        // Note that we need to insert this object instance into this connect
+        if (attributeHandle == AttributeHandle(0))
+          objectInstanceList.push_back(i.get());
+
+      } else {
+        // Never remove a attribute 0 subsciption as pushing the instance information may race
+        if (attributeHandle == AttributeHandle(0))
+          continue;
+
+        // Erase the connect handle from the receiving connects
+        if (instanceAttribute->_receivingConnects.erase(connectHandle) == 0)
+          continue;
+      }
+    }
+  }
+
+  void accumulateAllPublications(ConnectHandleSet& connectHandleSet)
+  {
+    connectHandleSet.insert(getPrivilegeToDeleteClassAttribute()->getPublishingConnectHandleSet().begin(),
+                            getPrivilegeToDeleteClassAttribute()->getPublishingConnectHandleSet().end());
+    for (ChildObjectClassList::iterator i = getChildObjectClassList().begin(); i != getChildObjectClassList().end(); ++i) {
+      i->accumulateAllPublications(connectHandleSet);
+    }
+  }
+
+private:
+#if 201103L <= __cplusplus
+  ObjectClass(ObjectClass const&) = delete;
+  ObjectClass(ObjectClass&&) = delete;
+  ObjectClass& operator=(ObjectClass const&) = delete;
+  ObjectClass& operator=(ObjectClass&&) = delete;
+#else
+  ObjectClass(ObjectClass const&);
+  ObjectClass& operator=(ObjectClass const&);
+#if 200610L <= __cpp_rvalue_reference
+  ObjectClass(ObjectClass&&);
+  ObjectClass& operator=(ObjectClass&&);
+#endif
+#endif
+
+  Federation& _federation;
+
+  ObjectClass* const _parentObjectClass;
+
+  /// List of ObjectClass instances belonging to this ObjectClass
+  ChildObjectClassList _childObjectClassList;
+
+  /// The list of Modules referencing this ObjectClass
+  ObjectClassModuleList _objectClassModuleList;
+
+  /// UnorderedSet of AttributeDefinition instances indexed by attributeHandle
+  AttributeHandleAttributeDefinitionMap _attributeHandleAttributeDefinitionMap;
+
+  /// UnorderedSet of AttributeDefinition instances indexed by name
+  AttributeNameAttributeDefinitionMap _attributeNameAttributeDefinitionMap;
+
+  /// The list of Modules referencing this ObjectClass set of AttributeDefinitions
+  AttributeDefinitionModuleList _attributeDefinitionModuleList;
+
+  /// UnorderedSet of ClassAttribute instances indexed by attributeHandle
+  AttributeHandleClassAttributeMap _attributeHandleClassAttributeMap;
+
+  /// List of ObjectInstance instances belonging to this ObjectClass
+  ObjectInstanceList _objectInstanceList;
+};
+
+} // namespace ServerModel
+} // namespace OpenRTI
+
+#endif // OpenRTI_ServerModel_ObjectClass_h

@@ -271,7 +271,7 @@ public:
     for (ServerModel::Federation::ObjectClassHandleObjectClassMap::iterator i = getObjectClassHandleObjectClassMap().begin();
          i != getObjectClassHandleObjectClassMap().end(); ++i) {
       AttributeHandleVector attributeHandleVector;
-      for (ServerModel::ClassAttribute::HandleMap::iterator j = i->getAttributeHandleClassAttributeMap().begin();
+      for (ServerModel::ObjectClass::AttributeHandleClassAttributeMap::iterator j = i->getAttributeHandleClassAttributeMap().begin();
            j != i->getAttributeHandleClassAttributeMap().end(); ++j) {
         if (Unpublished == j->getPublicationType())
           continue;
@@ -892,7 +892,7 @@ public:
     for (ServerModel::Federation::ObjectClassHandleObjectClassMap::iterator j = getObjectClassHandleObjectClassMap().begin();
          j != getObjectClassHandleObjectClassMap().end(); ++j) {
       AttributeHandleVector attributeHandleVector;
-      for (ServerModel::ClassAttribute::HandleMap::iterator k = j->getAttributeHandleClassAttributeMap().begin();
+      for (ServerModel::ObjectClass::AttributeHandleClassAttributeMap::iterator k = j->getAttributeHandleClassAttributeMap().begin();
            k != j->getAttributeHandleClassAttributeMap().end(); ++k) {
         if (k->getPublicationType(connectHandle) == Unpublished)
           continue;
@@ -945,7 +945,7 @@ public:
     ServerModel::FederationConnect* federationConnect = getFederationConnect(connectHandle);
     OpenRTIAssert(federationConnect);
 
-    ServerModel::ObjectClass::ObjectInstanceList objectInstanceList;
+    ServerModel::ObjectClass::ObjectInstanceList2 objectInstanceList;
     std::map<ConnectHandle, AttributeHandleVector> sendAttributeHandlesMap;
     for (std::vector<AttributeHandle>::const_iterator i = message->getAttributeHandles().begin();
          i != message->getAttributeHandles().end(); ++i) {
@@ -988,7 +988,7 @@ public:
 
     // Insert all object instances that are now new to this connect
     if (message->getSubscriptionType() != Unsubscribed) {
-      for (ServerModel::ObjectClass::ObjectInstanceList::iterator j = objectInstanceList.begin(); j != objectInstanceList.end(); ++j) {
+      for (ServerModel::ObjectClass::ObjectInstanceList2::iterator j = objectInstanceList.begin(); j != objectInstanceList.end(); ++j) {
         SharedPtr<InsertObjectInstanceMessage> request = new InsertObjectInstanceMessage;
         request->setFederationHandle(getFederationHandle());
         request->setObjectInstanceHandle((*j)->getObjectInstanceHandle());
@@ -1024,7 +1024,7 @@ public:
     for (ServerModel::Federation::ObjectClassHandleObjectClassMap::iterator j = getObjectClassHandleObjectClassMap().begin();
          j != getObjectClassHandleObjectClassMap().end(); ++j) {
       AttributeHandleVector attributeHandleVector;
-      for (ServerModel::ClassAttribute::HandleMap::iterator k = j->getAttributeHandleClassAttributeMap().begin();
+      for (ServerModel::ObjectClass::AttributeHandleClassAttributeMap::iterator k = j->getAttributeHandleClassAttributeMap().begin();
            k != j->getAttributeHandleClassAttributeMap().end(); ++k) {
         if (k->getSubscriptionType(connectHandle) == Unsubscribed)
           continue;

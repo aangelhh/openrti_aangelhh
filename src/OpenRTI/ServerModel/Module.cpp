@@ -19,6 +19,8 @@
 
 #include "Module.h"
 
+#include "ObjectClass.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 
@@ -148,7 +150,7 @@ Module::getModule(FOMModule& module) const
       // If so, add them too
       ++j;
       fomObjectClass.getAttributeList().reserve(objectClass.getNumAttributeDefinitions());
-      for (AttributeDefinition::HandleMap::const_iterator k = objectClass.getAttributeHandleAttributeDefinitionMap().begin();
+      for (ObjectClass::AttributeHandleAttributeDefinitionMap::const_iterator k = objectClass.getAttributeHandleAttributeDefinitionMap().begin();
            k != objectClass.getAttributeHandleAttributeDefinitionMap().end(); ++k) {
         fomObjectClass.getAttributeList().push_back(FOMAttribute());
         FOMAttribute& fomAttribute = fomObjectClass.getAttributeList().back();

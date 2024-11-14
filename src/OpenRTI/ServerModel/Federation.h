@@ -27,6 +27,7 @@
 #include "Handle.h"
 #include "HandleAllocator.h"
 #include "Module.h"
+#include "ObjectClass.h"
 #include "ServerModel.h"
 #include "StringUtils.h"
 
