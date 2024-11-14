@@ -63,24 +63,5 @@ InstanceAttribute::setAttributeHandle(const AttributeHandle& attributeHandle)
   HandleEntity<InstanceAttribute, AttributeHandle>::_setHandle(attributeHandle);
 }
 
-////////////////////////////////////////////////////////////
-
-ObjectInstanceConnect::ObjectInstanceConnect(ObjectInstance& objectInstance, FederationConnect& federationConnect) :
-  _objectInstance(objectInstance),
-  _federationConnect(federationConnect)
-{
-  setConnectHandle(federationConnect.getConnectHandle());
-}
-
-ObjectInstanceConnect::~ObjectInstanceConnect()
-{
-}
-
-void
-ObjectInstanceConnect::setConnectHandle(const ConnectHandle& connectHandle)
-{
-  HandleMap::Hook::setKey(connectHandle);
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI

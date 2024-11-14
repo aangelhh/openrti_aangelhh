@@ -294,27 +294,6 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-template<typename T, typename H>
-class OPENRTI_LOCAL HandleListEntity : public IntrusiveUnorderedMap<H, T>::Hook, public IntrusiveList<T, 0>::Hook {
-public:
-  typedef IntrusiveUnorderedMap<H, T> HandleMap;
-  typedef IntrusiveList<T, 0> FirstList;
-
-protected:
-  HandleListEntity()
-  { }
-  HandleListEntity(const H& handle) :
-    IntrusiveUnorderedMap<H, T>::Hook(handle)
-  { }
-
-  const H& _getHandle() const
-  { return HandleMap::Hook::getKey(); }
-  void _setHandle(const H& handle)
-  { HandleMap::Hook::setKey(handle); }
-};
-
-////////////////////////////////////////////////////////////
-
 // FIXME: make the Region some fixed definition but the RegionSubscription, RegionAssociation
 // a tree element that is fast in its lookup!!
 
@@ -397,42 +376,6 @@ private:
 
   ObjectInstance& _objectInstance;
   ClassAttribute& _classAttribute;
-};
-
-////////////////////////////////////////////////////////////
-
-class FederationConnect;
-class ObjectInstance;
-
-class OPENRTI_LOCAL ObjectInstanceConnect : public HandleListEntity<ObjectInstanceConnect, ConnectHandle> {
-public:
-  typedef HandleListEntity<ObjectInstanceConnect, ConnectHandle>::HandleMap HandleMap;
-  typedef HandleListEntity<ObjectInstanceConnect, ConnectHandle>::FirstList FirstList;
-
-  ObjectInstanceConnect(ObjectInstance& objectInstance, FederationConnect& federationConnect);
-  ~ObjectInstanceConnect();
-
-  /// The connect handle to identify this connect
-  const ConnectHandle& getConnectHandle() const
-  { return HandleMap::Hook::getKey(); }
-  void setConnectHandle(const ConnectHandle& connectHandle);
-
-  const ObjectInstance& getObjectInstance() const
-  { return _objectInstance; }
-  ObjectInstance& getObjectInstance()
-  { return _objectInstance; }
-
-  const FederationConnect& getFederationConnect() const
-  { return _federationConnect; }
-  FederationConnect& getFederationConnect()
-  { return _federationConnect; }
-
-private:
-  ObjectInstanceConnect(const ObjectInstanceConnect&);
-  ObjectInstanceConnect& operator=(const ObjectInstanceConnect&);
-
-  ObjectInstance& _objectInstance;
-  FederationConnect& _federationConnect;
 };
 
 } // namespace ServerModel

@@ -25,7 +25,7 @@
 
 #include "Federate.h"
 #include "Handle.h"
-#include "ServerModel.h"
+#include "ObjectInstanceConnect.h"
 
 namespace OpenRTI {
 namespace ServerModel {
