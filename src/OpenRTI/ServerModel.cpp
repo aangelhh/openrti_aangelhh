@@ -482,16 +482,5 @@ InteractionClassModule::~InteractionClassModule()
 {
 }
 
-////////////////////////////////////////////////////////////
-
-ParameterDefinitionModule::ParameterDefinitionModule(InteractionClass& interactionClass, Module& module) :
-  _interactionClass(interactionClass), _module(module)
-{
-}
-
-ParameterDefinitionModule::~ParameterDefinitionModule()
-{
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI

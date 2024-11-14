@@ -27,6 +27,7 @@
 #include "Handle.h"
 #include "Message.h"
 #include "ObjectClassModule.h"
+#include "ParameterDefinitionModule.h"
 #include "ServerModel.h"
 
 namespace OpenRTI {

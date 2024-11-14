@@ -183,6 +183,7 @@ set(OpenRTI_SOURCES
   ServerModel/ObjectClass.cpp
   ServerModel/ObjectClassModule.cpp
   ServerModel/ParameterDefinition.cpp
+  ServerModel/ParameterDefinitionModule.cpp
   ServerNode.cpp
   ProtocolSocketEvent.cpp
   RegionSet.cpp

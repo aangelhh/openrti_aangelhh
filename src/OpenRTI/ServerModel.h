@@ -923,33 +923,6 @@ private:
   Module& _module;
 };
 
-////////////////////////////////////////////////////////////
-
-class InteractionClass;
-class Module;
-
-class OPENRTI_LOCAL ParameterDefinitionModule : public ListPair<ParameterDefinitionModule> {
-public:
-  ParameterDefinitionModule(InteractionClass& interactionClass, Module& module);
-  ~ParameterDefinitionModule();
-
-  const InteractionClass& getInteractionClass() const
-  { return _interactionClass; }
-  InteractionClass& getInteractionClass()
-  { return _interactionClass; }
-  const Module& getModule() const
-  { return _module; }
-  Module& getModule()
-  { return _module; }
-
-private:
-  ParameterDefinitionModule(const ParameterDefinitionModule&);
-  ParameterDefinitionModule& operator=(const ParameterDefinitionModule&);
-
-  InteractionClass& _interactionClass;
-  Module& _module;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 

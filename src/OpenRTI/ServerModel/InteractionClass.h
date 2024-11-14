@@ -25,6 +25,7 @@
 
 #include "Handle.h"
 #include "ParameterDefinition.h"
+#include "ParameterDefinitionModule.h"
 #include "ServerModel.h"
 #include "StringUtils.h"
 #include "Message.h"
