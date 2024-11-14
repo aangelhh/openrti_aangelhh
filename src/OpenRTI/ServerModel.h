@@ -315,33 +315,6 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-template<typename T, typename H, typename S = std::string>
-class OPENRTI_LOCAL HandleStringEntity : public IntrusiveUnorderedMap<H, T>::Hook, public IntrusiveUnorderedMap<S, T>::Hook {
-public:
-  typedef IntrusiveUnorderedMap<H, T> HandleMap;
-  typedef IntrusiveUnorderedMap<S, T> StringMap;
-
-protected:
-  HandleStringEntity()
-  { }
-  HandleStringEntity(const H& handle, const S& name) :
-    IntrusiveUnorderedMap<H, T>::Hook(handle),
-    IntrusiveUnorderedMap<S, T>::Hook(name)
-  { }
-
-  const H& _getHandle() const
-  { return HandleMap::Hook::getKey(); }
-  void _setHandle(const H& handle)
-  { HandleMap::Hook::setKey(handle); }
-
-  const S& _getString() const
-  { return StringMap::Hook::getKey(); }
-  void _setString(const S& string)
-  { StringMap::Hook::setKey(string); }
-};
-
-////////////////////////////////////////////////////////////
-
 // FIXME: make the Region some fixed definition but the RegionSubscription, RegionAssociation
 // a tree element that is fast in its lookup!!
 
@@ -460,86 +433,6 @@ private:
 
   ObjectInstance& _objectInstance;
   FederationConnect& _federationConnect;
-};
-
-////////////////////////////////////////////////////////////
-
-class Federation;
-class ObjectClass;
-
-class OPENRTI_LOCAL ObjectInstance : public HandleStringEntity<ObjectInstance, ObjectInstanceHandle>, public IntrusiveList<ObjectInstance, 0>::Hook {
-public:
-  typedef HandleStringEntity<ObjectInstance, ObjectInstanceHandle>::HandleMap HandleMap;
-  typedef HandleStringEntity<ObjectInstance, ObjectInstanceHandle>::StringMap NameMap;
-  typedef IntrusiveList<ObjectInstance, 0> FirstList;
-
-  ObjectInstance(Federation& federation);
-  ~ObjectInstance();
-
-  const ObjectInstanceHandle& getObjectInstanceHandle() const
-  { return HandleStringEntity<ObjectInstance, ObjectInstanceHandle>::_getHandle(); }
-  void setObjectInstanceHandle(const ObjectInstanceHandle& objectInstanceHandle);
-
-  const std::string& getName() const
-  { return HandleStringEntity<ObjectInstance, ObjectInstanceHandle>::_getString(); }
-  void setName(const std::string& name);
-
-  const Federation& getFederation() const
-  { return _federation; }
-  Federation& getFederation()
-  { return _federation; }
-
-  void insert(InstanceAttribute& instanceAttribute);
-  InstanceAttribute* getInstanceAttribute(const AttributeHandle& attributeHandle);
-  InstanceAttribute* getPrivilegeToDeleteInstanceAttribute();
-  InstanceAttribute::HandleMap& getAttributeHandleInstanceAttributeMap()
-  { return _attributeHandleInstanceAttributeMap; }
-
-  void insert(ObjectInstanceConnect& objectInstanceConnect)
-  { _connectHandleObjectInstanceConnectMap.insert(objectInstanceConnect); }
-  ObjectInstanceConnect::HandleMap& getConnectHandleObjectInstanceConnectMap()
-  { return _connectHandleObjectInstanceConnectMap; }
-  /// Mark the name handle pair also represented with this as used in the federationConnect
-  void reference(FederationConnect& federationConnect);
-  /// Releases the ObjectInstanceConnect entry belonging to the connectHandle
-  bool unreference(const ConnectHandle& connectHandle);
-
-  void removeConnect(const ConnectHandle& connectHandle);
-
-  ObjectClass* getObjectClass()
-  { return _objectClass; }
-  void setObjectClass(ObjectClass* objectClass);
-
-  /// Return the connect that owns this object
-  ConnectHandle getOwnerConnectHandle()
-  {
-    InstanceAttribute* instanceAttribute = getInstanceAttribute(AttributeHandle(0));
-    if (!instanceAttribute)
-      return ConnectHandle();
-    return instanceAttribute->getOwnerConnectHandle();
-  }
-  void setOwnerConnectHandle(const ConnectHandle& connectHandle)
-  {
-    InstanceAttribute* instanceAttribute = getInstanceAttribute(AttributeHandle(0));
-    if (!instanceAttribute)
-      return;
-    instanceAttribute->setOwnerConnectHandle(connectHandle);
-  }
-
-private:
-  ObjectInstance(const ObjectInstance&);
-  ObjectInstance& operator=(const ObjectInstance&);
-
-  Federation& _federation;
-
-  /// The pointer to the object class this object is an instance of, can be zero
-  ObjectClass* _objectClass;
-
-  /// All the instance attributes here
-  InstanceAttribute::HandleMap _attributeHandleInstanceAttributeMap;
-
-  // List of object instance handle/name references at this connect.
-  ObjectInstanceConnect::HandleMap _connectHandleObjectInstanceConnectMap;
 };
 
 } // namespace ServerModel

@@ -31,7 +31,7 @@
 #include "InteractionClass.h"
 #include "Module.h"
 #include "ObjectClass.h"
-#include "ServerModel.h"
+#include "ObjectInstance.h"
 #include "StringUtils.h"
 #include "Synchronization.h"
 #include "UpdateRate.h"

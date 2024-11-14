@@ -28,7 +28,7 @@
 #include "ClassAttribute.h"
 #include "Handle.h"
 #include "ObjectClassModule.h"
-#include "ServerModel.h"
+#include "ObjectInstance.h"
 #include "StringUtils.h"
 
 namespace OpenRTI {

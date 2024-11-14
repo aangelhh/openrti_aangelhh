@@ -186,6 +186,7 @@ set(OpenRTI_SOURCES
   ServerModel/NodeConnect.cpp
   ServerModel/ObjectClass.cpp
   ServerModel/ObjectClassModule.cpp
+  ServerModel/ObjectInstance.cpp
   ServerModel/ParameterDefinition.cpp
   ServerModel/ParameterDefinitionModule.cpp
   ServerModel/Synchronization.cpp

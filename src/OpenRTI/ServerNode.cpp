@@ -995,7 +995,7 @@ public:
         request->setObjectClassHandle((*j)->getObjectClass()->getObjectClassHandle());
         request->setName((*j)->getName());
         request->getAttributeStateVector().reserve((*j)->getAttributeHandleInstanceAttributeMap().size());
-        for (ServerModel::InstanceAttribute::HandleMap::iterator k = (*j)->getAttributeHandleInstanceAttributeMap().begin();
+        for (ServerModel::ObjectInstance::AttributeHandleInstanceAttributeMap::iterator k = (*j)->getAttributeHandleInstanceAttributeMap().begin();
              k != (*j)->getAttributeHandleInstanceAttributeMap().end(); ++k) {
           AttributeState attributeState;
           attributeState.setAttributeHandle(k->getAttributeHandle());
@@ -1107,7 +1107,7 @@ public:
       ServerModel::ObjectInstance* objectInstance = getObjectInstance(*i);
       if (!objectInstance)
         throw MessageError("Got ReleaseMultipleObjectInstanceNameHandlePairsMessage for an unknown object instance!");
-      for (ServerModel::InstanceAttribute::HandleMap::iterator j = objectInstance->getAttributeHandleInstanceAttributeMap().begin();
+      for (ServerModel::ObjectInstance::AttributeHandleInstanceAttributeMap::iterator j = objectInstance->getAttributeHandleInstanceAttributeMap().begin();
            j != objectInstance->getAttributeHandleInstanceAttributeMap().end(); ++j) {
         j->removeConnect(connectHandle);
       }
@@ -1718,7 +1718,7 @@ public:
         // This is unreferencing the object instance.
         // If nobody else references finally release the object instance handle.
         ServerModel::ObjectInstance& objectInstance = j->getObjectInstance();
-        for (ServerModel::InstanceAttribute::HandleMap::iterator k = objectInstance.getAttributeHandleInstanceAttributeMap().begin();
+        for (ServerModel::ObjectInstance::AttributeHandleInstanceAttributeMap::iterator k = objectInstance.getAttributeHandleInstanceAttributeMap().begin();
              k != objectInstance.getAttributeHandleInstanceAttributeMap().end(); ++k) {
           k->removeConnect(connectHandle);
         }
