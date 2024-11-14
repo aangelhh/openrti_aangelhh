@@ -779,21 +779,6 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-template<typename T, typename H, typename S = StringVector>
-class ModuleClassEntity : public ModuleEntity<T, H, S>, public IntrusiveList<T, 0>::Hook {
-public:
-  typedef IntrusiveList<T, 0> ChildList;
-
-protected:
-  ModuleClassEntity()
-  { }
-  ModuleClassEntity(const H& handle, const S& name) :
-    ModuleEntity<T, H, S>(handle, name)
-  { }
-};
-
-////////////////////////////////////////////////////////////
-
 class Federation;
 
 class OPENRTI_LOCAL Dimension : public ModuleEntity<Dimension, DimensionHandle> {
@@ -1035,117 +1020,6 @@ private:
   InteractionClass& _interactionClass;
 
   ClassParameter::FirstList _classParameterList;
-};
-
-////////////////////////////////////////////////////////////
-
-class OPENRTI_LOCAL InteractionClass : public ModuleClassEntity<InteractionClass, InteractionClassHandle>, public PublishSubscribe /*FIXME*/ {
-public:
-  typedef ModuleClassEntity<InteractionClass, InteractionClassHandle>::HandleMap HandleMap;
-  typedef ModuleClassEntity<InteractionClass, InteractionClassHandle>::StringMap NameMap;
-
-  InteractionClass(Federation& federation, InteractionClass* parentInteractionClass = 0);
-  ~InteractionClass();
-
-  const Federation& getFederation() const
-  { return _federation; }
-  Federation& getFederation()
-  { return _federation; }
-
-  const StringVector& getName() const
-  { return ModuleClassEntity<InteractionClass, InteractionClassHandle>::_getString(); }
-  void setName(const StringVector& name);
-
-  const InteractionClassHandle& getInteractionClassHandle() const
-  { return ModuleClassEntity<InteractionClass, InteractionClassHandle>::_getHandle(); }
-  void setInteractionClassHandle(const InteractionClassHandle& interactionClassHandle);
-
-  OrderType getOrderType() const
-  { return _orderType; }
-  void setOrderType(OrderType orderType);
-
-  TransportationType getTransportationType() const
-  { return _transportationType; }
-  void setTransportationType(TransportationType transportationType);
-
-  InteractionClass* getParentInteractionClass();
-  InteractionClassHandle getParentInteractionClassHandle() const;
-
-  ChildList& getChildInteractionClassList()
-  { return _childInteractionClassList; }
-
-  bool getIsReferencedByAnyModule() const;
-  bool getAreParametersReferencedByAnyModule() const;
-
-  void eraseParameterDefinitions();
-  std::size_t getNumParameterDefinitions() const;
-  ParameterHandle getFirstUnusedParameterHandle();
-
-  void insert(ParameterDefinition& parameterDefinition);
-  ParameterDefinition* getParameterDefinition(const std::string& name);
-  ParameterDefinition* getParameterDefinition(const ParameterHandle& parameterHandle);
-  const ParameterDefinition::HandleMap& getParameterHandleParameterDefinitionMap() const
-  { return _parameterHandleParameterDefinitionMap; }
-  ParameterDefinition::HandleMap& getParameterHandleParameterDefinitionMap()
-  { return _parameterHandleParameterDefinitionMap; }
-
-  void insertClassParameterFor(ParameterDefinition& parameterDefinition);
-  ClassParameter* getClassParameter(const ParameterHandle& parameterHandle);
-  ClassParameter::HandleMap& getParameterHandleClassParameterMap()
-  { return _parameterHandleClassParameterMap; }
-
-  void insert(InteractionClassModule& interactionClassModule)
-  { _interactionClassModuleList.push_back(interactionClassModule); }
-  InteractionClassModule::SecondList& getInteractionClassModuleList()
-  { return _interactionClassModuleList; }
-
-  void insert(ParameterDefinitionModule& parameterDefinitionModule)
-  { _parameterDefinitionModuleList.push_back(parameterDefinitionModule); }
-  ParameterDefinitionModule::SecondList& getParameterDefinitionModuleList()
-  { return _parameterDefinitionModuleList; }
-
-  // FIXME temporarily in this way
-  DimensionHandleSet _dimensionHandleSet;
-
-  void updateCumulativeSubscription(const ConnectHandle& connectHandle)
-  {
-    bool parentSubscribed = false;
-    if (_parentInteractionClass &&
-        0 != _parentInteractionClass->_cumulativeSubscribedConnectHandleSet.count(connectHandle))
-      parentSubscribed = true;
-
-    _updateCumulativeSubscription(connectHandle, parentSubscribed);
-  }
-  void _updateCumulativeSubscription(const ConnectHandle& connectHandle, bool subscribe /*Replace with regionset or something*/)
-  {
-    subscribe |= (Unsubscribed != getSubscriptionType(connectHandle));
-    if (!updateCumulativeSubscribedConnectHandleSet(connectHandle, subscribe))
-      return;
-    // Update the receiving connect handle set
-    for (ChildList::iterator i = _childInteractionClassList.begin(); i != _childInteractionClassList.end(); ++i) {
-      i->_updateCumulativeSubscription(connectHandle, subscribe);
-    }
-  }
-
-private:
-  InteractionClass(const InteractionClass&);
-  InteractionClass& operator=(const InteractionClass&);
-
-  Federation& _federation;
-
-  InteractionClassModule::SecondList _interactionClassModuleList;
-  ParameterDefinitionModule::SecondList _parameterDefinitionModuleList;
-
-  InteractionClass* _parentInteractionClass;
-  ChildList _childInteractionClassList;
-
-  OrderType _orderType;
-  TransportationType _transportationType;
-
-  ParameterDefinition::HandleMap _parameterHandleParameterDefinitionMap;
-  ParameterDefinition::NameMap _parameterNameParameterMap;
-
-  ClassParameter::HandleMap _parameterHandleClassParameterMap;
 };
 
 } // namespace ServerModel

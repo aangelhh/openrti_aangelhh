@@ -19,6 +19,7 @@
 
 #include "Module.h"
 
+#include "InteractionClass.h"
 #include "ObjectClass.h"
 
 namespace OpenRTI {
@@ -120,7 +121,7 @@ Module::getModule(FOMModule& module) const
       // If so, add them too
       ++j;
       fomInteractionClass.getParameterList().reserve(interactionClass.getNumParameterDefinitions());
-      for (ParameterDefinition::HandleMap::const_iterator k = interactionClass.getParameterHandleParameterDefinitionMap().begin();
+      for (InteractionClass::ParameterHandleParameterDefinitionMap::const_iterator k = interactionClass.getParameterHandleParameterDefinitionMap().begin();
            k != interactionClass.getParameterHandleParameterDefinitionMap().end(); ++k) {
         fomInteractionClass.getParameterList().push_back(FOMParameter());
         FOMParameter& fomParameter = fomInteractionClass.getParameterList().back();

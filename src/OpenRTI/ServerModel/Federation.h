@@ -26,6 +26,7 @@
 #include "FederationConnect.h"
 #include "Handle.h"
 #include "HandleAllocator.h"
+#include "InteractionClass.h"
 #include "Module.h"
 #include "ObjectClass.h"
 #include "ServerModel.h"
