@@ -582,50 +582,6 @@ private:
   bool _successful;
 };
 
-////////////////////////////////////////////////////////////
-
-class OPENRTI_LOCAL Synchronization : public IntrusiveUnorderedMap<std::string, Synchronization>::Hook {
-public:
-  typedef IntrusiveUnorderedMap<std::string, Synchronization> NameMap;
-
-  Synchronization();
-  ~Synchronization();
-
-  const std::string& getLabel() const
-  { return NameMap::Hook::getKey(); }
-  void setLabel(const std::string& label);
-
-  const VariableLengthData& getTag() const
-  { return _tag; }
-  void setTag(const VariableLengthData& tag);
-
-  bool getAddJoiningFederates() const
-  { return _addJoiningFederates; }
-  void setAddJoiningFederates(bool addJoiningFederates);
-
-  bool getIsWaitingFor(const FederateHandle& federateHandle);
-
-  void insert(Federate& federate);
-  void achieved(const FederateHandle& federateHandle, bool successful);
-
-  // private:
-
-  // The FederateHandle to SynchronizationFederate map of federates
-  // waiting for this synchronization point
-  SynchronizationFederate::HandleMap _waitingFederateSynchronizationMap;
-  // The FederateHandle to SynchronizationFederate map of federates
-  // that have achieved the synchronization point
-  SynchronizationFederate::HandleMap _achievedFederateSynchronizationMap;
-
-private:
-  Synchronization(const Synchronization&);
-  Synchronization& operator=(const Synchronization&);
-
-  VariableLengthData _tag;
-
-  bool _addJoiningFederates;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 

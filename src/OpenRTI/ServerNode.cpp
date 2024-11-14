@@ -547,7 +547,7 @@ public:
         response->setLabel(message->getLabel());
         response->getFederateHandleBoolPairVector().reserve(i->_achievedFederateSynchronizationMap.size());
         FederateHandleVector federateHandleVector;
-        for (ServerModel::SynchronizationFederate::HandleMap::iterator j = i->_achievedFederateSynchronizationMap.begin();
+        for (ServerModel::Synchronization::AchievedFederateSynchronizationMap::iterator j = i->_achievedFederateSynchronizationMap.begin();
              j != i->_achievedFederateSynchronizationMap.end(); ++j) {
           federateHandleVector.push_back(j->getFederateHandle());
           response->getFederateHandleBoolPairVector().push_back(FederateHandleBoolPair(j->getFederateHandle(), j->getSuccessful()));
@@ -560,7 +560,7 @@ public:
         achieved->setFederationHandle(getFederationHandle());
         achieved->setLabel(message->getLabel());
         achieved->getFederateHandleBoolPairVector().reserve(i->_achievedFederateSynchronizationMap.size());
-        for (ServerModel::SynchronizationFederate::HandleMap::iterator j = i->_achievedFederateSynchronizationMap.begin();
+        for (ServerModel::Synchronization::AchievedFederateSynchronizationMap::iterator j = i->_achievedFederateSynchronizationMap.begin();
              j != i->_achievedFederateSynchronizationMap.end(); ++j) {
           achieved->getFederateHandleBoolPairVector().push_back(FederateHandleBoolPair(j->getFederateHandle(), j->getSuccessful()));
         }
