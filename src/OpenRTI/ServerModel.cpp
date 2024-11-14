@@ -20,6 +20,7 @@
 #include "ServerModel.h"
 
 #include "ServerOptions.h"
+#include "ServerModel/DimensionModule.h"
 #include "ServerModel/Node.h"
 
 namespace OpenRTI {
@@ -372,18 +373,6 @@ Federate::send(const SharedPtr<const AbstractMessage>& message)
   if (!_federationConnect)
     return;
   _federationConnect->send(message);
-}
-
-////////////////////////////////////////////////////////////
-
-DimensionModule::DimensionModule(Dimension& dimension, Module& module) :
-  _dimension(dimension),
-  _module(module)
-{
-}
-
-DimensionModule::~DimensionModule()
-{
 }
 
 } // namespace ServerModel

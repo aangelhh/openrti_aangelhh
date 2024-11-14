@@ -23,9 +23,9 @@
 #include "IntrusiveList.h"
 #include "IntrusiveUnorderedMap.h"
 
+#include "DimensionModule.h"
 #include "Handle.h"
 #include "Message.h"
-#include "ServerModel.h"
 
 namespace OpenRTI {
 namespace ServerModel {

@@ -24,12 +24,12 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "AttributeDefinitionModule.h"
+#include "DimensionModule.h"
 #include "Handle.h"
 #include "InteractionClassModule.h"
 #include "Message.h"
 #include "ObjectClassModule.h"
 #include "ParameterDefinitionModule.h"
-#include "ServerModel.h"
 #include "UpdateRateModule.h"
 
 namespace OpenRTI {

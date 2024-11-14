@@ -342,15 +342,6 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-template<typename T>
-class OPENRTI_LOCAL ListPair : public IntrusiveList<T, 0>::Hook, public IntrusiveList<T, 1>::Hook {
-public:
-  typedef IntrusiveList<T, 0> FirstList;
-  typedef IntrusiveList<T, 1> SecondList;
-};
-
-////////////////////////////////////////////////////////////
-
 // FIXME: make the Region some fixed definition but the RegionSubscription, RegionAssociation
 // a tree element that is fast in its lookup!!
 
@@ -734,33 +725,6 @@ private:
   VariableLengthData _timeAdvanceTimeStamp;
   VariableLengthData _nextMessageTimeStamp;
   Unsigned _commitId;
-};
-
-////////////////////////////////////////////////////////////
-
-class Dimension;
-class Module;
-
-class OPENRTI_LOCAL DimensionModule : public ListPair<DimensionModule> {
-public:
-  DimensionModule(Dimension& dimension, Module& module);
-  ~DimensionModule();
-
-  const Dimension& getDimension() const
-  { return _dimension; }
-  Dimension& getDimension()
-  { return _dimension; }
-  const Module& getModule() const
-  { return _module; }
-  Module& getModule()
-  { return _module; }
-
-private:
-  DimensionModule(const DimensionModule&);
-  DimensionModule& operator=(const DimensionModule&);
-
-  Dimension& _dimension;
-  Module& _module;
 };
 
 } // namespace ServerModel
