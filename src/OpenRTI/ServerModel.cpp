@@ -336,8 +336,8 @@ Federate::getRegion(const LocalRegionHandle& regionHandle)
 bool
 Federate::getIsTimeRegulating() const
 {
-  // OpenRTIAssert(!SecondList::Hook::is_linked() || _federationConnect->_permitTimeRegulation);
-  return SecondList::Hook::is_linked();
+  // OpenRTIAssert(!FederationConnect::TimeRegulatingFederateList::Hook::is_linked() || _federationConnect->_permitTimeRegulation);
+  return FederationConnect::TimeRegulatingFederateList::Hook::is_linked();
 }
 
 void
@@ -1139,103 +1139,6 @@ Module::insertAttributes(ObjectClass& objectClass)
   objectClass.insert(*attributeDefinitionModule);
   insert(*attributeDefinitionModule);
   return attributeDefinitionModule;
-}
-
-////////////////////////////////////////////////////////////
-
-FederationConnect::FederationConnect(Federation& federation, NodeConnect& nodeConnect) :
-  _federation(federation),
-  _nodeConnect(nodeConnect),
-  _active(false),
-  _permitTimeRegulation(true)
-{
-  HandleMap::Hook::setKey(nodeConnect.getConnectHandle());
-}
-
-FederationConnect::~FederationConnect()
-{
-  /// FIXME
-  _objectInstanceConnectList.clear();
-  _timeRegulatingFederateList.unlink();
-}
-
-const FederationHandle&
-FederationConnect::getFederationHandle() const
-{
-  return _federation.getFederationHandle();
-}
-
-const ConnectHandle&
-FederationConnect::getConnectHandle() const
-{
-  // return _nodeConnect.getConnectHandle();
-  return HandleMap::Hook::getKey();
-}
-
-bool
-FederationConnect::getIsParentConnect() const
-{
-  return _nodeConnect.getIsParentConnect();
-}
-
-bool
-FederationConnect::getHasFederates() const
-{
-  return !_federateList.empty();
-}
-
-bool
-FederationConnect::getActive() const
-{
-  return _active;
-}
-
-void
-FederationConnect::setActive(bool active)
-{
-  _active = active;
-}
-
-bool
-FederationConnect::getPermitTimeRegulation() const
-{
-  if (_permitTimeRegulation)
-    return true;
-  return getIsParentConnect();
-}
-
-void
-FederationConnect::setPermitTimeRegulation(bool permitTimeRegulation)
-{
-  _permitTimeRegulation = permitTimeRegulation;
-}
-
-bool
-FederationConnect::getIsTimeRegulating() const
-{
-  OpenRTIAssert(_timeRegulatingFederateList.empty() != Federation::TimeRegulatingFederationConnectList::Hook::is_linked());
-  OpenRTIAssert(!Federation::TimeRegulatingFederationConnectList::Hook::is_linked() || _permitTimeRegulation);
-  return Federation::TimeRegulatingFederationConnectList::Hook::is_linked();
-}
-
-void
-FederationConnect::insertTimeRegulating(Federate& federate)
-{
-  _timeRegulatingFederateList.push_back(federate);
-}
-
-void
-FederationConnect::eraseTimeRegulating(Federate& federate)
-{
-  _timeRegulatingFederateList.unlink(federate);
-}
-
-void
-FederationConnect::send(const SharedPtr<const AbstractMessage>& message)
-{
-  if (!_active)
-    return;
-  _nodeConnect.send(message);
 }
 
 } // namespace ServerModel

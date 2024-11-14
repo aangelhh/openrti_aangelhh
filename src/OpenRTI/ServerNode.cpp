@@ -437,7 +437,7 @@ public:
         // Build the intersection of the federate handles in the message and the ones in the connect.
         FederateHandleVector federateHandleVector;
         federateHandleVector.reserve(j->getFederateList().size());
-        for (ServerModel::Federate::FirstList::const_iterator k = j->getFederateList().begin();
+        for (ServerModel::FederationConnect::FederateList::const_iterator k = j->getFederateList().begin();
              k != j->getFederateList().end(); ++k) {
           if (!i->getIsWaitingFor(k->getFederateHandle()))
             continue;
@@ -1612,7 +1612,7 @@ public:
 
     for (ServerModel::Federation::TimeRegulatingFederationConnectList::iterator i = getTimeRegulatingFederationConnectList().begin();
          i != getTimeRegulatingFederationConnectList().end(); ++i) {
-      for (ServerModel::Federate::SecondList::iterator j = i->getTimeRegulatingFederateList().begin();
+      for (ServerModel::FederationConnect::TimeRegulatingFederateList::iterator j = i->getTimeRegulatingFederateList().begin();
            j != i->getTimeRegulatingFederateList().end(); ++j) {
         SharedPtr<EnableTimeRegulationRequestMessage> enable = new EnableTimeRegulationRequestMessage;
         enable->setFederationHandle(getFederationHandle());
@@ -1713,7 +1713,7 @@ public:
     // Release all object references
     if (!isParentConnect(connectHandle)) {
       SharedPtr<ReleaseMultipleObjectInstanceNameHandlePairsMessage> releaseMessage;
-      for (ServerModel::ObjectInstanceConnect::FirstList::iterator j = connect->getObjectInstanceConnectList().begin();
+      for (ServerModel::FederationConnect::ObjectInstanceConnectList::iterator j = connect->getObjectInstanceConnectList().begin();
            j != connect->getObjectInstanceConnectList().end();) {
         // This is unreferencing the object instance.
         // If nobody else references finally release the object instance handle.
@@ -1746,7 +1746,7 @@ public:
 
     ServerModel::FederationConnect* federationConnect =getFederationConnect(connectHandle);
     if (federationConnect) {
-      for (ServerModel::Federate::FirstList::iterator j = federationConnect->getFederateList().begin();
+      for (ServerModel::FederationConnect::FederateList::iterator j = federationConnect->getFederateList().begin();
            j != federationConnect->getFederateList().end();) {
         ServerModel::Federate* federate = (j++).get();
         OpenRTIAssert(federate);

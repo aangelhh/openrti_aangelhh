@@ -23,6 +23,7 @@
 #include "IntrusiveList.h"
 #include "IntrusiveUnorderedMap.h"
 
+#include "FederationConnect.h"
 #include "Handle.h"
 #include "HandleAllocator.h"
 #include "ServerModel.h"

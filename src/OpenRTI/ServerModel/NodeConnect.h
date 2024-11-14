@@ -24,9 +24,9 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "AbstractMessageSender.h"
+#include "FederationConnect.h"
 #include "Handle.h"
 #include "StringUtils.h"
-#include "ServerModel.h"
 
 namespace OpenRTI {
 namespace ServerModel {

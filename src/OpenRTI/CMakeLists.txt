@@ -171,6 +171,7 @@ set(OpenRTI_SOURCES
   ParenthesesReader.cpp
   ServerModel.cpp
   ServerModel/Federation.cpp
+  ServerModel/FederationConnect.cpp
   ServerModel/Node.cpp
   ServerModel/NodeConnect.cpp
   ServerNode.cpp
