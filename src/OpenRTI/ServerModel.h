@@ -1084,10 +1084,10 @@ public:
   void insert(ParameterDefinition& parameterDefinition);
   ParameterDefinition* getParameterDefinition(const std::string& name);
   ParameterDefinition* getParameterDefinition(const ParameterHandle& parameterHandle);
-  const ParameterDefinition::HandleMap& getParameterHandleParameterMap() const
-  { return _parameterHandleParameterMap; }
-  ParameterDefinition::HandleMap& getParameterHandleParameterMap()
-  { return _parameterHandleParameterMap; }
+  const ParameterDefinition::HandleMap& getParameterHandleParameterDefinitionMap() const
+  { return _parameterHandleParameterDefinitionMap; }
+  ParameterDefinition::HandleMap& getParameterHandleParameterDefinitionMap()
+  { return _parameterHandleParameterDefinitionMap; }
 
   void insertClassParameterFor(ParameterDefinition& parameterDefinition);
   ClassParameter* getClassParameter(const ParameterHandle& parameterHandle);
@@ -1142,7 +1142,7 @@ private:
   OrderType _orderType;
   TransportationType _transportationType;
 
-  ParameterDefinition::HandleMap _parameterHandleParameterMap;
+  ParameterDefinition::HandleMap _parameterHandleParameterDefinitionMap;
   ParameterDefinition::NameMap _parameterNameParameterMap;
 
   ClassParameter::HandleMap _parameterHandleClassParameterMap;

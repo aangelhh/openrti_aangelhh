@@ -556,7 +556,7 @@ InteractionClass::~InteractionClass()
 {
   _parameterHandleClassParameterMap.clear();
   eraseParameterDefinitions();
-  OpenRTIAssert(_parameterHandleParameterMap.empty());
+  OpenRTIAssert(_parameterHandleParameterDefinitionMap.empty());
   OpenRTIAssert(_parameterNameParameterMap.empty());
 
   OpenRTIAssert(_childInteractionClassList.empty());
@@ -626,7 +626,7 @@ std::size_t
 InteractionClass::getNumParameterDefinitions() const
 {
   // FIXME O(N)
-  return _parameterHandleParameterMap.size();
+  return _parameterHandleParameterDefinitionMap.size();
 }
 
 ParameterHandle
@@ -643,7 +643,7 @@ InteractionClass::getFirstUnusedParameterHandle()
 void
 InteractionClass::insert(ParameterDefinition& parameterDefinition)
 {
-  _parameterHandleParameterMap.insert(parameterDefinition);
+  _parameterHandleParameterDefinitionMap.insert(parameterDefinition);
   _parameterNameParameterMap.insert(parameterDefinition);
   insertClassParameterFor(parameterDefinition);
 }
@@ -660,8 +660,8 @@ InteractionClass::getParameterDefinition(const std::string& name)
 ParameterDefinition*
 InteractionClass::getParameterDefinition(const ParameterHandle& parameterHandle)
 {
-  ParameterDefinition::HandleMap::iterator i = _parameterHandleParameterMap.find(parameterHandle);
-  if (i == _parameterHandleParameterMap.end())
+  ParameterDefinition::HandleMap::iterator i = _parameterHandleParameterDefinitionMap.find(parameterHandle);
+  if (i == _parameterHandleParameterDefinitionMap.end())
     return 0;
   return i.get();
 }
@@ -1036,8 +1036,8 @@ Module::getModule(FOMModule& module) const
       // If so, add them too
       ++j;
       fomInteractionClass.getParameterList().reserve(interactionClass.getNumParameterDefinitions());
-      for (ParameterDefinition::HandleMap::const_iterator k = interactionClass.getParameterHandleParameterMap().begin();
-           k != interactionClass.getParameterHandleParameterMap().end(); ++k) {
+      for (ParameterDefinition::HandleMap::const_iterator k = interactionClass.getParameterHandleParameterDefinitionMap().begin();
+           k != interactionClass.getParameterHandleParameterDefinitionMap().end(); ++k) {
         fomInteractionClass.getParameterList().push_back(FOMParameter());
         FOMParameter& fomParameter = fomInteractionClass.getParameterList().back();
         fomParameter.setName(k->getName());
@@ -1923,7 +1923,7 @@ Federation::insert(Module& module, const FOMInteractionClass& fomInteractionClas
     // In this case we want to check for the parameter list being the same on both ends.
     if (!fomInteractionClass.getParameterList().empty()) {
       module.insertParameters(*i);
-      if (i->getParameterHandleParameterMap().empty()) {
+      if (i->getParameterHandleParameterDefinitionMap().empty()) {
         for (FOMParameterList::const_iterator j = fomInteractionClass.getParameterList().begin();
              j != fomInteractionClass.getParameterList().end(); ++j) {
           if (i->getParameterDefinition(j->getName()))
