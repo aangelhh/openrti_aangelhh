@@ -179,6 +179,7 @@ set(OpenRTI_SOURCES
   ServerModel/Federate.cpp
   ServerModel/Federation.cpp
   ServerModel/FederationConnect.cpp
+  ServerModel/InstanceAttribute.cpp
   ServerModel/InteractionClass.cpp
   ServerModel/InteractionClassModule.cpp
   ServerModel/Module.cpp

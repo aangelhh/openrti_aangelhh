@@ -24,8 +24,8 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "Handle.h"
+#include "InstanceAttribute.h"
 #include "ObjectInstanceConnect.h"
-#include "ServerModel.h"
 
 namespace OpenRTI {
 namespace ServerModel {

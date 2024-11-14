@@ -17,29 +17,24 @@
  *
  */
 
-#include "ServerModel.h"
+#include "InstanceAttribute.h"
 
-#include "ServerOptions.h"
-#include "ServerModel/DimensionModule.h"
-#include "ServerModel/Node.h"
+#include "ClassAttribute.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
-////////////////////////////////////////////////////////////
-
-Region::Region()
+InstanceAttribute::InstanceAttribute(ObjectInstance& objectInstance, ClassAttribute& classAttribute) :
+  IntrusiveUnorderedMap<AttributeHandle, InstanceAttribute>::Hook(classAttribute.getAttributeHandle()),
+  _objectInstance(objectInstance),
+  _classAttribute(classAttribute)
 {
+  /// FIXME
+  _receivingConnects = _classAttribute._cumulativeSubscribedConnectHandleSet;
 }
 
-Region::~Region()
+InstanceAttribute::~InstanceAttribute()
 {
-}
-
-void
-Region::setRegionHandle(const LocalRegionHandle& regionHandle)
-{
-  HandleEntity<Region, LocalRegionHandle>::_setHandle(regionHandle);
 }
 
 } // namespace ServerModel

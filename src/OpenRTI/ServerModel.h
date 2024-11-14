@@ -321,63 +321,6 @@ private:
   Region& operator=(const Region&);
 };
 
-////////////////////////////////////////////////////////////
-
-class ClassAttribute;
-class ObjectInstance;
-
-class OPENRTI_LOCAL InstanceAttribute : public HandleEntity<InstanceAttribute, AttributeHandle> {
-public:
-  typedef HandleEntity<InstanceAttribute, AttributeHandle>::HandleMap HandleMap;
-
-  InstanceAttribute(ObjectInstance& objectInstance, ClassAttribute& classAttribute);
-  ~InstanceAttribute();
-
-  const AttributeHandle& getAttributeHandle() const
-  { return HandleEntity<InstanceAttribute, AttributeHandle>::_getHandle(); }
-  void setAttributeHandle(const AttributeHandle& attributeHandle);
-
-  const ObjectInstance& getObjectInstance() const
-  { return _objectInstance; }
-  ObjectInstance& getObjectInstance()
-  { return _objectInstance; }
-
-  const ClassAttribute& getClassAttribute() const
-  { return _classAttribute; }
-  ClassAttribute& getClassAttribute()
-  { return _classAttribute; }
-
-  /// Get the ConnectHandle this attribute is owned
-  const ConnectHandle& getOwnerConnectHandle() const
-  { return _ownerConnectHandle; }
-  void setOwnerConnectHandle(const ConnectHandle& connectHandle)
-  {
-    _receivingConnects.erase(connectHandle);
-    _ownerConnectHandle = connectHandle;
-  }
-
-  void removeConnect(const ConnectHandle& connectHandle)
-  {
-    _receivingConnects.erase(connectHandle);
-    if (_ownerConnectHandle == connectHandle)
-      _ownerConnectHandle = ConnectHandle();
-  }
-
-  // Because of attribute ownership, it is clear for an object attribute where the update
-  // stems from, so just have a set of connect handles that want to receive the updates
-  ConnectHandleSet _receivingConnects;
-
-  /// The connect this attribute is owned by
-  ConnectHandle _ownerConnectHandle;
-
-private:
-  InstanceAttribute(const InstanceAttribute&);
-  InstanceAttribute& operator=(const InstanceAttribute&);
-
-  ObjectInstance& _objectInstance;
-  ClassAttribute& _classAttribute;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 
