@@ -125,7 +125,7 @@ public:
     broadcastToChildren(connectHandle, notify);
 
     // For those sync request that are automatically extended to new federates, send the announcement
-    for (ServerModel::Synchronization::NameMap::iterator j = _synchronizationNameSynchronizationMap.begin();
+    for (ServerModel::Federation::SynchronizationNameSynchronizationMap::iterator j = _synchronizationNameSynchronizationMap.begin();
          j != _synchronizationNameSynchronizationMap.end(); ++j) {
       // only those with an auto expanding federate set
       if (!j->getAddJoiningFederates())
@@ -251,7 +251,7 @@ public:
 
   void pushPublications(const ConnectHandle& connectHandle)
   {
-    for (ServerModel::InteractionClass::HandleMap::iterator i = getInteractionClassHandleInteractionClassMap().begin();
+    for (ServerModel::Federation::InteractionClassHandleInteractionClassMap::iterator i = getInteractionClassHandleInteractionClassMap().begin();
          i != getInteractionClassHandleInteractionClassMap().end(); ++i) {
       const ServerModel::InteractionClass* interactionClass = i.get();
       if (!interactionClass)
@@ -268,7 +268,7 @@ public:
     }
 
     // Object classes
-    for (ServerModel::ObjectClass::HandleMap::iterator i = getObjectClassHandleObjectClassMap().begin();
+    for (ServerModel::Federation::ObjectClassHandleObjectClassMap::iterator i = getObjectClassHandleObjectClassMap().begin();
          i != getObjectClassHandleObjectClassMap().end(); ++i) {
       AttributeHandleVector attributeHandleVector;
       for (ServerModel::ClassAttribute::HandleMap::iterator j = i->getAttributeHandleClassAttributeMap().begin();
@@ -301,7 +301,7 @@ public:
       return;
     OpenRTIAssert(!federationConnect->getHasFederates());
 
-    for (ServerModel::Federate::HandleMap::const_iterator i = getFederateHandleFederateMap().begin();
+    for (ServerModel::Federation::FederateHandleFederateMap::const_iterator i = getFederateHandleFederateMap().begin();
          i != getFederateHandleFederateMap().end(); ++i) {
       SharedPtr<ResignFederateNotifyMessage> notify = new ResignFederateNotifyMessage;
       notify->setFederationHandle(getFederationHandle());
@@ -319,7 +319,7 @@ public:
 
   void broadcastEraseFederationExecution()
   {
-    for (ServerModel::FederationConnect::HandleMap::iterator i = getConnectHandleFederationConnectMap().begin();
+    for (ServerModel::Federation::ConnectHandleFederationConnectMap::iterator i = getConnectHandleFederationConnectMap().begin();
          i != getConnectHandleFederationConnectMap().end(); ++i) {
       if (i->getIsParentConnect())
         continue;
@@ -397,13 +397,13 @@ public:
       ServerModel::Synchronization* synchronization;
       synchronization = new ServerModel::Synchronization;
       synchronization->setLabel(message->getLabel());
-      ServerModel::Synchronization::NameMap::iterator i;
+      ServerModel::Federation::SynchronizationNameSynchronizationMap::iterator i;
       i = _synchronizationNameSynchronizationMap.insert(*synchronization);
 
       if (message->getFederateHandleVector().empty()) {
         // In this case add all known federates and the future ones also
         i->setAddJoiningFederates(true);
-        for (ServerModel::Federate::HandleMap::iterator j = getFederateHandleFederateMap().begin();
+        for (ServerModel::Federation::FederateHandleFederateMap::iterator j = getFederateHandleFederateMap().begin();
              j != getFederateHandleFederateMap().end(); ++j) {
           i->insert(*j);
         }
@@ -432,7 +432,7 @@ public:
 
       // Cycle over all child connects and send announcements with the appropriate handle sets
 
-      for (ServerModel::FederationConnect::HandleMap::iterator j = getConnectHandleFederationConnectMap().begin();
+      for (ServerModel::Federation::ConnectHandleFederationConnectMap::iterator j = getConnectHandleFederationConnectMap().begin();
            j != getConnectHandleFederationConnectMap().end(); ++j) {
         // Build the intersection of the federate handles in the message and the ones in the connect.
         FederateHandleVector federateHandleVector;
@@ -476,7 +476,7 @@ public:
     if (message->getLabel().empty())
       throw MessageError("Received empty label in AnnounceSynchronizationPointMessage!");
 
-    ServerModel::Synchronization::NameMap::iterator i = _synchronizationNameSynchronizationMap.find(message->getLabel());
+    ServerModel::Federation::SynchronizationNameSynchronizationMap::iterator i = _synchronizationNameSynchronizationMap.find(message->getLabel());
     if (i == _synchronizationNameSynchronizationMap.end()) {
       // label is new, create one
       ServerModel::Synchronization* synchronization;
@@ -531,7 +531,7 @@ public:
   }
   void accept(const ConnectHandle& connectHandle, const SynchronizationPointAchievedMessage* message)
   {
-    ServerModel::Synchronization::NameMap::iterator i = _synchronizationNameSynchronizationMap.find(message->getLabel());
+    ServerModel::Federation::SynchronizationNameSynchronizationMap::iterator i = _synchronizationNameSynchronizationMap.find(message->getLabel());
     if (i == _synchronizationNameSynchronizationMap.end())
       throw MessageError("SynchronizationPointAchievedMessage for unknown label!");
 
@@ -553,7 +553,7 @@ public:
           response->getFederateHandleBoolPairVector().push_back(FederateHandleBoolPair(j->getFederateHandle(), j->getSuccessful()));
         }
         broadcastToChildren(federateHandleVector, response);
-        ServerModel::Synchronization::NameMap::erase(*i);
+        ServerModel::Federation::SynchronizationNameSynchronizationMap::erase(*i);
       } else {
         SharedPtr<SynchronizationPointAchievedMessage> achieved;
         achieved = new SynchronizationPointAchievedMessage;
@@ -570,7 +570,7 @@ public:
   }
   void accept(const ConnectHandle& connectHandle, const FederationSynchronizedMessage* message)
   {
-    ServerModel::Synchronization::NameMap::iterator i = _synchronizationNameSynchronizationMap.find(message->getLabel());
+    ServerModel::Federation::SynchronizationNameSynchronizationMap::iterator i = _synchronizationNameSynchronizationMap.find(message->getLabel());
     if (i == _synchronizationNameSynchronizationMap.end())
       throw MessageError("FederateSynchronizedMessage for unknown label.");
 
@@ -607,7 +607,7 @@ public:
       send(j->first, synchronized);
     }
 
-    ServerModel::Synchronization::NameMap::erase(*i);
+    ServerModel::Federation::SynchronizationNameSynchronizationMap::erase(*i);
   }
 
   // Time management
@@ -702,7 +702,7 @@ public:
   {
     // Only time regulating federates are interrested in this message.
     // May be we should at one point track and store this connect handle set.
-    for (ServerModel::FederationConnect::SecondList::iterator i = getTimeRegulatingFederationConnectList().begin();
+    for (ServerModel::Federation::TimeRegulatingFederationConnectList::iterator i = getTimeRegulatingFederationConnectList().begin();
          i != getTimeRegulatingFederationConnectList().end(); ++i) {
       if (connectHandle == i->getConnectHandle())
         continue;
@@ -879,7 +879,7 @@ public:
   void unpublishConnect(const ConnectHandle& connectHandle)
   {
     // Unpublish this connect by fake unpublish messages?!!
-    for (ServerModel::InteractionClass::HandleMap::iterator j = getInteractionClassHandleInteractionClassMap().begin();
+    for (ServerModel::Federation::InteractionClassHandleInteractionClassMap::iterator j = getInteractionClassHandleInteractionClassMap().begin();
          j != getInteractionClassHandleInteractionClassMap().end(); ++j) {
       if (j->getPublicationType(connectHandle) == Unpublished)
         continue;
@@ -889,7 +889,7 @@ public:
       message->setInteractionClassHandle(j->getInteractionClassHandle());
       accept(connectHandle, message.get());
     }
-    for (ServerModel::ObjectClass::HandleMap::iterator j = getObjectClassHandleObjectClassMap().begin();
+    for (ServerModel::Federation::ObjectClassHandleObjectClassMap::iterator j = getObjectClassHandleObjectClassMap().begin();
          j != getObjectClassHandleObjectClassMap().end(); ++j) {
       AttributeHandleVector attributeHandleVector;
       for (ServerModel::ClassAttribute::HandleMap::iterator k = j->getAttributeHandleClassAttributeMap().begin();
@@ -1011,7 +1011,7 @@ public:
   void unsubscribeConnect(const ConnectHandle& connectHandle)
   {
     // Unsubscribe this connect by fake unsubscribe messages?!!
-    for (ServerModel::InteractionClass::HandleMap::iterator j = getInteractionClassHandleInteractionClassMap().begin();
+    for (ServerModel::Federation::InteractionClassHandleInteractionClassMap::iterator j = getInteractionClassHandleInteractionClassMap().begin();
          j != getInteractionClassHandleInteractionClassMap().end(); ++j) {
       if (j->getSubscriptionType(connectHandle) == Unsubscribed)
         continue;
@@ -1021,7 +1021,7 @@ public:
       message->setInteractionClassHandle(j->getInteractionClassHandle());
       accept(connectHandle, message.get());
     }
-    for (ServerModel::ObjectClass::HandleMap::iterator j = getObjectClassHandleObjectClassMap().begin();
+    for (ServerModel::Federation::ObjectClassHandleObjectClassMap::iterator j = getObjectClassHandleObjectClassMap().begin();
          j != getObjectClassHandleObjectClassMap().end(); ++j) {
       AttributeHandleVector attributeHandleVector;
       for (ServerModel::ClassAttribute::HandleMap::iterator k = j->getAttributeHandleClassAttributeMap().begin();
@@ -1598,7 +1598,7 @@ public:
 
     /// FIXME currently these are all flushed when an EraseFederationExecutionMessage is received.
     /// FIXME Make that more explicit????
-    for (ServerModel::Federate::HandleMap::const_iterator i = getFederateHandleFederateMap().begin();
+    for (ServerModel::Federation::FederateHandleFederateMap::const_iterator i = getFederateHandleFederateMap().begin();
          i != getFederateHandleFederateMap().end(); ++i) {
       if (i->getConnectHandle() == connectHandle)
         continue;
@@ -1610,7 +1610,7 @@ public:
       federationConnect->send(notify);
     }
 
-    for (ServerModel::FederationConnect::SecondList::iterator i = getTimeRegulatingFederationConnectList().begin();
+    for (ServerModel::Federation::TimeRegulatingFederationConnectList::iterator i = getTimeRegulatingFederationConnectList().begin();
          i != getTimeRegulatingFederationConnectList().end(); ++i) {
       for (ServerModel::Federate::SecondList::iterator j = i->getTimeRegulatingFederateList().begin();
            j != i->getTimeRegulatingFederateList().end(); ++j) {
@@ -1633,7 +1633,7 @@ public:
 
     pushPublications(federationConnect->getConnectHandle());
 
-    for (ServerModel::Federate::HandleMap::iterator i = getFederateHandleFederateMap().begin();
+    for (ServerModel::Federation::FederateHandleFederateMap::iterator i = getFederateHandleFederateMap().begin();
          i != getFederateHandleFederateMap().end(); ++i) {
       if (i->getConnectHandle() == connectHandle)
         continue;
@@ -1685,7 +1685,7 @@ public:
     // FIXME avoid this loop over all objects
     // FIXME avoid precollecting these in the object handle set
     ObjectInstanceHandleSet objectInstanceHandleSet;
-    for (ServerModel::ObjectInstance::HandleMap::iterator i = getObjectInstanceHandleObjectInstanceMap().begin();
+    for (ServerModel::Federation::ObjectInstanceHandleObjectInstanceMap::iterator i = getObjectInstanceHandleObjectInstanceMap().begin();
          i != getObjectInstanceHandleObjectInstanceMap().end(); ++i) {
       if (i->getOwnerConnectHandle() != connectHandle)
         continue;
