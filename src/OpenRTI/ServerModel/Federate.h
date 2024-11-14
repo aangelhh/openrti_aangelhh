@@ -26,6 +26,7 @@
 #include "Handle.h"
 #include "Message.h"
 #include "ServerModel.h"
+#include "SynchronizationFederate.h"
 #include "VariableLengthData.h"
 
 namespace OpenRTI {

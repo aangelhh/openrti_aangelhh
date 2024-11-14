@@ -542,46 +542,6 @@ private:
   ObjectInstanceConnect::HandleMap _connectHandleObjectInstanceConnectMap;
 };
 
-////////////////////////////////////////////////////////////
-
-class Federate;
-class Synchronization;
-
-class OPENRTI_LOCAL SynchronizationFederate : public HandleListEntity<SynchronizationFederate, FederateHandle>  {
-public:
-  typedef HandleListEntity<SynchronizationFederate, FederateHandle>::HandleMap HandleMap;
-  typedef HandleListEntity<SynchronizationFederate, FederateHandle>::FirstList FirstList;
-
-  SynchronizationFederate(Synchronization& synchronization, Federate& federate);
-  ~SynchronizationFederate();
-
-  const FederateHandle& getFederateHandle() const
-  { return HandleListEntity<SynchronizationFederate, FederateHandle>::_getHandle(); }
-  void setFederateHandle(const FederateHandle& federateHandle);
-
-  const Synchronization& getSynchronization() const
-  { return _synchronization; }
-  Synchronization& getSynchronization()
-  { return _synchronization; }
-  const Federate& getFederate() const
-  { return _federate; }
-  Federate& getFederate()
-  { return _federate; }
-
-  bool getSuccessful() const
-  { return _successful; }
-  void setSuccessful(bool successful);
-
-private:
-  SynchronizationFederate(const SynchronizationFederate&);
-  SynchronizationFederate& operator=(const SynchronizationFederate&);
-
-  Synchronization& _synchronization;
-  Federate& _federate;
-
-  bool _successful;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 

@@ -189,6 +189,7 @@ set(OpenRTI_SOURCES
   ServerModel/ParameterDefinition.cpp
   ServerModel/ParameterDefinitionModule.cpp
   ServerModel/Synchronization.cpp
+  ServerModel/SynchronizationFederate.cpp
   ServerModel/UpdateRate.cpp
   ServerModel/UpdateRateModule.cpp
   ServerNode.cpp

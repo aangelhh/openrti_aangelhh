@@ -183,30 +183,5 @@ ObjectInstance::setObjectClass(ObjectClass* objectClass)
   }
 }
 
-////////////////////////////////////////////////////////////
-
-SynchronizationFederate::SynchronizationFederate(Synchronization& synchronization, Federate& federate) :
-  _synchronization(synchronization),
-  _federate(federate),
-  _successful(false)
-{
-}
-
-SynchronizationFederate::~SynchronizationFederate()
-{
-}
-
-void
-SynchronizationFederate::setFederateHandle(const FederateHandle& federateHandle)
-{
-  HandleListEntity<SynchronizationFederate, FederateHandle>::_setHandle(federateHandle);
-}
-
-void
-SynchronizationFederate::setSuccessful(bool successful)
-{
-  _successful = successful;
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI

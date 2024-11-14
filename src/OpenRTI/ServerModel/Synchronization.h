@@ -24,7 +24,7 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "Handle.h"
-#include "ServerModel.h"
+#include "SynchronizationFederate.h"
 #include "VariableLengthData.h"
 
 namespace OpenRTI {
