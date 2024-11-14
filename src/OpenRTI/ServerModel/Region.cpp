@@ -17,16 +17,10 @@
  *
  */
 
-#include "ServerModel.h"
-
-#include "ServerOptions.h"
-#include "ServerModel/DimensionModule.h"
-#include "ServerModel/Node.h"
+#include "Region.h"
 
 namespace OpenRTI {
 namespace ServerModel {
-
-////////////////////////////////////////////////////////////
 
 Region::Region()
 {
@@ -37,9 +31,9 @@ Region::~Region()
 }
 
 void
-Region::setRegionHandle(const LocalRegionHandle& regionHandle)
+Region::setRegionHandle(LocalRegionHandle const& regionHandle)
 {
-  HandleEntity<Region, LocalRegionHandle>::_setHandle(regionHandle);
+  IntrusiveUnorderedMap<LocalRegionHandle, Region>::Hook::setKey(regionHandle);
 }
 
 } // namespace ServerModel

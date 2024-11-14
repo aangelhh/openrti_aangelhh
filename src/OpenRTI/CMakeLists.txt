@@ -169,7 +169,6 @@ set(OpenRTI_SOURCES
   NetworkServer.cpp
   Options.cpp
   ParenthesesReader.cpp
-  ServerModel.cpp
   ServerModel/AttributeDefinition.cpp
   ServerModel/AttributeDefinitionModule.cpp
   ServerModel/ClassAttribute.cpp
@@ -191,6 +190,7 @@ set(OpenRTI_SOURCES
   ServerModel/ObjectInstanceConnect.cpp
   ServerModel/ParameterDefinition.cpp
   ServerModel/ParameterDefinitionModule.cpp
+  ServerModel/Region.cpp
   ServerModel/Synchronization.cpp
   ServerModel/SynchronizationFederate.cpp
   ServerModel/UpdateRate.cpp

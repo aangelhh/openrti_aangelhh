@@ -25,7 +25,7 @@
 
 #include "Handle.h"
 #include "Message.h"
-#include "ServerModel.h"
+#include "Region.h"
 #include "SynchronizationFederate.h"
 #include "VariableLengthData.h"
 
