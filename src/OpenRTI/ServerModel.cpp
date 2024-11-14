@@ -434,42 +434,5 @@ UpdateRateModule::~UpdateRateModule()
 {
 }
 
-////////////////////////////////////////////////////////////
-
-UpdateRate::UpdateRate(Federation& federation) :
-  _federation(federation),
-  _rate(0)
-{
-}
-
-UpdateRate::~UpdateRate()
-{
-  OpenRTIAssert(_updateRateModuleList.empty());
-}
-
-void
-UpdateRate::setName(const std::string& name)
-{
-  ModuleEntity<UpdateRate, UpdateRateHandle>::_setString(name);
-}
-
-void
-UpdateRate::setUpdateRateHandle(const UpdateRateHandle& updateRateHandle)
-{
-  ModuleEntity<UpdateRate, UpdateRateHandle>::_setHandle(updateRateHandle);
-}
-
-void
-UpdateRate::setRate(const double& rate)
-{
-  _rate = rate;
-}
-
-bool
-UpdateRate::getIsReferencedByAnyModule() const
-{
-  return !_updateRateModuleList.empty();
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI

@@ -21,6 +21,7 @@
 
 #include "InteractionClass.h"
 #include "ObjectClass.h"
+#include "UpdateRate.h"
 
 namespace OpenRTI {
 namespace ServerModel {

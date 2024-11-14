@@ -31,6 +31,7 @@
 #include "ObjectClass.h"
 #include "ServerModel.h"
 #include "StringUtils.h"
+#include "UpdateRate.h"
 
 namespace OpenRTI {
 namespace ServerModel {

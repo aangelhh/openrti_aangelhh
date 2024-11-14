@@ -851,51 +851,6 @@ private:
   Module& _module;
 };
 
-////////////////////////////////////////////////////////////
-
-class Federation;
-
-class OPENRTI_LOCAL UpdateRate : public ModuleEntity<UpdateRate, UpdateRateHandle> {
-public:
-  typedef ModuleEntity<UpdateRate, UpdateRateHandle>::HandleMap HandleMap;
-  typedef ModuleEntity<UpdateRate, UpdateRateHandle>::StringMap NameMap;
-
-  UpdateRate(Federation& federation);
-  ~UpdateRate();
-
-  const Federation& getFederation() const
-  { return _federation; }
-  Federation& getFederation()
-  { return _federation; }
-
-  const std::string& getName() const
-  { return ModuleEntity<UpdateRate, UpdateRateHandle>::_getString(); }
-  void setName(const std::string& name);
-
-  const UpdateRateHandle& getUpdateRateHandle() const
-  { return ModuleEntity<UpdateRate, UpdateRateHandle>::_getHandle(); }
-  void setUpdateRateHandle(const UpdateRateHandle& updateRateHandle);
-
-  const double& getRate() const
-  { return _rate; }
-  void setRate(const double& rate);
-
-  bool getIsReferencedByAnyModule() const;
-
-  void insert(UpdateRateModule& updateRateModule)
-  { _updateRateModuleList.push_back(updateRateModule); }
-
-private:
-  UpdateRate(const UpdateRate&);
-  UpdateRate& operator=(const UpdateRate&);
-
-  Federation& _federation;
-
-  double _rate;
-
-  UpdateRateModule::SecondList _updateRateModuleList;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 
