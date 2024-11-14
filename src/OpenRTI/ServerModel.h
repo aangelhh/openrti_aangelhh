@@ -619,12 +619,12 @@ public:
 
   // private:
 
-  // The FederateHandle to SyncronizationFederate map of federates
+  // The FederateHandle to SynchronizationFederate map of federates
   // waiting for this synchronization point
-  SynchronizationFederate::HandleMap _waitingFederateSyncronizationMap;
-  // The FederateHandle to SyncronizationFederate map of federates
+  SynchronizationFederate::HandleMap _waitingFederateSynchronizationMap;
+  // The FederateHandle to SynchronizationFederate map of federates
   // that have achieved the synchronization point
-  SynchronizationFederate::HandleMap _achievedFederateSyncronizationMap;
+  SynchronizationFederate::HandleMap _achievedFederateSynchronizationMap;
 
 private:
   Synchronization(const Synchronization&);
@@ -1804,7 +1804,7 @@ public:
   /// FIXME
   ObjectInstance* insertObjectInstance(const ObjectInstanceHandle& objectInstanceHandle, const std::string& objectInstanceName);
 
-  /// Syncronization state FIXME
+  /// Synchronization state FIXME
   Synchronization::NameMap _synchronizationNameSynchronizationMap;
 
 

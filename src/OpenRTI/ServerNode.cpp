@@ -539,16 +539,16 @@ public:
          j != message->getFederateHandleBoolPairVector().end(); ++j) {
       i->achieved(j->first, j->second);
     }
-    if (i->_waitingFederateSyncronizationMap.empty()) {
+    if (i->_waitingFederateSynchronizationMap.empty()) {
       if (isRootServer()) {
         SharedPtr<FederationSynchronizedMessage> response;
         response = new FederationSynchronizedMessage;
         response->setFederationHandle(getFederationHandle());
         response->setLabel(message->getLabel());
-        response->getFederateHandleBoolPairVector().reserve(i->_achievedFederateSyncronizationMap.size());
+        response->getFederateHandleBoolPairVector().reserve(i->_achievedFederateSynchronizationMap.size());
         FederateHandleVector federateHandleVector;
-        for (ServerModel::SynchronizationFederate::HandleMap::iterator j = i->_achievedFederateSyncronizationMap.begin();
-             j != i->_achievedFederateSyncronizationMap.end(); ++j) {
+        for (ServerModel::SynchronizationFederate::HandleMap::iterator j = i->_achievedFederateSynchronizationMap.begin();
+             j != i->_achievedFederateSynchronizationMap.end(); ++j) {
           federateHandleVector.push_back(j->getFederateHandle());
           response->getFederateHandleBoolPairVector().push_back(FederateHandleBoolPair(j->getFederateHandle(), j->getSuccessful()));
         }
@@ -559,9 +559,9 @@ public:
         achieved = new SynchronizationPointAchievedMessage;
         achieved->setFederationHandle(getFederationHandle());
         achieved->setLabel(message->getLabel());
-        achieved->getFederateHandleBoolPairVector().reserve(i->_achievedFederateSyncronizationMap.size());
-        for (ServerModel::SynchronizationFederate::HandleMap::iterator j = i->_achievedFederateSyncronizationMap.begin();
-             j != i->_achievedFederateSyncronizationMap.end(); ++j) {
+        achieved->getFederateHandleBoolPairVector().reserve(i->_achievedFederateSynchronizationMap.size());
+        for (ServerModel::SynchronizationFederate::HandleMap::iterator j = i->_achievedFederateSynchronizationMap.begin();
+             j != i->_achievedFederateSynchronizationMap.end(); ++j) {
           achieved->getFederateHandleBoolPairVector().push_back(FederateHandleBoolPair(j->getFederateHandle(), j->getSuccessful()));
         }
         sendToParent(achieved);
@@ -1059,7 +1059,7 @@ public:
       ServerModel::FederationConnect* federationConnect = getFederationConnect(connectHandle);
 
       // Provide some object instance handles to a federate.
-      // This is to be completely asyncronous in the registerObjectInstance call.
+      // This is to be completely asynchronous in the registerObjectInstance call.
       SharedPtr<ObjectInstanceHandlesResponseMessage> response;
       response = new ObjectInstanceHandlesResponseMessage;
       response->setFederationHandle(message->getFederationHandle());

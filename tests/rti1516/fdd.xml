@@ -2649,7 +2649,7 @@ implied, concerning the content or accuracy of these views.">
         dataType="HLAsyncPointFederate"
         cardinality="Dynamic"
         encoding="HLAvariableArray"
-        semantics="List of joined federates and the syncronization status of each"/>
+        semantics="List of joined federates and the synchronization status of each"/>
     </arrayDataTypes>
 
     <fixedRecordDataTypes>

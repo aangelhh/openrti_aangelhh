@@ -204,7 +204,7 @@ LogStream::LogStream() :
           CATEGORY(ServerConnect),
           CATEGORY(ServerFederation),
           CATEGORY(ServerFederate),
-          CATEGORY(ServerSyncronization),
+          CATEGORY(ServerSynchronization),
           CATEGORY(ServerTime),
           CATEGORY(ServerObjectInstance)
 #undef CATEGORY

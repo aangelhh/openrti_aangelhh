@@ -1177,7 +1177,7 @@ public:
         // Or, we try to reserve this object name behind the scenes.
         // Ok, if this is allowed, like for a rti13 federate or for the option
         // of allowing that to emulate certi behavior, we need to do the reservation
-        // of the name now. This is the only syncronous operation in the rti.
+        // of the name now. This is the only synchronous operation in the rti.
         Clock timeout = Clock::now() + Clock::fromSeconds(60); // FIXME???
         objectInstanceHandle = dispatchWaitReserveObjectInstanceName(timeout, objectInstanceName);
         if (!objectInstanceHandle.valid())
@@ -3545,7 +3545,7 @@ public:
     _getFreeObjectInstanceHandleNamePair()
   {
     // Usually we already have some handles locally available, but for each new one,
-    // start requesting the next from the server, this way we should stay asyncronous for ever.
+    // start requesting the next from the server, this way we should stay asynchronous for ever.
     // May be the initial amount of object handles should be configuration option ...
     _requestObjectInstanceHandles(1);
 

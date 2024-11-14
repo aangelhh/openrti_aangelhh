@@ -526,7 +526,7 @@
     <field name="ResignAction" type="ResignAction"/>
   </message>
 
-  <!-- Syncronisation points.
+  <!-- Synchronisation points.
     -->
   <message type="RegisterFederationSynchronizationPoint">
     <!-- The federation handle to identify packets -->
@@ -720,7 +720,7 @@
   <!-- ObjectInstance handle and name management -->
   <!-- This pair of request/response messages is used internally to allocate a
        pool of object instance name/handle pairs in a federate. This is to make
-       the nameless registerObjectInstance call completely asyncronous.
+       the nameless registerObjectInstance call completely asynchronous.
   -->
   <message type="ObjectInstanceHandlesRequest">
     <field name="FederationHandle" type="FederationHandle"/>

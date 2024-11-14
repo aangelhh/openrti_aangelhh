@@ -214,8 +214,8 @@ Synchronization::Synchronization()
 
 Synchronization::~Synchronization()
 {
-  _achievedFederateSyncronizationMap.clear();
-  _waitingFederateSyncronizationMap.clear();
+  _achievedFederateSynchronizationMap.clear();
+  _waitingFederateSynchronizationMap.clear();
 }
 
 void
@@ -239,35 +239,35 @@ Synchronization::setAddJoiningFederates(bool addJoiningFederates)
 bool
 Synchronization::getIsWaitingFor(const FederateHandle& federateHandle)
 {
-  return _waitingFederateSyncronizationMap.find(federateHandle) != _waitingFederateSyncronizationMap.end();
+  return _waitingFederateSynchronizationMap.find(federateHandle) != _waitingFederateSynchronizationMap.end();
 }
 
 void
 Synchronization::insert(Federate& federate)
 {
-  OpenRTIAssert(_waitingFederateSyncronizationMap.find(federate.getFederateHandle()) == _waitingFederateSyncronizationMap.end());
-  OpenRTIAssert(_achievedFederateSyncronizationMap.find(federate.getFederateHandle()) == _achievedFederateSyncronizationMap.end());
+  OpenRTIAssert(_waitingFederateSynchronizationMap.find(federate.getFederateHandle()) == _waitingFederateSynchronizationMap.end());
+  OpenRTIAssert(_achievedFederateSynchronizationMap.find(federate.getFederateHandle()) == _achievedFederateSynchronizationMap.end());
   if (federate.getResignPending())
     return;
   SynchronizationFederate* synchronizationFederate = new SynchronizationFederate(*this, federate);
   synchronizationFederate->setFederateHandle(federate.getFederateHandle());
   federate.insert(*synchronizationFederate);
-  _waitingFederateSyncronizationMap.insert(*synchronizationFederate);
+  _waitingFederateSynchronizationMap.insert(*synchronizationFederate);
 }
 
 void
 Synchronization::achieved(const FederateHandle& federateHandle, bool successful)
 {
   ServerModel::SynchronizationFederate::HandleMap::iterator i;
-  i = _waitingFederateSyncronizationMap.find(federateHandle);
-  if (i == _waitingFederateSyncronizationMap.end())
+  i = _waitingFederateSynchronizationMap.find(federateHandle);
+  if (i == _waitingFederateSynchronizationMap.end())
     return;
   i->setSuccessful(successful);
-  // OpenRTIAssert(_achievedFederateSyncronizationMap.find(i->getFederateHandle()) == _achievedFederateSyncronizationMap.end());
+  // OpenRTIAssert(_achievedFederateSynchronizationMap.find(i->getFederateHandle()) == _achievedFederateSynchronizationMap.end());
   // Note that no matter where we are currently linked,
   // this removes the entry from one of the maps
   SynchronizationFederate::HandleMap::unlink(*i);
-  _achievedFederateSyncronizationMap.insert(*i);
+  _achievedFederateSynchronizationMap.insert(*i);
 }
 
 ////////////////////////////////////////////////////////////
