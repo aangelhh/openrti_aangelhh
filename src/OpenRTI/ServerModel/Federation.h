@@ -24,6 +24,7 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "Dimension.h"
+#include "Federate.h"
 #include "FederationConnect.h"
 #include "Handle.h"
 #include "HandleAllocator.h"

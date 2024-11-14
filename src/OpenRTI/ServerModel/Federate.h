@@ -1,0 +1,169 @@
+/* -*-c++-*- OpenRTI - Copyright (C) 2009-2024 Mathias Froehlich
+ *
+ * This file is part of OpenRTI.
+ *
+ * OpenRTI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenRTI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with OpenRTI.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#ifndef OpenRTI_ServerModel_Federate_h
+#define OpenRTI_ServerModel_Federate_h
+
+#include "IntrusiveList.h"
+#include "IntrusiveUnorderedMap.h"
+
+#include "Handle.h"
+#include "Message.h"
+#include "ServerModel.h"
+#include "VariableLengthData.h"
+
+namespace OpenRTI {
+namespace ServerModel {
+
+class Federation;
+class FederationConnect;
+class Region;
+
+class OPENRTI_LOCAL Federate :
+    public IntrusiveUnorderedMap<FederateHandle, Federate>::Hook,
+    public IntrusiveUnorderedMap<std::string, Federate>::Hook,
+    public IntrusiveList<Federate, 0>::Hook,
+    public IntrusiveList<Federate, 1>::Hook
+{
+public:
+  typedef IntrusiveUnorderedMap<FederateHandle, Federate> HandleMap;
+  typedef IntrusiveUnorderedMap<std::string, Federate> NameMap;
+  typedef IntrusiveList<Federate, 0> FirstList; // Used to access federates from the FederationConnect
+  typedef IntrusiveList<Federate, 1> SecondList; // Used to access time regulating federates from the FederationConnect
+
+  Federate(Federation& federation);
+  ~Federate();
+
+  Federation const& getFederation() const
+  { return _federation; }
+  Federation& getFederation()
+  { return _federation; }
+
+  FederateHandle const& getFederateHandle() const
+  { return IntrusiveUnorderedMap<FederateHandle, Federate>::Hook::getKey(); }
+  void setFederateHandle(FederateHandle const& federateHandle);
+
+  std::string const& getName() const
+  { return IntrusiveUnorderedMap<std::string, Federate>::Hook::getKey(); }
+  void setName(std::string const& name);
+
+  std::string const& getFederateType() const
+  { return _federateType; }
+  void setFederateType(std::string const& federateType);
+
+  ResignAction getResignAction() const
+  { return _resignAction; }
+  void setResignAction(ResignAction resignAction);
+
+  bool getResignPending() const
+  { return _resignPending; }
+  void setResignPending(bool resignPending);
+
+  /// The connect where this Federate is sitting behind
+  FederationConnect const* getFederationConnect() const
+  { return _federationConnect; }
+  FederationConnect* getFederationConnect()
+  { return _federationConnect; }
+  void setFederationConnect(FederationConnect* federationConnect);
+  ConnectHandle getConnectHandle() const;
+
+  void send(const SharedPtr<const AbstractMessage>& message);
+
+  /// List of SynchronizationFederate instances belonging to this Federate
+  typedef IntrusiveList<SynchronizationFederate, 0> SynchronizationFederateList;
+  /// Get the list of SynchronizationFederate instances
+  SynchronizationFederateList const& getSynchronizationFederateList() const
+  { return _synchronizationFederateList; }
+  SynchronizationFederateList& getSynchronizationFederateList()
+  { return _synchronizationFederateList; }
+  void insert(SynchronizationFederate& synchronizationFederate)
+  { _synchronizationFederateList.push_back(synchronizationFederate); }
+
+  bool getIsTimeRegulating() const;
+
+  /// Time constrained federates current state
+  VariableLengthData const& getTimeAdvanceTimeStamp() const
+  { return _timeAdvanceTimeStamp; }
+  void setTimeAdvanceTimeStamp(VariableLengthData const& timeAdvanceTimeStamp);
+
+  VariableLengthData const& getNextMessageTimeStamp() const
+  { return _nextMessageTimeStamp; }
+  void setNextMessageTimeStamp(VariableLengthData const& nextMessageTimeStamp);
+
+  Unsigned getCommitId() const
+  { return _commitId; }
+  void setCommitId(Unsigned commitId);
+
+  /// UnorderedSet of Region instances indexed by regionHandle
+  typedef IntrusiveUnorderedMap<LocalRegionHandle, Region> RegionHandleRegionMap;
+  /// Get the set of Region instances
+  RegionHandleRegionMap const& getRegionHandleRegionMap() const
+  { return _regionHandleRegionMap; }
+  RegionHandleRegionMap& getRegionHandleRegionMap()
+  { return _regionHandleRegionMap; }
+  /// Get one Region instance matching regionHandle
+  Region const* getRegion(LocalRegionHandle const& regionHandle) const;
+  Region* getRegion(LocalRegionHandle const& regionHandle);
+  void insert(Region& region)
+  { _regionHandleRegionMap.insert(region); }
+
+private:
+#if 201103L <= __cplusplus
+  Federate(Federate const&) = delete;
+  Federate(Federate&&) = delete;
+  Federate& operator=(Federate const&) = delete;
+  Federate& operator=(Federate&&) = delete;
+#else
+  Federate(Federate const&);
+  Federate& operator=(Federate const&);
+#if 200610L <= __cpp_rvalue_reference
+  Federate(Federate&&);
+  Federate& operator=(Federate&&);
+#endif
+#endif
+
+  Federation& _federation;
+
+  std::string _federateType;
+
+  ResignAction _resignAction;
+
+  bool _resignPending;
+
+  /// The connect where this Federate is sitting behind
+  FederationConnect* _federationConnect;
+
+  /// List of SynchronizationFederate instances belonging to this Federate
+  SynchronizationFederateList _synchronizationFederateList;
+
+  /// Time constrained federates current state
+  VariableLengthData _timeAdvanceTimeStamp;
+
+  VariableLengthData _nextMessageTimeStamp;
+
+  Unsigned _commitId;
+
+  /// UnorderedSet of Region instances indexed by regionHandle
+  RegionHandleRegionMap _regionHandleRegionMap;
+};
+
+} // namespace ServerModel
+} // namespace OpenRTI
+
+#endif // OpenRTI_ServerModel_Federate_h

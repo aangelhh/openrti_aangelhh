@@ -19,6 +19,8 @@
 
 #include "NodeConnect.h"
 
+#include "Federate.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 

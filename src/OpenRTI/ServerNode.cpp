@@ -188,7 +188,7 @@ public:
       broadcast(connectHandle, request);
     }
 
-    for (ServerModel::SynchronizationFederate::FirstList::iterator k = federate->getSynchronizationFederateList().begin();
+    for (ServerModel::Federate::SynchronizationFederateList::iterator k = federate->getSynchronizationFederateList().begin();
          k != federate->getSynchronizationFederateList().end();) {
       if (!k->getSynchronization().getIsWaitingFor(federate->getFederateHandle()))
         ++k;
@@ -1649,7 +1649,7 @@ public:
       commitRegionMessage->setFederationHandle(getFederationHandle());
       commitRegionMessage->getRegionHandleRegionValuePairVector().reserve(count);
 
-      for (ServerModel::Region::HandleMap::iterator j = i->getRegionHandleRegionMap().begin();
+      for (ServerModel::Federate::RegionHandleRegionMap::iterator j = i->getRegionHandleRegionMap().begin();
            j != i->getRegionHandleRegionMap().end(); ++j) {
         RegionHandle regionHandle(i->getFederateHandle(), j->getRegionHandle());
         insertRegionMessage->getRegionHandleDimensionHandleSetPairVector().push_back(RegionHandleDimensionHandleSetPair(regionHandle, j->_dimensionHandleSet));
@@ -1756,7 +1756,7 @@ public:
           SharedPtr<EraseRegionMessage> eraseRegionMessage = new EraseRegionMessage;
           eraseRegionMessage->setFederationHandle(getFederationHandle());
           eraseRegionMessage->getRegionHandleVector().reserve(federate->getRegionHandleRegionMap().size());
-          for (ServerModel::Region::HandleMap::iterator k = federate->getRegionHandleRegionMap().begin();
+          for (ServerModel::Federate::RegionHandleRegionMap::iterator k = federate->getRegionHandleRegionMap().begin();
                k != federate->getRegionHandleRegionMap().end(); ++k) {
             RegionHandle regionHandle(federate->getFederateHandle(), k->getRegionHandle());
             eraseRegionMessage->getRegionHandleVector().push_back(regionHandle);
@@ -1773,7 +1773,7 @@ public:
           broadcast(connectHandle, request);
         }
 
-        for (ServerModel::SynchronizationFederate::FirstList::iterator k = federate->getSynchronizationFederateList().begin();
+        for (ServerModel::Federate::SynchronizationFederateList::iterator k = federate->getSynchronizationFederateList().begin();
              k != federate->getSynchronizationFederateList().end();) {
           if (!k->getSynchronization().getIsWaitingFor(federate->getFederateHandle()))
             ++k;
