@@ -728,43 +728,5 @@ ClassAttribute::setAttributeHandle(const AttributeHandle& attributeHandle)
   HandleListEntity<ClassAttribute, AttributeHandle>::_setHandle(attributeHandle);
 }
 
-////////////////////////////////////////////////////////////
-
-AttributeDefinition::AttributeDefinition(ObjectClass& objectClass) :
-  _objectClass(objectClass),
-  _orderType(),
-  _transportationType()
-{
-}
-
-AttributeDefinition::~AttributeDefinition()
-{
-  _classAttributeList.clear();
-}
-
-void
-AttributeDefinition::setName(const std::string& name)
-{
-  HandleStringEntity<AttributeDefinition, AttributeHandle>::_setString(name);
-}
-
-void
-AttributeDefinition::setAttributeHandle(const AttributeHandle& attributeHandle)
-{
-  HandleStringEntity<AttributeDefinition, AttributeHandle>::_setHandle(attributeHandle);
-}
-
-void
-AttributeDefinition::setOrderType(OrderType orderType)
-{
-  _orderType = orderType;
-}
-
-void
-AttributeDefinition::setTransportationType(TransportationType transportationType)
-{
-  _transportationType = transportationType;
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI

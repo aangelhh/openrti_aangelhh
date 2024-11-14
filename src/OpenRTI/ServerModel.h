@@ -1239,59 +1239,6 @@ private:
   // InstanceAttribute::FirstList _instanceAttributeList;
 };
 
-////////////////////////////////////////////////////////////
-
-/// May be move the handle out here and move this into the object class attribute??
-class OPENRTI_LOCAL AttributeDefinition : public HandleStringEntity<AttributeDefinition, AttributeHandle> {
-public:
-  typedef HandleStringEntity<AttributeDefinition, AttributeHandle>::HandleMap HandleMap;
-  typedef HandleStringEntity<AttributeDefinition, AttributeHandle>::StringMap NameMap;
-
-  AttributeDefinition(ObjectClass& objectClass);
-  ~AttributeDefinition();
-
-  const std::string& getName() const
-  { return HandleStringEntity<AttributeDefinition, AttributeHandle>::_getString(); }
-  void setName(const std::string& name);
-
-  const AttributeHandle& getAttributeHandle() const
-  { return HandleStringEntity<AttributeDefinition, AttributeHandle>::_getHandle(); }
-  void setAttributeHandle(const AttributeHandle& attributeHandle);
-
-  const ObjectClass& getObjectClass() const
-  { return _objectClass; }
-  ObjectClass& getObjectClass()
-  { return _objectClass; }
-
-  OrderType getOrderType() const
-  { return _orderType; }
-  void setOrderType(OrderType orderType);
-
-  TransportationType getTransportationType() const
-  { return _transportationType; }
-  void setTransportationType(TransportationType transportationType);
-
-  void insert(ClassAttribute& classAttribute)
-  { _classAttributeList.push_back(classAttribute); }
-  ClassAttribute::FirstList& getClassAttributeList()
-  { return _classAttributeList; }
-
-
-  // FIXME temporarily in this way
-  DimensionHandleSet _dimensionHandleSet;
-
-private:
-  AttributeDefinition(const AttributeDefinition&);
-  AttributeDefinition& operator=(const AttributeDefinition&);
-
-  ObjectClass& _objectClass;
-
-  OrderType _orderType;
-  TransportationType _transportationType;
-
-  ClassAttribute::FirstList _classAttributeList;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 

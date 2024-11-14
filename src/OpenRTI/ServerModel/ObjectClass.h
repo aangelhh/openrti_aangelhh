@@ -23,6 +23,7 @@
 #include "IntrusiveList.h"
 #include "IntrusiveUnorderedMap.h"
 
+#include "AttributeDefinition.h"
 #include "Handle.h"
 #include "ServerModel.h"
 #include "StringUtils.h"
