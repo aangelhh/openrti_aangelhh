@@ -1148,33 +1148,6 @@ private:
   ClassParameter::HandleMap _parameterHandleClassParameterMap;
 };
 
-////////////////////////////////////////////////////////////
-
-class Module;
-class ObjectClass;
-
-class OPENRTI_LOCAL ObjectClassModule : public ListPair<ObjectClassModule> {
-public:
-  ObjectClassModule(ObjectClass& objectClass, Module& module);
-  ~ObjectClassModule();
-
-  const ObjectClass& getObjectClass() const
-  { return _objectClass; }
-  ObjectClass& getObjectClass()
-  { return _objectClass; }
-  const Module& getModule() const
-  { return _module; }
-  Module& getModule()
-  { return _module; }
-
-private:
-  ObjectClassModule(const ObjectClassModule&);
-  ObjectClassModule& operator=(const ObjectClassModule&);
-
-  ObjectClass& _objectClass;
-  Module& _module;
-};
-
 } // namespace ServerModel
 } // namespace OpenRTI
 

@@ -688,16 +688,5 @@ InteractionClass::getClassParameter(const ParameterHandle& parameterHandle)
   return i.get();
 }
 
-////////////////////////////////////////////////////////////
-
-ObjectClassModule::ObjectClassModule(ObjectClass& objectClass, Module& module) :
-  _objectClass(objectClass), _module(module)
-{
-}
-
-ObjectClassModule::~ObjectClassModule()
-{
-}
-
 } // namespace ServerModel
 } // namespace OpenRTI

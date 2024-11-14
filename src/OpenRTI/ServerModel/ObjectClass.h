@@ -27,6 +27,7 @@
 #include "AttributeDefinitionModule.h"
 #include "ClassAttribute.h"
 #include "Handle.h"
+#include "ObjectClassModule.h"
 #include "ServerModel.h"
 #include "StringUtils.h"
 
