@@ -108,7 +108,7 @@ for generator in "${generators[@]}" ; do
 
                     case ${buildconfig}`uname` in
                         *Linux|Release*CYGWIN*)
-                            ctest --buildconfig $buildconfig
+                            ctest --build-config $buildconfig
                             if [ "$?" != "0" ] ; then
                                 1>&2 echo "Tests failed."
                                 exit 1
