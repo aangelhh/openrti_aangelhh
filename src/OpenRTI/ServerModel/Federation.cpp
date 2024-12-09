@@ -1267,9 +1267,6 @@ Federation::isFederateNameInUse(std::string const& name) const
 void
 Federation::insert(Federate& federate)
 {
-  federate.setFederateHandle(_federateHandleAllocator.getOrTake(federate.getFederateHandle()));
-  if (federate.getName().empty())
-    federate.setName(federate.getFederateHandle().getReservedName("HLAfederate"));
   OpenRTIAssert(!isFederateNameInUse(federate.getName()));
   _federateNameFederateMap.insert(federate);
   _federateHandleFederateMap.insert(federate);
@@ -1388,6 +1385,16 @@ Federation::insertObjectInstance(ObjectInstanceHandle const& objectInstanceHandl
   objectInstance->setName(objectInstanceName);
   insert(*objectInstance);
   return objectInstance;
+}
+
+Federate*
+Federation::createFederate(FederateHandle const& federateHandle, std::string const& name)
+{
+  FederateHandle federateHandle2 = _federateHandleAllocator.getOrTake(federateHandle);
+  if (name.empty())
+    return new Federate(*this, federateHandle2, federateHandle2.getReservedName("HLAfederate"));
+  else
+    return new Federate(*this, federateHandle2, name);
 }
 
 } // namespace ServerModel

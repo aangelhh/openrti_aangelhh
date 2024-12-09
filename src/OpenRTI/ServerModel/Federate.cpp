@@ -24,7 +24,9 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-Federate::Federate(Federation& federation) :
+Federate::Federate(Federation& federation, FederateHandle const& federateHandle, std::string const& name) :
+  IntrusiveUnorderedMap<FederateHandle const, Federate>::Hook(federateHandle),
+  IntrusiveUnorderedMap<std::string const, Federate>::Hook(name),
   _federation(federation),
   _resignAction(CANCEL_THEN_DELETE_THEN_DIVEST),
   _resignPending(false),
@@ -41,18 +43,6 @@ Federate::~Federate()
 
   OpenRTIAssert(_regionHandleRegionMap.empty());
   OpenRTIAssert(_synchronizationFederateList.empty());
-}
-
-void
-Federate::setFederateHandle(FederateHandle const& federateHandle)
-{
-  IntrusiveUnorderedMap<FederateHandle, Federate>::Hook::setKey(federateHandle);
-}
-
-void
-Federate::setName(std::string const& name)
-{
-  IntrusiveUnorderedMap<std::string, Federate>::Hook::setKey(name);
 }
 
 void

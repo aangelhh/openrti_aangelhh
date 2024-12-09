@@ -37,13 +37,13 @@ class FederationConnect;
 class Region;
 
 class OPENRTI_LOCAL Federate :
-    public IntrusiveUnorderedMap<FederateHandle, Federate>::Hook,
-    public IntrusiveUnorderedMap<std::string, Federate>::Hook,
+    public IntrusiveUnorderedMap<FederateHandle const, Federate>::Hook,
+    public IntrusiveUnorderedMap<std::string const, Federate>::Hook,
     public IntrusiveList<Federate, 0>::Hook,
     public IntrusiveList<Federate, 1>::Hook
 {
 public:
-  Federate(Federation& federation);
+  Federate(Federation& federation, FederateHandle const& federateHandle, std::string const& name);
   ~Federate();
 
   Federation const& getFederation() const
@@ -52,12 +52,10 @@ public:
   { return _federation; }
 
   FederateHandle const& getFederateHandle() const
-  { return IntrusiveUnorderedMap<FederateHandle, Federate>::Hook::getKey(); }
-  void setFederateHandle(FederateHandle const& federateHandle);
+  { return IntrusiveUnorderedMap<FederateHandle const, Federate>::Hook::getKey(); }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string, Federate>::Hook::getKey(); }
-  void setName(std::string const& name);
+  { return IntrusiveUnorderedMap<std::string const, Federate>::Hook::getKey(); }
 
   std::string const& getFederateType() const
   { return _federateType; }

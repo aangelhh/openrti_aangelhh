@@ -93,8 +93,7 @@ public:
     }
 
     // ... insert a new federate ...
-    ServerModel::Federate* federate = new ServerModel::Federate(*this);
-    federate->setName(message->getFederateName());
+    ServerModel::Federate* federate = createFederate(FederateHandle(), message->getFederateName());
     federate->setFederateType(message->getFederateType());
     insert(*federate);
 
@@ -1823,9 +1822,7 @@ public:
     OpenRTIAssert(!getFederate(federateHandle));
 
     // Register that we reach this federate through this connect
-    ServerModel::Federate* federate = new ServerModel::Federate(*this);
-    federate->setName(federateName);
-    federate->setFederateHandle(federateHandle);
+    ServerModel::Federate* federate = createFederate(federateHandle, federateName);
     ServerModel::Federation::insert(*federate);
 
     ServerModel::FederationConnect* federationConnect = getFederationConnect(connectHandle);

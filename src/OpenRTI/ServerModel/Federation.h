@@ -251,7 +251,7 @@ public:
   SynchronizationNameSynchronizationMap _synchronizationNameSynchronizationMap;
 
   /// UnorderedSet of Federate instances indexed by federateHandle
-  typedef IntrusiveUnorderedMap<FederateHandle, Federate> FederateHandleFederateMap;
+  typedef IntrusiveUnorderedMap<FederateHandle const, Federate> FederateHandleFederateMap;
   /// Get the set of Federate instances
   FederateHandleFederateMap const& getFederateHandleFederateMap() const
   { return _federateHandleFederateMap; }
@@ -262,7 +262,7 @@ public:
   Federate* getFederate(FederateHandle const& federateHandle);
 
   /// UnorderedSet of Federate instances indexed by name
-  typedef IntrusiveUnorderedMap<std::string, Federate> FederateNameFederateMap;
+  typedef IntrusiveUnorderedMap<std::string const, Federate> FederateNameFederateMap;
   /// Get one Federate instance matching name
   Federate const* getFederate(std::string const& name) const;
   Federate* getFederate(std::string const& name);
@@ -298,6 +298,10 @@ public:
   bool isObjectInstanceNameInUse(std::string const& name) const;
   /// FIXME
   ObjectInstance* insertObjectInstance(ObjectInstanceHandle const& objectInstanceHandle, std::string const& objectInstanceName);
+
+  ///
+  /// Create a new Federate instance
+  Federate* createFederate(FederateHandle const& federateHandle, std::string const& name);
 
 private:
 #if 201103L <= __cplusplus
