@@ -37,9 +37,6 @@ class OPENRTI_LOCAL AttributeDefinition :
     public IntrusiveUnorderedMap<std::string, AttributeDefinition>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<AttributeHandle, AttributeDefinition> HandleMap;
-  typedef IntrusiveUnorderedMap<std::string, AttributeDefinition> NameMap;
-
   AttributeDefinition(ObjectClass& objectClass);
   ~AttributeDefinition();
 

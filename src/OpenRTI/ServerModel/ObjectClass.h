@@ -44,10 +44,6 @@ class OPENRTI_LOCAL ObjectClass :
     public IntrusiveList<ObjectClass, 0>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<ObjectClassHandle, ObjectClass> HandleMap;
-  typedef IntrusiveUnorderedMap<StringVector, ObjectClass> NameMap;
-  typedef IntrusiveList<ObjectClass, 0> ChildList;
-
   ObjectClass(Federation& federation, ObjectClass* parentObjectClass = 0);
   ~ObjectClass();
 

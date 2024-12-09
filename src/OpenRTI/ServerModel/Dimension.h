@@ -37,9 +37,6 @@ class OPENRTI_LOCAL Dimension :
     public IntrusiveUnorderedMap<std::string, Dimension>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<DimensionHandle, Dimension> HandleMap;
-  typedef IntrusiveUnorderedMap<std::string, Dimension> NameMap;
-
   Dimension(Federation& federation);
   ~Dimension();
 

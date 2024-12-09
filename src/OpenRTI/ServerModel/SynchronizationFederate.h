@@ -36,9 +36,6 @@ class OPENRTI_LOCAL SynchronizationFederate :
     public IntrusiveList<SynchronizationFederate, 0>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<FederateHandle, SynchronizationFederate> HandleMap;
-  typedef IntrusiveList<SynchronizationFederate, 0> FirstList;
-
   SynchronizationFederate(Synchronization& synchronization, Federate& federate);
   ~SynchronizationFederate();
 

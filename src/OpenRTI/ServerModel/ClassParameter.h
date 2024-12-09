@@ -36,9 +36,6 @@ class OPENRTI_LOCAL ClassParameter :
     public IntrusiveList<ClassParameter, 0>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<ParameterHandle, ClassParameter> HandleMap;
-  typedef IntrusiveList<ClassParameter, 0> FirstList;
-
   ClassParameter(InteractionClass& interactionClass, ParameterDefinition& parameterDefinition);
   ~ClassParameter();
 

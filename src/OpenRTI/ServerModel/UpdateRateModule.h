@@ -34,9 +34,6 @@ class OPENRTI_LOCAL UpdateRateModule :
     public IntrusiveList<UpdateRateModule, 1>::Hook
 {
 public:
-  typedef IntrusiveList<UpdateRateModule, 0> FirstList;
-  typedef IntrusiveList<UpdateRateModule, 1> SecondList;
-
   UpdateRateModule(UpdateRate& updateRate, Module& module);
   ~UpdateRateModule();
 

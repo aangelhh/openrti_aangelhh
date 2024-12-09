@@ -34,9 +34,6 @@ class OPENRTI_LOCAL DimensionModule :
     public IntrusiveList<DimensionModule, 1>::Hook
 {
 public:
-  typedef IntrusiveList<DimensionModule, 0> FirstList;
-  typedef IntrusiveList<DimensionModule, 1> SecondList;
-
   DimensionModule(Dimension& dimension, Module& module);
   ~DimensionModule();
 

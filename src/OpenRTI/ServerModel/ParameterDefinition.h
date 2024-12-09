@@ -36,9 +36,6 @@ class OPENRTI_LOCAL ParameterDefinition :
     public IntrusiveUnorderedMap<std::string, ParameterDefinition>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<ParameterHandle, ParameterDefinition> HandleMap;
-  typedef IntrusiveUnorderedMap<std::string, ParameterDefinition> NameMap;
-
   ParameterDefinition(InteractionClass& interactionClass);
   ~ParameterDefinition();
 

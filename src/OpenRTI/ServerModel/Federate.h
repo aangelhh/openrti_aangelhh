@@ -43,11 +43,6 @@ class OPENRTI_LOCAL Federate :
     public IntrusiveList<Federate, 1>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<FederateHandle, Federate> HandleMap;
-  typedef IntrusiveUnorderedMap<std::string, Federate> NameMap;
-  typedef IntrusiveList<Federate, 0> FirstList; // Used to access federates from the FederationConnect
-  typedef IntrusiveList<Federate, 1> SecondList; // Used to access time regulating federates from the FederationConnect
-
   Federate(Federation& federation);
   ~Federate();
 

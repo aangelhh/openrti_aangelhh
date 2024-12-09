@@ -35,8 +35,6 @@ class OPENRTI_LOCAL NodeConnect :
     public IntrusiveUnorderedMap<ConnectHandle, NodeConnect>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<ConnectHandle, NodeConnect> HandleMap;
-
   NodeConnect();
   ~NodeConnect();
 

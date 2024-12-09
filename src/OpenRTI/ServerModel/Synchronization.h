@@ -36,8 +36,6 @@ class OPENRTI_LOCAL Synchronization :
     public IntrusiveUnorderedMap<std::string, Synchronization>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<std::string, Synchronization> NameMap;
-
   Synchronization();
   ~Synchronization();
 

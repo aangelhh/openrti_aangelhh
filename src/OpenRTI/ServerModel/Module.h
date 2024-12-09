@@ -41,8 +41,6 @@ class OPENRTI_LOCAL Module :
     public IntrusiveUnorderedMap<ModuleHandle, Module>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<ModuleHandle, Module> HandleMap;
-
   Module(Federation& federation);
   ~Module();
 

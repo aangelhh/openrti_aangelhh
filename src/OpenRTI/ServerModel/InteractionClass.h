@@ -45,10 +45,6 @@ class OPENRTI_LOCAL InteractionClass :
     public PublishSubscribe
 {
 public:
-  typedef IntrusiveUnorderedMap<InteractionClassHandle, InteractionClass> HandleMap;
-  typedef IntrusiveUnorderedMap<StringVector, InteractionClass> NameMap;
-  typedef IntrusiveList<InteractionClass, 0> ChildList;
-
   InteractionClass(Federation& federation, InteractionClass* parentInteractionClass = 0);
   ~InteractionClass();
 

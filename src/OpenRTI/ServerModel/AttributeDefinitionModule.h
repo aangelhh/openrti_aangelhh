@@ -34,9 +34,6 @@ class OPENRTI_LOCAL AttributeDefinitionModule :
     public IntrusiveList<AttributeDefinitionModule, 1>::Hook
 {
 public:
-  typedef IntrusiveList<AttributeDefinitionModule, 0> FirstList;
-  typedef IntrusiveList<AttributeDefinitionModule, 1> SecondList;
-
   AttributeDefinitionModule(ObjectClass& objectClass, Module& module);
   ~AttributeDefinitionModule();
 

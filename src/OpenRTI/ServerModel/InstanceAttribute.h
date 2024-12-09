@@ -35,8 +35,6 @@ class OPENRTI_LOCAL InstanceAttribute :
     public IntrusiveUnorderedMap<AttributeHandle, InstanceAttribute>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<AttributeHandle, InstanceAttribute> HandleMap;
-
   InstanceAttribute(ObjectInstance& objectInstance, ClassAttribute& classAttribute);
   ~InstanceAttribute();
 

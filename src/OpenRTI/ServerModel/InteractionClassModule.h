@@ -34,9 +34,6 @@ class OPENRTI_LOCAL InteractionClassModule :
     public IntrusiveList<InteractionClassModule, 1>::Hook
 {
 public:
-  typedef IntrusiveList<InteractionClassModule, 0> FirstList;
-  typedef IntrusiveList<InteractionClassModule, 1> SecondList;
-
   InteractionClassModule(InteractionClass& interactionClass, Module& module);
   ~InteractionClassModule();
 

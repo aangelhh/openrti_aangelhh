@@ -40,10 +40,6 @@ class OPENRTI_LOCAL ObjectInstance :
     public IntrusiveList<ObjectInstance, 0>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<ObjectInstanceHandle, ObjectInstance> HandleMap;
-  typedef IntrusiveUnorderedMap<std::string, ObjectInstance> NameMap;
-  typedef IntrusiveList<ObjectInstance, 0> FirstList;
-
   ObjectInstance(Federation& federation);
   ~ObjectInstance();
 

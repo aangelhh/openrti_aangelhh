@@ -54,9 +54,6 @@ class OPENRTI_LOCAL Federation :
     public IntrusiveUnorderedMap<std::string, Federation>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<FederationHandle, Federation> HandleMap;
-  typedef IntrusiveUnorderedMap<std::string, Federation> NameMap;
-
   Federation(Node& serverNode);
   virtual ~Federation();
 

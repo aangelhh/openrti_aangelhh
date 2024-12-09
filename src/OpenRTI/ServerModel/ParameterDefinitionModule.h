@@ -34,9 +34,6 @@ class OPENRTI_LOCAL ParameterDefinitionModule :
     public IntrusiveList<ParameterDefinitionModule, 1>::Hook
 {
 public:
-  typedef IntrusiveList<ParameterDefinitionModule, 0> FirstList;
-  typedef IntrusiveList<ParameterDefinitionModule, 1> SecondList;
-
   ParameterDefinitionModule(InteractionClass& interactionClass, Module& module);
   ~ParameterDefinitionModule();
 

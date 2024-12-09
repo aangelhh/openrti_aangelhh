@@ -33,8 +33,6 @@ class OPENRTI_LOCAL Region :
     public IntrusiveUnorderedMap<LocalRegionHandle, Region>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<LocalRegionHandle, Region> HandleMap;
-
   Region();
   ~Region();
 

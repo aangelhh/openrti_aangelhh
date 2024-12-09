@@ -36,9 +36,6 @@ class OPENRTI_LOCAL UpdateRate :
     public IntrusiveUnorderedMap<std::string, UpdateRate>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<UpdateRateHandle, UpdateRate> HandleMap;
-  typedef IntrusiveUnorderedMap<std::string, UpdateRate> NameMap;
-
   UpdateRate(Federation& federation);
   ~UpdateRate();
 

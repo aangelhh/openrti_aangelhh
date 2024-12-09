@@ -39,10 +39,6 @@ class OPENRTI_LOCAL FederationConnect :
     public IntrusiveList<FederationConnect, 1>::Hook
 {
 public:
-  typedef IntrusiveList<FederationConnect, 0> FirstList; /// Used to access FederationConnects from a NodeConnect
-  typedef IntrusiveUnorderedMap<ConnectHandle, FederationConnect> HandleMap;
-  typedef IntrusiveList<FederationConnect, 1> SecondList; /// Used to access time regulating connects from the federation
-
   FederationConnect(Federation& federation, NodeConnect& nodeConnect);
   ~FederationConnect();
 

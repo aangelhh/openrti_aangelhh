@@ -36,9 +36,6 @@ class OPENRTI_LOCAL ObjectInstanceConnect :
     public IntrusiveList<ObjectInstanceConnect, 0>::Hook
 {
 public:
-  typedef IntrusiveUnorderedMap<ConnectHandle, ObjectInstanceConnect> HandleMap;
-  typedef IntrusiveList<ObjectInstanceConnect, 0> FirstList;
-
   ObjectInstanceConnect(ObjectInstance& objectInstance, FederationConnect& federationConnect);
   ~ObjectInstanceConnect();
 

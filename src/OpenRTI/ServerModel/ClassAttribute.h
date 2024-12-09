@@ -38,9 +38,6 @@ class OPENRTI_LOCAL ClassAttribute :
     public PublishSubscribe
 {
 public:
-  typedef IntrusiveUnorderedMap<AttributeHandle, ClassAttribute> HandleMap;
-  typedef IntrusiveList<ClassAttribute, 0> FirstList;
-
   ClassAttribute(ObjectClass& objectClass, AttributeDefinition& attributeDefinition);
   ~ClassAttribute();
 
