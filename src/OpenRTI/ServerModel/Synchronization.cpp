@@ -24,7 +24,8 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-Synchronization::Synchronization() :
+Synchronization::Synchronization(Federation& federation) :
+  _federation(federation),
   _addJoiningFederates(true)
 {
 }

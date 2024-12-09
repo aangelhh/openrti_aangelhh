@@ -32,12 +32,19 @@ namespace ServerModel {
 
 class Federate;
 
+class Federation;
+
 class OPENRTI_LOCAL Synchronization :
     public IntrusiveUnorderedMap<std::string, Synchronization>::Hook
 {
 public:
-  Synchronization();
+  Synchronization(Federation& federation);
   ~Synchronization();
+
+  Federation const& getFederation() const
+  { return _federation; }
+  Federation& getFederation()
+  { return _federation; }
 
   std::string const& getLabel() const
   { return IntrusiveUnorderedMap<std::string, Synchronization>::Hook::getKey(); }
@@ -81,6 +88,8 @@ private:
   Synchronization& operator=(Synchronization&&);
 #endif
 #endif
+
+  Federation& _federation;
 
   VariableLengthData _tag;
 
