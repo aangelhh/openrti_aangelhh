@@ -80,7 +80,7 @@ Node::getNodeConnect(ConnectHandle const& connectHandle)
 NodeConnect*
 Node::insertNodeConnect(const SharedPtr<AbstractMessageSender>& messageSender, StringStringListMap const& options)
 {
-  NodeConnect* nodeConnect = new NodeConnect(*this);
+  NodeConnect* nodeConnect = new NodeConnect(*this, _connectHandleAllocator.get());
   insert(*nodeConnect);
   nodeConnect->setMessageSender(messageSender);
   nodeConnect->setOptions(options);
@@ -100,7 +100,6 @@ Node::insertParentNodeConnect(const SharedPtr<AbstractMessageSender>& messageSen
 void
 Node::insert(NodeConnect& nodeConnect)
 {
-  nodeConnect.setConnectHandle(_connectHandleAllocator.getOrTake(nodeConnect.getConnectHandle()));
   _connectHandleNodeConnectMap.insert(nodeConnect);
 }
 

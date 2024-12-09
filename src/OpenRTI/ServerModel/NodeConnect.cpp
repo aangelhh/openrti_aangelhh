@@ -24,7 +24,8 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-NodeConnect::NodeConnect(Node& serverNode) :
+NodeConnect::NodeConnect(Node& serverNode, ConnectHandle const& connectHandle) :
+  IntrusiveUnorderedMap<ConnectHandle const, NodeConnect>::Hook(connectHandle),
   _serverNode(serverNode),
   _isParentConnect(false)
 {
@@ -37,12 +38,6 @@ NodeConnect::~NodeConnect()
   _federationConnectList.clear();
 
   OpenRTIAssert(_federationConnectList.empty());
-}
-
-void
-NodeConnect::setConnectHandle(ConnectHandle const& connectHandle)
-{
-  IntrusiveUnorderedMap<ConnectHandle, NodeConnect>::Hook::setKey(connectHandle);
 }
 
 void

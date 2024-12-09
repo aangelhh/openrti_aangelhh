@@ -74,7 +74,7 @@ public:
   { return _serverOptions->getServerPath(); }
 
   /// UnorderedSet of NodeConnect instances indexed by connectHandle
-  typedef IntrusiveUnorderedMap<ConnectHandle, NodeConnect> ConnectHandleNodeConnectMap;
+  typedef IntrusiveUnorderedMap<ConnectHandle const, NodeConnect> ConnectHandleNodeConnectMap;
   /// Get the set of NodeConnect instances
   ConnectHandleNodeConnectMap const& getConnectHandleNodeConnectMap() const
   { return _connectHandleNodeConnectMap; }

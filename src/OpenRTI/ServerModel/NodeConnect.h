@@ -34,10 +34,10 @@ namespace ServerModel {
 class Node;
 
 class OPENRTI_LOCAL NodeConnect :
-    public IntrusiveUnorderedMap<ConnectHandle, NodeConnect>::Hook
+    public IntrusiveUnorderedMap<ConnectHandle const, NodeConnect>::Hook
 {
 public:
-  NodeConnect(Node& serverNode);
+  NodeConnect(Node& serverNode, ConnectHandle const& connectHandle);
   ~NodeConnect();
 
   /// The parent ServerNode
@@ -48,8 +48,7 @@ public:
 
   /// The connect handle to identify this connect
   ConnectHandle const& getConnectHandle() const
-  { return IntrusiveUnorderedMap<ConnectHandle, NodeConnect>::Hook::getKey(); }
-  void setConnectHandle(ConnectHandle const& connectHandle);
+  { return IntrusiveUnorderedMap<ConnectHandle const, NodeConnect>::Hook::getKey(); }
 
   /// True if this is the parent connect
   bool getIsParentConnect() const
