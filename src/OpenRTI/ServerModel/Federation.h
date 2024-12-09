@@ -160,7 +160,7 @@ public:
   void insert(Dimension& dimension);
 
   /// UnorderedSet of UpdateRate instances indexed by updateRateHandle
-  typedef IntrusiveUnorderedMap<UpdateRateHandle, UpdateRate> UpdateRateHandleUpdateRateMap;
+  typedef IntrusiveUnorderedMap<UpdateRateHandle const, UpdateRate> UpdateRateHandleUpdateRateMap;
   /// Get the set of UpdateRate instances
   UpdateRateHandleUpdateRateMap const& getUpdateRateHandleUpdateRateMap() const
   { return _updateRateHandleUpdateRateMap; }
@@ -171,7 +171,7 @@ public:
   UpdateRate* getUpdateRate(UpdateRateHandle const& updateRateHandle);
 
   /// UnorderedSet of UpdateRate instances indexed by name
-  typedef IntrusiveUnorderedMap<std::string, UpdateRate> UpdateRateNameUpdateRateMap;
+  typedef IntrusiveUnorderedMap<std::string const, UpdateRate> UpdateRateNameUpdateRateMap;
   /// Get one UpdateRate instance matching name
   UpdateRate const* getUpdateRate(std::string const& name) const;
   UpdateRate* getUpdateRate(std::string const& name);

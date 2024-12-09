@@ -573,9 +573,7 @@ Federation::insertOrCheck(Module& module, FOMStringUpdateRate const& stringUpdat
     module.insert(*i);
     return false;
   } else {
-    UpdateRate* updateRate = new UpdateRate(*this);
-    updateRate->setName(stringUpdateRate.getName());
-    updateRate->setUpdateRateHandle(_updateRateHandleAllocator.get());
+    UpdateRate* updateRate = new UpdateRate(*this, _updateRateHandleAllocator.get(), stringUpdateRate.getName());
     updateRate->setRate(stringUpdateRate.getRate());
     insert(*updateRate);
     module.insert(*updateRate);
@@ -927,9 +925,7 @@ Federation::insert(Module& module, FOMUpdateRate const& fomUpdateRate)
     module.insert(*i);
   } else {
     _updateRateHandleAllocator.take(fomUpdateRate.getUpdateRateHandle());
-    UpdateRate* updateRate = new UpdateRate(*this);
-    updateRate->setName(fomUpdateRate.getName());
-    updateRate->setUpdateRateHandle(fomUpdateRate.getUpdateRateHandle());
+    UpdateRate* updateRate = new UpdateRate(*this, fomUpdateRate.getUpdateRateHandle(), fomUpdateRate.getName());
     updateRate->setRate(fomUpdateRate.getRate());
     insert(*updateRate);
     module.insert(*updateRate);

@@ -32,11 +32,11 @@ namespace ServerModel {
 class Federation;
 
 class OPENRTI_LOCAL UpdateRate :
-    public IntrusiveUnorderedMap<UpdateRateHandle, UpdateRate>::Hook,
-    public IntrusiveUnorderedMap<std::string, UpdateRate>::Hook
+    public IntrusiveUnorderedMap<UpdateRateHandle const, UpdateRate>::Hook,
+    public IntrusiveUnorderedMap<std::string const, UpdateRate>::Hook
 {
 public:
-  UpdateRate(Federation& federation);
+  UpdateRate(Federation& federation, UpdateRateHandle const& updateRateHandle, std::string const& name);
   ~UpdateRate();
 
   Federation const& getFederation() const
@@ -45,12 +45,10 @@ public:
   { return _federation; }
 
   UpdateRateHandle const& getUpdateRateHandle() const
-  { return IntrusiveUnorderedMap<UpdateRateHandle, UpdateRate>::Hook::getKey(); }
-  void setUpdateRateHandle(UpdateRateHandle const& updateRateHandle);
+  { return IntrusiveUnorderedMap<UpdateRateHandle const, UpdateRate>::Hook::getKey(); }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string, UpdateRate>::Hook::getKey(); }
-  void setName(std::string const& name);
+  { return IntrusiveUnorderedMap<std::string const, UpdateRate>::Hook::getKey(); }
 
   double getRate() const
   { return _rate; }

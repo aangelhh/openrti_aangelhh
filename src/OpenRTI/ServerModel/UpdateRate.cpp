@@ -22,7 +22,9 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-UpdateRate::UpdateRate(Federation& federation) :
+UpdateRate::UpdateRate(Federation& federation, UpdateRateHandle const& updateRateHandle, std::string const& name) :
+  IntrusiveUnorderedMap<UpdateRateHandle const, UpdateRate>::Hook(updateRateHandle),
+  IntrusiveUnorderedMap<std::string const, UpdateRate>::Hook(name),
   _federation(federation),
   _rate(0)
 {
@@ -31,18 +33,6 @@ UpdateRate::UpdateRate(Federation& federation) :
 UpdateRate::~UpdateRate()
 {
   OpenRTIAssert(_updateRateModuleList.empty());
-}
-
-void
-UpdateRate::setUpdateRateHandle(UpdateRateHandle const& updateRateHandle)
-{
-  IntrusiveUnorderedMap<UpdateRateHandle, UpdateRate>::Hook::setKey(updateRateHandle);
-}
-
-void
-UpdateRate::setName(std::string const& name)
-{
-  IntrusiveUnorderedMap<std::string, UpdateRate>::Hook::setKey(name);
 }
 
 void
