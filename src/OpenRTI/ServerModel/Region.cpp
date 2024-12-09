@@ -22,19 +22,14 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-Region::Region(Federate& federate) :
+Region::Region(Federate& federate, LocalRegionHandle const& regionHandle) :
+  IntrusiveUnorderedMap<LocalRegionHandle const, Region>::Hook(regionHandle),
   _federate(federate)
 {
 }
 
 Region::~Region()
 {
-}
-
-void
-Region::setRegionHandle(LocalRegionHandle const& regionHandle)
-{
-  IntrusiveUnorderedMap<LocalRegionHandle, Region>::Hook::setKey(regionHandle);
 }
 
 } // namespace ServerModel

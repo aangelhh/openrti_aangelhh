@@ -32,10 +32,10 @@ namespace ServerModel {
 class Federate;
 
 class OPENRTI_LOCAL Region :
-    public IntrusiveUnorderedMap<LocalRegionHandle, Region>::Hook
+    public IntrusiveUnorderedMap<LocalRegionHandle const, Region>::Hook
 {
 public:
-  Region(Federate& federate);
+  Region(Federate& federate, LocalRegionHandle const& regionHandle);
   ~Region();
 
   Federate const& getFederate() const
@@ -44,8 +44,7 @@ public:
   { return _federate; }
 
   LocalRegionHandle const& getRegionHandle() const
-  { return IntrusiveUnorderedMap<LocalRegionHandle, Region>::Hook::getKey(); }
-  void setRegionHandle(LocalRegionHandle const& regionHandle);
+  { return IntrusiveUnorderedMap<LocalRegionHandle const, Region>::Hook::getKey(); }
 
   RegionValue _regionValue;
   DimensionHandleSet _dimensionHandleSet;
