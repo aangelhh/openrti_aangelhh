@@ -66,11 +66,11 @@ public:
 
   /// The FederateHandle to SynchronizationFederate map of federates
   /// waiting for this synchronization point
-  typedef IntrusiveUnorderedMap<FederateHandle, SynchronizationFederate> WaitingFederateSynchronizationMap;
+  typedef IntrusiveUnorderedMap<FederateHandle const, SynchronizationFederate> WaitingFederateSynchronizationMap;
   WaitingFederateSynchronizationMap _waitingFederateSynchronizationMap;
   /// The FederateHandle to SynchronizationFederate map of federates
   /// that have achieved the synchronization point
-  typedef IntrusiveUnorderedMap<FederateHandle, SynchronizationFederate> AchievedFederateSynchronizationMap;
+  typedef IntrusiveUnorderedMap<FederateHandle const, SynchronizationFederate> AchievedFederateSynchronizationMap;
   AchievedFederateSynchronizationMap _achievedFederateSynchronizationMap;
 
 private:

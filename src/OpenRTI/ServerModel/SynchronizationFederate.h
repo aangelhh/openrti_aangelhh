@@ -32,7 +32,7 @@ class Federate;
 class Synchronization;
 
 class OPENRTI_LOCAL SynchronizationFederate :
-    public IntrusiveUnorderedMap<FederateHandle, SynchronizationFederate>::Hook,
+    public IntrusiveUnorderedMap<FederateHandle const, SynchronizationFederate>::Hook,
     public IntrusiveList<SynchronizationFederate, 0>::Hook
 {
 public:
@@ -50,8 +50,7 @@ public:
   { return _federate; }
 
   FederateHandle const& getFederateHandle() const
-  { return IntrusiveUnorderedMap<FederateHandle, SynchronizationFederate>::Hook::getKey(); }
-  void setFederateHandle(FederateHandle const& federateHandle);
+  { return IntrusiveUnorderedMap<FederateHandle const, SynchronizationFederate>::Hook::getKey(); }
 
   bool getSuccessful() const
   { return _successful; }

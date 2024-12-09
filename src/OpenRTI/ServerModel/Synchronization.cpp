@@ -66,7 +66,6 @@ Synchronization::insert(Federate& federate)
   if (federate.getResignPending())
     return;
   SynchronizationFederate* synchronizationFederate = new SynchronizationFederate(*this, federate);
-  synchronizationFederate->setFederateHandle(federate.getFederateHandle());
   federate.insert(*synchronizationFederate);
   _waitingFederateSynchronizationMap.insert(*synchronizationFederate);
 }
