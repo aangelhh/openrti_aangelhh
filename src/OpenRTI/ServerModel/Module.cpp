@@ -27,7 +27,8 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-Module::Module(Federation& federation) :
+Module::Module(Federation& federation, ModuleHandle const& moduleHandle) :
+  IntrusiveUnorderedMap<ModuleHandle const, Module>::Hook(moduleHandle),
   _federation(federation),
   _artificialInteractionRoot(false),
   _artificialObjectRoot(false)
@@ -42,12 +43,6 @@ Module::~Module()
   OpenRTIAssert(_interactionClassModuleList.empty());
   OpenRTIAssert(_updateRateModuleList.empty());
   OpenRTIAssert(_dimensionModuleList.empty());
-}
-
-void
-Module::setModuleHandle(ModuleHandle const& moduleHandle)
-{
-  IntrusiveUnorderedMap<ModuleHandle, Module>::Hook::setKey(moduleHandle);
 }
 
 void

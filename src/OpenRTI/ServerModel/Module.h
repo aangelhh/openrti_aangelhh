@@ -38,10 +38,10 @@ namespace ServerModel {
 class Federation;
 
 class OPENRTI_LOCAL Module :
-    public IntrusiveUnorderedMap<ModuleHandle, Module>::Hook
+    public IntrusiveUnorderedMap<ModuleHandle const, Module>::Hook
 {
 public:
-  Module(Federation& federation);
+  Module(Federation& federation, ModuleHandle const& moduleHandle);
   ~Module();
 
   Federation const& getFederation() const
@@ -50,8 +50,7 @@ public:
   { return _federation; }
 
   ModuleHandle const& getModuleHandle() const
-  { return IntrusiveUnorderedMap<ModuleHandle, Module>::Hook::getKey(); }
-  void setModuleHandle(ModuleHandle const& moduleHandle);
+  { return IntrusiveUnorderedMap<ModuleHandle const, Module>::Hook::getKey(); }
 
   std::string const& getContent() const
   { return _content; }
