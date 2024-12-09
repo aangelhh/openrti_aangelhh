@@ -29,12 +29,19 @@
 namespace OpenRTI {
 namespace ServerModel {
 
+class Federate;
+
 class OPENRTI_LOCAL Region :
     public IntrusiveUnorderedMap<LocalRegionHandle, Region>::Hook
 {
 public:
-  Region();
+  Region(Federate& federate);
   ~Region();
+
+  Federate const& getFederate() const
+  { return _federate; }
+  Federate& getFederate()
+  { return _federate; }
 
   LocalRegionHandle const& getRegionHandle() const
   { return IntrusiveUnorderedMap<LocalRegionHandle, Region>::Hook::getKey(); }
@@ -57,6 +64,8 @@ private:
   Region& operator=(Region&&);
 #endif
 #endif
+
+  Federate& _federate;
 };
 
 } // namespace ServerModel

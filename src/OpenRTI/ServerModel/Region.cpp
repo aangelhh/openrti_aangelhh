@@ -22,7 +22,8 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-Region::Region()
+Region::Region(Federate& federate) :
+  _federate(federate)
 {
 }
 
