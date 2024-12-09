@@ -22,7 +22,9 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-ParameterDefinition::ParameterDefinition(InteractionClass& interactionClass) :
+ParameterDefinition::ParameterDefinition(InteractionClass& interactionClass, ParameterHandle const& parameterHandle, std::string const& name) :
+  IntrusiveUnorderedMap<ParameterHandle const, ParameterDefinition>::Hook(parameterHandle),
+  IntrusiveUnorderedMap<std::string const, ParameterDefinition>::Hook(name),
   _interactionClass(interactionClass)
 {
 }
@@ -32,18 +34,6 @@ ParameterDefinition::~ParameterDefinition()
   _classParameterList.clear();
 
   OpenRTIAssert(_classParameterList.empty());
-}
-
-void
-ParameterDefinition::setParameterHandle(ParameterHandle const& parameterHandle)
-{
-  IntrusiveUnorderedMap<ParameterHandle, ParameterDefinition>::Hook::setKey(parameterHandle);
-}
-
-void
-ParameterDefinition::setName(std::string const& name)
-{
-  IntrusiveUnorderedMap<std::string, ParameterDefinition>::Hook::setKey(name);
 }
 
 } // namespace ServerModel

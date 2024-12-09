@@ -32,11 +32,11 @@ namespace ServerModel {
 class InteractionClass;
 
 class OPENRTI_LOCAL ParameterDefinition :
-    public IntrusiveUnorderedMap<ParameterHandle, ParameterDefinition>::Hook,
-    public IntrusiveUnorderedMap<std::string, ParameterDefinition>::Hook
+    public IntrusiveUnorderedMap<ParameterHandle const, ParameterDefinition>::Hook,
+    public IntrusiveUnorderedMap<std::string const, ParameterDefinition>::Hook
 {
 public:
-  ParameterDefinition(InteractionClass& interactionClass);
+  ParameterDefinition(InteractionClass& interactionClass, ParameterHandle const& parameterHandle, std::string const& name);
   ~ParameterDefinition();
 
   InteractionClass const& getInteractionClass() const
@@ -45,12 +45,10 @@ public:
   { return _interactionClass; }
 
   ParameterHandle const& getParameterHandle() const
-  { return IntrusiveUnorderedMap<ParameterHandle, ParameterDefinition>::Hook::getKey(); }
-  void setParameterHandle(ParameterHandle const& parameterHandle);
+  { return IntrusiveUnorderedMap<ParameterHandle const, ParameterDefinition>::Hook::getKey(); }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string, ParameterDefinition>::Hook::getKey(); }
-  void setName(std::string const& name);
+  { return IntrusiveUnorderedMap<std::string const, ParameterDefinition>::Hook::getKey(); }
 
   /// List of ClassParameter instances belonging to this ParameterDefinition
   typedef IntrusiveList<ClassParameter, 0> ClassParameterList;

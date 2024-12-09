@@ -93,7 +93,7 @@ public:
   bool getIsReferencedByAnyModule() const;
 
   /// UnorderedSet of ParameterDefinition instances indexed by parameterHandle
-  typedef IntrusiveUnorderedMap<ParameterHandle, ParameterDefinition> ParameterHandleParameterDefinitionMap;
+  typedef IntrusiveUnorderedMap<ParameterHandle const, ParameterDefinition> ParameterHandleParameterDefinitionMap;
   /// Get the set of ParameterDefinition instances
   ParameterHandleParameterDefinitionMap const& getParameterHandleParameterDefinitionMap() const
   { return _parameterHandleParameterDefinitionMap; }
@@ -104,7 +104,7 @@ public:
   ParameterDefinition* getParameterDefinition(ParameterHandle const& parameterHandle);
 
   /// UnorderedSet of ParameterDefinition instances indexed by name
-  typedef IntrusiveUnorderedMap<std::string, ParameterDefinition> ParameterNameParameterDefinitionMap;
+  typedef IntrusiveUnorderedMap<std::string const, ParameterDefinition> ParameterNameParameterDefinitionMap;
   /// Get one ParameterDefinition instance matching name
   ParameterDefinition const* getParameterDefinition(std::string const& name) const;
   ParameterDefinition* getParameterDefinition(std::string const& name);
