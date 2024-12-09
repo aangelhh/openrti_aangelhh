@@ -656,9 +656,7 @@ Federation::insertOrCheck(Module& module, FOMStringInteractionClass const& strin
     // This signals an error in message preparation
     if (!parentInteractionClass && 1 < stringInteractionClass.getName().size())
       throw MessageError("Cannot resolve parent interaction class name!");
-    InteractionClass* interactionClass = new InteractionClass(*this, parentInteractionClass);
-    interactionClass->setName(stringInteractionClass.getName());
-    interactionClass->setInteractionClassHandle(_interactionClassHandleAllocator.get());
+    InteractionClass* interactionClass = new InteractionClass(*this, _interactionClassHandleAllocator.get(), stringInteractionClass.getName(), parentInteractionClass);
     insert(*interactionClass);
     module.insert(*interactionClass);
 
@@ -994,9 +992,7 @@ Federation::insert(Module& module, FOMInteractionClass const& fomInteractionClas
       name = parentInteractionClass->getName();
     name.push_back(fomInteractionClass.getName());
     _interactionClassHandleAllocator.take(fomInteractionClass.getInteractionClassHandle());
-    InteractionClass* interactionClass = new InteractionClass(*this, parentInteractionClass);
-    interactionClass->setName(name);
-    interactionClass->setInteractionClassHandle(fomInteractionClass.getInteractionClassHandle());
+    InteractionClass* interactionClass = new InteractionClass(*this, fomInteractionClass.getInteractionClassHandle(), name, parentInteractionClass);
     insert(*interactionClass);
     module.insert(*interactionClass);
     interactionClass->setOrderType(fomInteractionClass.getOrderType());

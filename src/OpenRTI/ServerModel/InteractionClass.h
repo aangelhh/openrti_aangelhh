@@ -39,13 +39,13 @@ class Federation;
 class ParameterDefinition;
 
 class OPENRTI_LOCAL InteractionClass :
-    public IntrusiveUnorderedMap<InteractionClassHandle, InteractionClass>::Hook,
-    public IntrusiveUnorderedMap<StringVector, InteractionClass>::Hook,
+    public IntrusiveUnorderedMap<InteractionClassHandle const, InteractionClass>::Hook,
+    public IntrusiveUnorderedMap<StringVector const, InteractionClass>::Hook,
     public IntrusiveList<InteractionClass, 0>::Hook,
     public PublishSubscribe
 {
 public:
-  InteractionClass(Federation& federation, InteractionClass* parentInteractionClass = 0);
+  InteractionClass(Federation& federation, InteractionClassHandle const& interactionClassHandle, StringVector const& name, InteractionClass* parentInteractionClass = 0);
   ~InteractionClass();
 
   Federation const& getFederation() const
@@ -54,12 +54,10 @@ public:
   { return _federation; }
 
   InteractionClassHandle const& getInteractionClassHandle() const
-  { return IntrusiveUnorderedMap<InteractionClassHandle, InteractionClass>::Hook::getKey(); }
-  void setInteractionClassHandle(InteractionClassHandle const& interactionClassHandle);
+  { return IntrusiveUnorderedMap<InteractionClassHandle const, InteractionClass>::Hook::getKey(); }
 
   StringVector const& getName() const
-  { return IntrusiveUnorderedMap<StringVector, InteractionClass>::Hook::getKey(); }
-  void setName(StringVector const& name);
+  { return IntrusiveUnorderedMap<StringVector const, InteractionClass>::Hook::getKey(); }
 
   OrderType getOrderType() const
   { return _orderType; }

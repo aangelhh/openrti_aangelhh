@@ -22,7 +22,9 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-InteractionClass::InteractionClass(Federation& federation, InteractionClass* parentInteractionClass) :
+InteractionClass::InteractionClass(Federation& federation, InteractionClassHandle const& interactionClassHandle, StringVector const& name, InteractionClass* parentInteractionClass) :
+  IntrusiveUnorderedMap<InteractionClassHandle const, InteractionClass>::Hook(interactionClassHandle),
+  IntrusiveUnorderedMap<StringVector const, InteractionClass>::Hook(name),
   _federation(federation),
   _orderType(RECEIVE),
   _transportationType(RELIABLE),
@@ -49,18 +51,6 @@ InteractionClass::~InteractionClass()
   OpenRTIAssert(_parameterHandleParameterDefinitionMap.empty());
   OpenRTIAssert(_interactionClassModuleList.empty());
   OpenRTIAssert(_childInteractionClassList.empty());
-}
-
-void
-InteractionClass::setInteractionClassHandle(InteractionClassHandle const& interactionClassHandle)
-{
-  IntrusiveUnorderedMap<InteractionClassHandle, InteractionClass>::Hook::setKey(interactionClassHandle);
-}
-
-void
-InteractionClass::setName(StringVector const& name)
-{
-  IntrusiveUnorderedMap<StringVector, InteractionClass>::Hook::setKey(name);
 }
 
 void
