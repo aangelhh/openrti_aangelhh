@@ -24,7 +24,8 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-Synchronization::Synchronization(Federation& federation) :
+Synchronization::Synchronization(Federation& federation, std::string const& label) :
+  IntrusiveUnorderedMap<std::string const, Synchronization>::Hook(label),
   _federation(federation),
   _addJoiningFederates(true)
 {
@@ -37,12 +38,6 @@ Synchronization::~Synchronization()
 
   OpenRTIAssert(_achievedFederateSynchronizationMap.empty());
   OpenRTIAssert(_waitingFederateSynchronizationMap.empty());
-}
-
-void
-Synchronization::setLabel(std::string const& label)
-{
-  IntrusiveUnorderedMap<std::string, Synchronization>::Hook::setKey(label);
 }
 
 void

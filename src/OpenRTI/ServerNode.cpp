@@ -395,8 +395,7 @@ public:
       }
 
       ServerModel::Synchronization* synchronization;
-      synchronization = new ServerModel::Synchronization(*this);
-      synchronization->setLabel(message->getLabel());
+      synchronization = new ServerModel::Synchronization(*this, message->getLabel());
       ServerModel::Federation::SynchronizationNameSynchronizationMap::iterator i;
       i = _synchronizationNameSynchronizationMap.insert(*synchronization);
 
@@ -480,8 +479,7 @@ public:
     if (i == _synchronizationNameSynchronizationMap.end()) {
       // label is new, create one
       ServerModel::Synchronization* synchronization;
-      synchronization = new ServerModel::Synchronization(*this);
-      synchronization->setLabel(message->getLabel());
+      synchronization = new ServerModel::Synchronization(*this, message->getLabel());
       i = _synchronizationNameSynchronizationMap.insert(*synchronization);
       i->setTag(message->getTag());
       i->setAddJoiningFederates(message->getAddJoiningFederates());

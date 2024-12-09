@@ -35,10 +35,10 @@ class Federate;
 class Federation;
 
 class OPENRTI_LOCAL Synchronization :
-    public IntrusiveUnorderedMap<std::string, Synchronization>::Hook
+    public IntrusiveUnorderedMap<std::string const, Synchronization>::Hook
 {
 public:
-  Synchronization(Federation& federation);
+  Synchronization(Federation& federation, std::string const& label);
   ~Synchronization();
 
   Federation const& getFederation() const
@@ -47,8 +47,7 @@ public:
   { return _federation; }
 
   std::string const& getLabel() const
-  { return IntrusiveUnorderedMap<std::string, Synchronization>::Hook::getKey(); }
-  void setLabel(std::string const& label);
+  { return IntrusiveUnorderedMap<std::string const, Synchronization>::Hook::getKey(); }
 
   VariableLengthData const& getTag() const
   { return _tag; }

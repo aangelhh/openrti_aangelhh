@@ -247,7 +247,7 @@ public:
 
   /// Synchronization state FIXME
   /// UnorderedSet of Synchronization instances indexed by label
-  typedef IntrusiveUnorderedMap<std::string, Synchronization> SynchronizationNameSynchronizationMap;
+  typedef IntrusiveUnorderedMap<std::string const, Synchronization> SynchronizationNameSynchronizationMap;
   SynchronizationNameSynchronizationMap _synchronizationNameSynchronizationMap;
 
   /// UnorderedSet of Federate instances indexed by federateHandle
