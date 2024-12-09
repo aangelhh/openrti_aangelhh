@@ -31,12 +31,20 @@
 namespace OpenRTI {
 namespace ServerModel {
 
+class Node;
+
 class OPENRTI_LOCAL NodeConnect :
     public IntrusiveUnorderedMap<ConnectHandle, NodeConnect>::Hook
 {
 public:
-  NodeConnect();
+  NodeConnect(Node& serverNode);
   ~NodeConnect();
+
+  /// The parent ServerNode
+  Node const& getServerNode() const
+  { return _serverNode; }
+  Node& getServerNode()
+  { return _serverNode; }
 
   /// The connect handle to identify this connect
   ConnectHandle const& getConnectHandle() const
@@ -89,6 +97,9 @@ private:
   NodeConnect& operator=(NodeConnect&&);
 #endif
 #endif
+
+  /// The parent ServerNode
+  Node& _serverNode;
 
   /// True if this is the parent connect
   bool _isParentConnect;

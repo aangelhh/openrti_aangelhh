@@ -24,7 +24,8 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-NodeConnect::NodeConnect() :
+NodeConnect::NodeConnect(Node& serverNode) :
+  _serverNode(serverNode),
   _isParentConnect(false)
 {
 }

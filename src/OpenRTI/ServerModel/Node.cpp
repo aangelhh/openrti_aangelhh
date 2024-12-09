@@ -80,7 +80,7 @@ Node::getNodeConnect(ConnectHandle const& connectHandle)
 NodeConnect*
 Node::insertNodeConnect(const SharedPtr<AbstractMessageSender>& messageSender, StringStringListMap const& options)
 {
-  NodeConnect* nodeConnect = new NodeConnect;
+  NodeConnect* nodeConnect = new NodeConnect(*this);
   insert(*nodeConnect);
   nodeConnect->setMessageSender(messageSender);
   nodeConnect->setOptions(options);
