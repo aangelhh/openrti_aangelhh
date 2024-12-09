@@ -278,7 +278,7 @@ public:
   Region* getRegion(RegionHandle const& regionHandle);
 
   /// UnorderedSet of ObjectInstance instances indexed by objectInstanceHandle
-  typedef IntrusiveUnorderedMap<ObjectInstanceHandle, ObjectInstance> ObjectInstanceHandleObjectInstanceMap;
+  typedef IntrusiveUnorderedMap<ObjectInstanceHandle const, ObjectInstance> ObjectInstanceHandleObjectInstanceMap;
   /// Get the set of ObjectInstance instances
   ObjectInstanceHandleObjectInstanceMap const& getObjectInstanceHandleObjectInstanceMap() const
   { return _objectInstanceHandleObjectInstanceMap; }
@@ -289,7 +289,7 @@ public:
   ObjectInstance* getObjectInstance(ObjectInstanceHandle const& objectInstanceHandle);
 
   /// UnorderedSet of ObjectInstance instances indexed by name
-  typedef IntrusiveUnorderedMap<std::string, ObjectInstance> ObjectInstanceNameObjectInstanceMap;
+  typedef IntrusiveUnorderedMap<std::string const, ObjectInstance> ObjectInstanceNameObjectInstanceMap;
   /// Get one ObjectInstance instance matching name
   ObjectInstance const* getObjectInstance(std::string const& name) const;
   ObjectInstance* getObjectInstance(std::string const& name);
@@ -302,6 +302,10 @@ public:
   ///
   /// Create a new Federate instance
   Federate* createFederate(FederateHandle const& federateHandle, std::string const& name);
+
+  ///
+  /// Create a new ObjectInstance instance
+  ObjectInstance* createObjectInstance(ObjectInstanceHandle const& objectInstanceHandle, std::string const& name);
 
 private:
 #if 201103L <= __cplusplus

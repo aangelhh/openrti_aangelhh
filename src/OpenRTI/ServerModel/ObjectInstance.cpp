@@ -26,7 +26,9 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-ObjectInstance::ObjectInstance(Federation& federation) :
+ObjectInstance::ObjectInstance(Federation& federation, ObjectInstanceHandle const& objectInstanceHandle, std::string const& name) :
+  IntrusiveUnorderedMap<ObjectInstanceHandle const, ObjectInstance>::Hook(objectInstanceHandle),
+  IntrusiveUnorderedMap<std::string const, ObjectInstance>::Hook(name),
   _federation(federation),
   _objectClass(0)
 {
@@ -39,18 +41,6 @@ ObjectInstance::~ObjectInstance()
 
   OpenRTIAssert(_attributeHandleInstanceAttributeMap.empty());
   OpenRTIAssert(_connectHandleObjectInstanceConnectMap.empty());
-}
-
-void
-ObjectInstance::setObjectInstanceHandle(ObjectInstanceHandle const& objectInstanceHandle)
-{
-  IntrusiveUnorderedMap<ObjectInstanceHandle, ObjectInstance>::Hook::setKey(objectInstanceHandle);
-}
-
-void
-ObjectInstance::setName(std::string const& name)
-{
-  IntrusiveUnorderedMap<std::string, ObjectInstance>::Hook::setKey(name);
 }
 
 void

@@ -1354,9 +1354,6 @@ Federation::getObjectInstance(std::string const& name)
 void
 Federation::insert(ObjectInstance& objectInstance)
 {
-  objectInstance.setObjectInstanceHandle(_objectInstanceHandleAllocator.getOrTake(objectInstance.getObjectInstanceHandle()));
-  if (objectInstance.getName().empty())
-    objectInstance.setName(objectInstance.getObjectInstanceHandle().getReservedName("HLAobjectInstance"));
   OpenRTIAssert(_objectInstanceHandleObjectInstanceMap.find(objectInstance.getObjectInstanceHandle()) == _objectInstanceHandleObjectInstanceMap.end());
   OpenRTIAssert(!isObjectInstanceNameInUse(objectInstance.getName()));
   _objectInstanceHandleObjectInstanceMap.insert(objectInstance);
@@ -1379,9 +1376,7 @@ Federation::isObjectInstanceNameInUse(std::string const& name) const
 ObjectInstance*
 Federation::insertObjectInstance(ObjectInstanceHandle const& objectInstanceHandle, std::string const& objectInstanceName)
 {
-  ObjectInstance* objectInstance = new ObjectInstance(*this);
-  objectInstance->setObjectInstanceHandle(objectInstanceHandle);
-  objectInstance->setName(objectInstanceName);
+  ObjectInstance* objectInstance = createObjectInstance(objectInstanceHandle, objectInstanceName);
   insert(*objectInstance);
   return objectInstance;
 }
@@ -1394,6 +1389,16 @@ Federation::createFederate(FederateHandle const& federateHandle, std::string con
     return new Federate(*this, federateHandle2, federateHandle2.getReservedName("HLAfederate"));
   else
     return new Federate(*this, federateHandle2, name);
+}
+
+ObjectInstance*
+Federation::createObjectInstance(ObjectInstanceHandle const& objectInstanceHandle, std::string const& name)
+{
+  ObjectInstanceHandle objectInstanceHandle2 = _objectInstanceHandleAllocator.getOrTake(objectInstanceHandle);
+  if (name.empty())
+    return new ObjectInstance(*this, objectInstanceHandle2, objectInstanceHandle2.getReservedName("HLAobjectInstance"));
+  else
+    return new ObjectInstance(*this, objectInstanceHandle2, name);
 }
 
 } // namespace ServerModel

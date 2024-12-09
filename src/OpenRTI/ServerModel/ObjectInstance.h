@@ -35,12 +35,12 @@ class InstanceAttribute;
 class ObjectClass;
 
 class OPENRTI_LOCAL ObjectInstance :
-    public IntrusiveUnorderedMap<ObjectInstanceHandle, ObjectInstance>::Hook,
-    public IntrusiveUnorderedMap<std::string, ObjectInstance>::Hook,
+    public IntrusiveUnorderedMap<ObjectInstanceHandle const, ObjectInstance>::Hook,
+    public IntrusiveUnorderedMap<std::string const, ObjectInstance>::Hook,
     public IntrusiveList<ObjectInstance, 0>::Hook
 {
 public:
-  ObjectInstance(Federation& federation);
+  ObjectInstance(Federation& federation, ObjectInstanceHandle const& objectInstanceHandle, std::string const& name);
   ~ObjectInstance();
 
   Federation const& getFederation() const
@@ -49,12 +49,10 @@ public:
   { return _federation; }
 
   ObjectInstanceHandle const& getObjectInstanceHandle() const
-  { return IntrusiveUnorderedMap<ObjectInstanceHandle, ObjectInstance>::Hook::getKey(); }
-  void setObjectInstanceHandle(ObjectInstanceHandle const& objectInstanceHandle);
+  { return IntrusiveUnorderedMap<ObjectInstanceHandle const, ObjectInstance>::Hook::getKey(); }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string, ObjectInstance>::Hook::getKey(); }
-  void setName(std::string const& name);
+  { return IntrusiveUnorderedMap<std::string const, ObjectInstance>::Hook::getKey(); }
 
   /// The pointer to the object class this object is an instance of, can be zero
   ObjectClass const* getObjectClass() const
