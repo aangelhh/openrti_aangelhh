@@ -22,7 +22,9 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-ObjectClass::ObjectClass(Federation& federation, ObjectClass* parentObjectClass) :
+ObjectClass::ObjectClass(Federation& federation, ObjectClassHandle const& objectClassHandle, StringVector const& name, ObjectClass* parentObjectClass) :
+  IntrusiveUnorderedMap<ObjectClassHandle const, ObjectClass>::Hook(objectClassHandle),
+  IntrusiveUnorderedMap<StringVector const, ObjectClass>::Hook(name),
   _federation(federation),
   _parentObjectClass(parentObjectClass)
 {
@@ -48,18 +50,6 @@ ObjectClass::~ObjectClass()
   OpenRTIAssert(_attributeHandleAttributeDefinitionMap.empty());
   OpenRTIAssert(_objectClassModuleList.empty());
   OpenRTIAssert(_childObjectClassList.empty());
-}
-
-void
-ObjectClass::setObjectClassHandle(ObjectClassHandle const& objectClassHandle)
-{
-  IntrusiveUnorderedMap<ObjectClassHandle, ObjectClass>::Hook::setKey(objectClassHandle);
-}
-
-void
-ObjectClass::setName(StringVector const& name)
-{
-  IntrusiveUnorderedMap<StringVector, ObjectClass>::Hook::setKey(name);
 }
 
 ObjectClassHandle

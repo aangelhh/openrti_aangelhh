@@ -199,7 +199,7 @@ public:
   InteractionClass* resolveParentInteractionClass(StringVector const& interactionClassName);
 
   /// UnorderedSet of ObjectClass instances indexed by objectClassHandle
-  typedef IntrusiveUnorderedMap<ObjectClassHandle, ObjectClass> ObjectClassHandleObjectClassMap;
+  typedef IntrusiveUnorderedMap<ObjectClassHandle const, ObjectClass> ObjectClassHandleObjectClassMap;
   /// Get the set of ObjectClass instances
   ObjectClassHandleObjectClassMap const& getObjectClassHandleObjectClassMap() const
   { return _objectClassHandleObjectClassMap; }
@@ -210,7 +210,7 @@ public:
   ObjectClass* getObjectClass(ObjectClassHandle const& objectClassHandle);
 
   /// UnorderedSet of ObjectClass instances indexed by name
-  typedef IntrusiveUnorderedMap<StringVector, ObjectClass> ObjectClassNameObjectClassMap;
+  typedef IntrusiveUnorderedMap<StringVector const, ObjectClass> ObjectClassNameObjectClassMap;
   /// Get one ObjectClass instance matching name
   ObjectClass const* getObjectClass(StringVector const& name) const;
   ObjectClass* getObjectClass(StringVector const& name);

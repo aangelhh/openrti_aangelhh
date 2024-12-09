@@ -772,9 +772,7 @@ Federation::insertOrCheck(Module& module, FOMStringObjectClass const& stringObje
     // This signals an error in message preparation
     if (!parentObjectClass && 1 < stringObjectClass.getName().size())
       throw MessageError("Cannot resolve parent object class name!");
-    ObjectClass* objectClass = new ObjectClass(*this, parentObjectClass);
-    objectClass->setName(stringObjectClass.getName());
-    objectClass->setObjectClassHandle(_objectClassHandleAllocator.get());
+    ObjectClass* objectClass = new ObjectClass(*this, _objectClassHandleAllocator.get(), stringObjectClass.getName(), parentObjectClass);
     insert(*objectClass);
     module.insert(*objectClass);
 
@@ -1074,9 +1072,7 @@ Federation::insert(Module& module, FOMObjectClass const& fomObjectClass)
       name = parentObjectClass->getName();
     name.push_back(fomObjectClass.getName());
     _objectClassHandleAllocator.take(fomObjectClass.getObjectClassHandle());
-    ObjectClass* objectClass = new ObjectClass(*this, parentObjectClass);
-    objectClass->setName(name);
-    objectClass->setObjectClassHandle(fomObjectClass.getObjectClassHandle());
+    ObjectClass* objectClass = new ObjectClass(*this, fomObjectClass.getObjectClassHandle(), name, parentObjectClass);
     insert(*objectClass);
     module.insert(*objectClass);
     if (!fomObjectClass.getAttributeList().empty())

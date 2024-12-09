@@ -39,12 +39,12 @@ class ClassAttribute;
 class Federation;
 
 class OPENRTI_LOCAL ObjectClass :
-    public IntrusiveUnorderedMap<ObjectClassHandle, ObjectClass>::Hook,
-    public IntrusiveUnorderedMap<StringVector, ObjectClass>::Hook,
+    public IntrusiveUnorderedMap<ObjectClassHandle const, ObjectClass>::Hook,
+    public IntrusiveUnorderedMap<StringVector const, ObjectClass>::Hook,
     public IntrusiveList<ObjectClass, 0>::Hook
 {
 public:
-  ObjectClass(Federation& federation, ObjectClass* parentObjectClass = 0);
+  ObjectClass(Federation& federation, ObjectClassHandle const& objectClassHandle, StringVector const& name, ObjectClass* parentObjectClass = 0);
   ~ObjectClass();
 
   Federation const& getFederation() const
@@ -53,12 +53,10 @@ public:
   { return _federation; }
 
   ObjectClassHandle const& getObjectClassHandle() const
-  { return IntrusiveUnorderedMap<ObjectClassHandle, ObjectClass>::Hook::getKey(); }
-  void setObjectClassHandle(ObjectClassHandle const& objectClassHandle);
+  { return IntrusiveUnorderedMap<ObjectClassHandle const, ObjectClass>::Hook::getKey(); }
 
   StringVector const& getName() const
-  { return IntrusiveUnorderedMap<StringVector, ObjectClass>::Hook::getKey(); }
-  void setName(StringVector const& name);
+  { return IntrusiveUnorderedMap<StringVector const, ObjectClass>::Hook::getKey(); }
 
   ObjectClass const* getParentObjectClass() const
   { return _parentObjectClass; }
