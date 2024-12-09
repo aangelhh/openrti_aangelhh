@@ -22,7 +22,9 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-AttributeDefinition::AttributeDefinition(ObjectClass& objectClass) :
+AttributeDefinition::AttributeDefinition(ObjectClass& objectClass, AttributeHandle const& attributeHandle, std::string const& name) :
+  IntrusiveUnorderedMap<AttributeHandle const, AttributeDefinition>::Hook(attributeHandle),
+  IntrusiveUnorderedMap<std::string const, AttributeDefinition>::Hook(name),
   _objectClass(objectClass),
   _orderType(RECEIVE),
   _transportationType(RELIABLE)
@@ -34,18 +36,6 @@ AttributeDefinition::~AttributeDefinition()
   _classAttributeList.clear();
 
   OpenRTIAssert(_classAttributeList.empty());
-}
-
-void
-AttributeDefinition::setAttributeHandle(AttributeHandle const& attributeHandle)
-{
-  IntrusiveUnorderedMap<AttributeHandle, AttributeDefinition>::Hook::setKey(attributeHandle);
-}
-
-void
-AttributeDefinition::setName(std::string const& name)
-{
-  IntrusiveUnorderedMap<std::string, AttributeDefinition>::Hook::setKey(name);
 }
 
 void

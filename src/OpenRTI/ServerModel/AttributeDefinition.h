@@ -33,11 +33,11 @@ namespace ServerModel {
 class ObjectClass;
 
 class OPENRTI_LOCAL AttributeDefinition :
-    public IntrusiveUnorderedMap<AttributeHandle, AttributeDefinition>::Hook,
-    public IntrusiveUnorderedMap<std::string, AttributeDefinition>::Hook
+    public IntrusiveUnorderedMap<AttributeHandle const, AttributeDefinition>::Hook,
+    public IntrusiveUnorderedMap<std::string const, AttributeDefinition>::Hook
 {
 public:
-  AttributeDefinition(ObjectClass& objectClass);
+  AttributeDefinition(ObjectClass& objectClass, AttributeHandle const& attributeHandle, std::string const& name);
   ~AttributeDefinition();
 
   ObjectClass const& getObjectClass() const
@@ -46,12 +46,10 @@ public:
   { return _objectClass; }
 
   AttributeHandle const& getAttributeHandle() const
-  { return IntrusiveUnorderedMap<AttributeHandle, AttributeDefinition>::Hook::getKey(); }
-  void setAttributeHandle(AttributeHandle const& attributeHandle);
+  { return IntrusiveUnorderedMap<AttributeHandle const, AttributeDefinition>::Hook::getKey(); }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string, AttributeDefinition>::Hook::getKey(); }
-  void setName(std::string const& name);
+  { return IntrusiveUnorderedMap<std::string const, AttributeDefinition>::Hook::getKey(); }
 
   OrderType getOrderType() const
   { return _orderType; }
