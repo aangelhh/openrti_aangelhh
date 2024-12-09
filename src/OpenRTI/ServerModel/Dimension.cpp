@@ -22,7 +22,9 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-Dimension::Dimension(Federation& federation) :
+Dimension::Dimension(Federation& federation, DimensionHandle const& dimensionHandle, std::string const& name) :
+  IntrusiveUnorderedMap<DimensionHandle const, Dimension>::Hook(dimensionHandle),
+  IntrusiveUnorderedMap<std::string const, Dimension>::Hook(name),
   _federation(federation),
   _upperBound(~Unsigned(0))
 {
@@ -31,18 +33,6 @@ Dimension::Dimension(Federation& federation) :
 Dimension::~Dimension()
 {
   OpenRTIAssert(_dimensionModuleList.empty());
-}
-
-void
-Dimension::setDimensionHandle(DimensionHandle const& dimensionHandle)
-{
-  IntrusiveUnorderedMap<DimensionHandle, Dimension>::Hook::setKey(dimensionHandle);
-}
-
-void
-Dimension::setName(std::string const& name)
-{
-  IntrusiveUnorderedMap<std::string, Dimension>::Hook::setKey(name);
 }
 
 void

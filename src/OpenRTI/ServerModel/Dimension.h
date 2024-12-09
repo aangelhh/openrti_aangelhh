@@ -33,11 +33,11 @@ namespace ServerModel {
 class Federation;
 
 class OPENRTI_LOCAL Dimension :
-    public IntrusiveUnorderedMap<DimensionHandle, Dimension>::Hook,
-    public IntrusiveUnorderedMap<std::string, Dimension>::Hook
+    public IntrusiveUnorderedMap<DimensionHandle const, Dimension>::Hook,
+    public IntrusiveUnorderedMap<std::string const, Dimension>::Hook
 {
 public:
-  Dimension(Federation& federation);
+  Dimension(Federation& federation, DimensionHandle const& dimensionHandle, std::string const& name);
   ~Dimension();
 
   Federation const& getFederation() const
@@ -46,12 +46,10 @@ public:
   { return _federation; }
 
   DimensionHandle const& getDimensionHandle() const
-  { return IntrusiveUnorderedMap<DimensionHandle, Dimension>::Hook::getKey(); }
-  void setDimensionHandle(DimensionHandle const& dimensionHandle);
+  { return IntrusiveUnorderedMap<DimensionHandle const, Dimension>::Hook::getKey(); }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string, Dimension>::Hook::getKey(); }
-  void setName(std::string const& name);
+  { return IntrusiveUnorderedMap<std::string const, Dimension>::Hook::getKey(); }
 
   /// The upper bound
   Unsigned getUpperBound() const

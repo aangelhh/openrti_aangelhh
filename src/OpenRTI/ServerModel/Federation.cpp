@@ -549,9 +549,7 @@ Federation::insertOrCheck(Module& module, FOMStringDimension const& stringDimens
     module.insert(*i);
     return false;
   } else {
-    Dimension* dimension = new Dimension(*this);
-    dimension->setName(stringDimension.getName());
-    dimension->setDimensionHandle(_dimensionHandleAllocator.get());
+    Dimension* dimension = new Dimension(*this, _dimensionHandleAllocator.get(), stringDimension.getName());
     dimension->setUpperBound(stringDimension.getUpperBound());
     insert(*dimension);
     module.insert(*dimension);
@@ -910,9 +908,7 @@ Federation::insert(Module& module, FOMDimension const& fomDimension)
     module.insert(*i);
   } else {
     _dimensionHandleAllocator.take(fomDimension.getDimensionHandle());
-    Dimension* dimension = new Dimension(*this);
-    dimension->setName(fomDimension.getName());
-    dimension->setDimensionHandle(fomDimension.getDimensionHandle());
+    Dimension* dimension = new Dimension(*this, fomDimension.getDimensionHandle(), fomDimension.getName());
     dimension->setUpperBound(fomDimension.getUpperBound());
     insert(*dimension);
     module.insert(*dimension);
