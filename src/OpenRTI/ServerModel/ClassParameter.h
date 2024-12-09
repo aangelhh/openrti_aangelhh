@@ -32,7 +32,7 @@ class InteractionClass;
 class ParameterDefinition;
 
 class OPENRTI_LOCAL ClassParameter :
-    public IntrusiveUnorderedMap<ParameterHandle, ClassParameter>::Hook,
+    public IntrusiveUnorderedMap<ParameterHandle const, ClassParameter>::Hook,
     public IntrusiveList<ClassParameter, 0>::Hook
 {
 public:
@@ -50,8 +50,7 @@ public:
   { return _parameterDefinition; }
 
   ParameterHandle const& getParameterHandle() const
-  { return IntrusiveUnorderedMap<ParameterHandle, ClassParameter>::Hook::getKey(); }
-  void setParameterHandle(ParameterHandle const& parameterHandle);
+  { return IntrusiveUnorderedMap<ParameterHandle const, ClassParameter>::Hook::getKey(); }
 
 private:
 #if 201103L <= __cplusplus

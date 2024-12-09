@@ -25,7 +25,7 @@ namespace OpenRTI {
 namespace ServerModel {
 
 ClassParameter::ClassParameter(InteractionClass& interactionClass, ParameterDefinition& parameterDefinition) :
-  // IntrusiveUnorderedMap<ParameterHandle, ClassParameter>::Hook(parameterDefinition.getParameterHandle()),
+  IntrusiveUnorderedMap<ParameterHandle const, ClassParameter>::Hook(parameterDefinition.getParameterHandle()),
   _interactionClass(interactionClass),
   _parameterDefinition(parameterDefinition)
 {
@@ -33,12 +33,6 @@ ClassParameter::ClassParameter(InteractionClass& interactionClass, ParameterDefi
 
 ClassParameter::~ClassParameter()
 {
-}
-
-void
-ClassParameter::setParameterHandle(ParameterHandle const& parameterHandle)
-{
-  IntrusiveUnorderedMap<ParameterHandle, ClassParameter>::Hook::setKey(parameterHandle);
 }
 
 } // namespace ServerModel

@@ -182,7 +182,6 @@ void
 InteractionClass::insertClassParameterFor(ParameterDefinition& parameterDefinition)
 {
   ClassParameter* classParameter = new ClassParameter(*this, parameterDefinition);
-  classParameter->setParameterHandle(parameterDefinition.getParameterHandle());
   _parameterHandleClassParameterMap.insert(*classParameter);
   parameterDefinition.insert(*classParameter);
 

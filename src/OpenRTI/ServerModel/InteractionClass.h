@@ -127,7 +127,7 @@ public:
   bool getAreParametersReferencedByAnyModule() const;
 
   /// UnorderedSet of ClassParameter instances indexed by parameterHandle
-  typedef IntrusiveUnorderedMap<ParameterHandle, ClassParameter> ParameterHandleClassParameterMap;
+  typedef IntrusiveUnorderedMap<ParameterHandle const, ClassParameter> ParameterHandleClassParameterMap;
   /// Get the set of ClassParameter instances
   ParameterHandleClassParameterMap const& getParameterHandleClassParameterMap() const
   { return _parameterHandleClassParameterMap; }
