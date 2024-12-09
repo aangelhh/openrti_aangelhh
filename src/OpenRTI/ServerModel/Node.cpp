@@ -143,7 +143,6 @@ Node::getFederation(FederationHandle const& federationHandle)
 void
 Node::insert(Federation& federation)
 {
-  federation.setFederationHandle(_federationHandleAllocator.getOrTake(federation.getFederationHandle()));
   _federationNameFederationMap.insert(federation);
   _federationHandleFederationMap.insert(federation);
 }

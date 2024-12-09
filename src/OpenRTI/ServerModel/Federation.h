@@ -50,11 +50,11 @@ class ObjectInstance;
 class UpdateRate;
 
 class OPENRTI_LOCAL Federation :
-    public IntrusiveUnorderedMap<FederationHandle, Federation>::Hook,
-    public IntrusiveUnorderedMap<std::string, Federation>::Hook
+    public IntrusiveUnorderedMap<FederationHandle const, Federation>::Hook,
+    public IntrusiveUnorderedMap<std::string const, Federation>::Hook
 {
 public:
-  Federation(Node& serverNode);
+  Federation(Node& serverNode, FederationHandle const& federationHandle, std::string const& name);
   virtual ~Federation();
 
   /// The parent server node this belongs to
@@ -81,13 +81,11 @@ public:
 
   /// The federation handle
   FederationHandle const& getFederationHandle() const
-  { return IntrusiveUnorderedMap<FederationHandle, Federation>::Hook::getKey(); }
-  void setFederationHandle(FederationHandle const& federationHandle);
+  { return IntrusiveUnorderedMap<FederationHandle const, Federation>::Hook::getKey(); }
 
   /// The federation name
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string, Federation>::Hook::getKey(); }
-  void setName(std::string const& name);
+  { return IntrusiveUnorderedMap<std::string const, Federation>::Hook::getKey(); }
 
   /// The name of the logical time factory
   std::string const& getLogicalTimeFactoryName() const

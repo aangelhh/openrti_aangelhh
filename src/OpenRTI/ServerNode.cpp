@@ -31,8 +31,8 @@ namespace OpenRTI {
 
 class OPENRTI_LOCAL FederationServer : public ServerModel::Federation {
 public:
-  FederationServer(ServerModel::Node& serverNode) :
-    ServerModel::Federation(serverNode),
+  FederationServer(ServerModel::Node& serverNode, FederationHandle const& federationHandle, std::string const& name) :
+    ServerModel::Federation(serverNode, federationHandle, name),
     _parentPermitTimeRegulation(true)
   { }
   virtual ~FederationServer()
@@ -1900,6 +1900,12 @@ public:
 
 class OPENRTI_LOCAL ServerMessageDispatcher : public ServerModel::Node {
 public:
+
+  FederationServer* createFederation(FederationHandle const& federationHandle, std::string const& name)
+  {
+    return new FederationServer(*this, _federationHandleAllocator.getOrTake(federationHandle), name);
+  }
+
   /// We have some stateless upstream messages that get handled in the root server,
   /// We remember these and know where to send them back.
   template<typename M>
@@ -1962,11 +1968,10 @@ public:
       send(connectHandle, response);
     } else {
       // Successful create
-      FederationServer* federationServer;
-      federationServer = new FederationServer(*this);
-      federationServer->setName(message->getFederationExecution());
-      federationServer->setLogicalTimeFactoryName(message->getLogicalTimeFactoryName());
+      FederationServer* federationServer = NULL;
       try {
+        federationServer = createFederation(FederationHandle(), message->getFederationExecution());
+        federationServer->setLogicalTimeFactoryName(message->getLogicalTimeFactoryName());
         federationServer->insert(message->getFOMStringModuleList());
 
         // register this one
@@ -2547,9 +2552,7 @@ private:
     ServerModel::NodeConnect* connect = getNodeConnect(getParentConnectHandle());
     OpenRTIAssert(connect);
 
-    FederationServer* federationServer = new FederationServer(*this);
-    federationServer->setName(name);
-    federationServer->setFederationHandle(federationHandle);
+    FederationServer* federationServer = createFederation(federationHandle, name);
     federationServer->getOrInsertConnect(*connect);
 
     insert(*federationServer);

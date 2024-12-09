@@ -90,7 +90,7 @@ public:
   void erase(NodeConnect& nodeConnect);
 
   /// UnorderedSet of Federation instances indexed by federationHandle
-  typedef IntrusiveUnorderedMap<FederationHandle, Federation> FederationHandleFederationMap;
+  typedef IntrusiveUnorderedMap<FederationHandle const, Federation> FederationHandleFederationMap;
   /// Get the set of Federation instances
   FederationHandleFederationMap const& getFederationHandleFederationMap() const
   { return _federationHandleFederationMap; }
@@ -103,7 +103,7 @@ public:
   void erase(Federation& federation);
 
   /// UnorderedSet of Federation instances indexed by name
-  typedef IntrusiveUnorderedMap<std::string, Federation> FederationNameFederationMap;
+  typedef IntrusiveUnorderedMap<std::string const, Federation> FederationNameFederationMap;
   /// Get one Federation instance matching name
   Federation const* getFederation(std::string const& name) const;
   Federation* getFederation(std::string const& name);

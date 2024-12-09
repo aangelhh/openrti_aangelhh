@@ -24,7 +24,9 @@
 namespace OpenRTI {
 namespace ServerModel {
 
-Federation::Federation(Node& serverNode) :
+Federation::Federation(Node& serverNode, FederationHandle const& federationHandle, std::string const& name) :
+  IntrusiveUnorderedMap<FederationHandle const, Federation>::Hook(federationHandle),
+  IntrusiveUnorderedMap<std::string const, Federation>::Hook(name),
   _serverNode(serverNode),
   _objectInstanceHandleObjectInstanceMap(16384/*hash size*/)
 {
@@ -136,18 +138,6 @@ Federation::hasJoinedChildren() /*const*/
     return true;
   }
   return false;
-}
-
-void
-Federation::setFederationHandle(FederationHandle const& federationHandle)
-{
-  IntrusiveUnorderedMap<FederationHandle, Federation>::Hook::setKey(federationHandle);
-}
-
-void
-Federation::setName(std::string const& name)
-{
-  IntrusiveUnorderedMap<std::string, Federation>::Hook::setKey(name);
 }
 
 void
