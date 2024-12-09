@@ -26,7 +26,7 @@ namespace OpenRTI {
 namespace ServerModel {
 
 ClassAttribute::ClassAttribute(ObjectClass& objectClass, AttributeDefinition& attributeDefinition) :
-  // IntrusiveUnorderedMap<AttributeHandle, ClassAttribute>::Hook(attributeDefinition.getAttributeHandle()),
+  IntrusiveUnorderedMap<AttributeHandle const, ClassAttribute>::Hook(attributeDefinition.getAttributeHandle()),
   _objectClass(objectClass),
   _attributeDefinition(attributeDefinition)
 {
@@ -34,12 +34,6 @@ ClassAttribute::ClassAttribute(ObjectClass& objectClass, AttributeDefinition& at
 
 ClassAttribute::~ClassAttribute()
 {
-}
-
-void
-ClassAttribute::setAttributeHandle(AttributeHandle const& attributeHandle)
-{
-  IntrusiveUnorderedMap<AttributeHandle, ClassAttribute>::Hook::setKey(attributeHandle);
 }
 
 } // namespace ServerModel

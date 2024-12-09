@@ -33,7 +33,7 @@ class AttributeDefinition;
 class ObjectClass;
 
 class OPENRTI_LOCAL ClassAttribute :
-    public IntrusiveUnorderedMap<AttributeHandle, ClassAttribute>::Hook,
+    public IntrusiveUnorderedMap<AttributeHandle const, ClassAttribute>::Hook,
     public IntrusiveList<ClassAttribute, 0>::Hook,
     public PublishSubscribe
 {
@@ -52,8 +52,7 @@ public:
   { return _attributeDefinition; }
 
   AttributeHandle const& getAttributeHandle() const
-  { return IntrusiveUnorderedMap<AttributeHandle, ClassAttribute>::Hook::getKey(); }
-  void setAttributeHandle(AttributeHandle const& attributeHandle);
+  { return IntrusiveUnorderedMap<AttributeHandle const, ClassAttribute>::Hook::getKey(); }
 
 private:
 #if 201103L <= __cplusplus

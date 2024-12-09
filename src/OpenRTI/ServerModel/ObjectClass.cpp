@@ -180,7 +180,6 @@ void
 ObjectClass::insertClassAttributeFor(AttributeDefinition& attributeDefinition)
 {
   ClassAttribute* classAttribute = new ClassAttribute(*this, attributeDefinition);
-  classAttribute->setAttributeHandle(attributeDefinition.getAttributeHandle());
   _attributeHandleClassAttributeMap.insert(*classAttribute);
   attributeDefinition.insert(*classAttribute);
 
