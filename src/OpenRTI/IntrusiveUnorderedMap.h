@@ -29,10 +29,7 @@
 namespace OpenRTI {
 
 template<typename T>
-struct OPENRTI_LOCAL Hash {
-  std::size_t operator()(const T& value) const
-  { return 0; }
-};
+struct OPENRTI_LOCAL Hash;
 
 template<typename T>
 struct OPENRTI_LOCAL Hash<const T> : Hash<T> {
