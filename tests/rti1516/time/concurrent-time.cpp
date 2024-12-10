@@ -427,7 +427,7 @@ public:
     try {
       LogicalTime logicalTime;
       ambassador.queryLogicalTime(logicalTime);
-      if (logicalTime != _logicalTime) {
+      if (!(static_cast<const rti1516::LogicalTime&>(logicalTime) == _logicalTime)) {
         std::wcout << L"Queried logical time does not match the one in timeConstrainedEnabled callback!" << std::endl;
         return false;
       }
@@ -577,7 +577,7 @@ public:
     try {
       LogicalTime logicalTime;
       ambassador.queryLogicalTime(logicalTime);
-      if (logicalTime != _logicalTime) {
+      if (!(static_cast<const rti1516::LogicalTime&>(logicalTime) == _logicalTime)) {
         std::wcout << L"Queried logical time does not match the one in timeRegulationEnabled callback!" << std::endl;
         return false;
       }
@@ -592,7 +592,7 @@ public:
     try {
       LogicalTimeInterval lookahead;
       ambassador.queryLookahead(lookahead);
-      if (lookahead != _lookahead) {
+      if (!(static_cast<const rti1516::LogicalTimeInterval&>(lookahead) == _lookahead)) {
         std::wcout << L"Queried lookahead does not match the one in enableTimeRegulation!" << std::endl;
         return false;
       }
@@ -885,7 +885,7 @@ public:
     case FlushQueueRequest:
       if (!_nextMessageTimePending) {
         if (_timeAdvanceMode != FlushQueueRequest) {
-          if (_logicalTime != _nextMessageTime) {
+          if (!(static_cast<const rti1516::LogicalTime&>(_logicalTime) == _nextMessageTime)) {
             std::wcout << L"Time advance grant time grants for a time not equal to the next message time!" << std::endl;
             _fail = true;
           }
@@ -903,7 +903,7 @@ public:
       break;
     case TimeAdvanceRequest:
     case TimeAdvanceRequestAvailable:
-      if (_logicalTime != _advanceLogicalTime) {
+      if (!(static_cast<const rti1516::LogicalTime&>(_logicalTime) == _advanceLogicalTime)) {
         std::wcout << L"Time advance grant time grants for a time not equal to the requested advance time!" << std::endl;
         _fail = true;
       }
