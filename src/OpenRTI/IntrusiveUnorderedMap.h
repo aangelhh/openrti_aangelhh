@@ -34,6 +34,10 @@ struct OPENRTI_LOCAL Hash {
   { return 0; }
 };
 
+template<typename T>
+struct OPENRTI_LOCAL Hash<const T> : Hash<T> {
+};
+
 template<>
 struct OPENRTI_LOCAL Hash<std::string> {
   std::size_t operator()(const std::string& string) const
