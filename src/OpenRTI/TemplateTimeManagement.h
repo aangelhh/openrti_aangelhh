@@ -1171,7 +1171,8 @@ public:
     void unlink()
     {
       IntrusiveList<_MessageListElement>::unlink(*this);
-      IntrusiveUnorderedMap<ObjectInstanceHandle, _MessageListElement>::unlink(*this);
+      if (IntrusiveUnorderedMap<ObjectInstanceHandle, _MessageListElement>::Hook::is_linked())
+        IntrusiveUnorderedMap<ObjectInstanceHandle, _MessageListElement>::unlink(*this);
       IntrusiveUnorderedMap<ObjectInstanceHandle, _MessageListElement>::Hook::setKey(ObjectInstanceHandle());
     }
     const ObjectInstanceHandle& getObjectInstanceHandle() const
