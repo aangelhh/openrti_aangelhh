@@ -190,8 +190,6 @@ void
 ObjectClass::insertClassAttributeFor(AttributeDefinition& attributeDefinition)
 {
   ClassAttribute* classAttribute = new ClassAttribute(*this, attributeDefinition);
-  _attributeHandleClassAttributeMap.insert(*classAttribute);
-  attributeDefinition.insert(*classAttribute);
 
   for (ChildObjectClassList::iterator i = _childObjectClassList.begin(); i != _childObjectClassList.end(); ++i)
     i->insertClassAttributeFor(attributeDefinition);
@@ -269,6 +267,18 @@ void
 ObjectClass::_unlinkAttributeDefinitionModuleList(AttributeDefinitionModule& attributeDefinitionModule)
 {
   _attributeDefinitionModuleList.unlink(attributeDefinitionModule);
+}
+
+void
+ObjectClass::_insertAttributeHandleClassAttributeMap(ClassAttribute& classAttribute)
+{
+  _attributeHandleClassAttributeMap.insert(classAttribute);
+}
+
+void
+ObjectClass::_unlinkAttributeHandleClassAttributeMap(ClassAttribute& classAttribute)
+{
+  _attributeHandleClassAttributeMap.unlink(classAttribute);
 }
 
 } // namespace ServerModel

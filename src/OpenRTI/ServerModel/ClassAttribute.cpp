@@ -30,10 +30,14 @@ ClassAttribute::ClassAttribute(ObjectClass& objectClass, AttributeDefinition& at
   _attributeDefinition(attributeDefinition),
   _attributeHandle(attributeDefinition.getAttributeHandle())
 {
+  _objectClass._insertAttributeHandleClassAttributeMap(*this);
+  _attributeDefinition._insertClassAttributeList(*this);
 }
 
 ClassAttribute::~ClassAttribute()
 {
+  _attributeDefinition._unlinkClassAttributeList(*this);
+  _objectClass._unlinkAttributeHandleClassAttributeMap(*this);
 }
 
 } // namespace ServerModel

@@ -59,9 +59,15 @@ AttributeDefinition::setTransportationType(TransportationType transportationType
 }
 
 void
-AttributeDefinition::insert(ClassAttribute& classAttribute)
+AttributeDefinition::_insertClassAttributeList(ClassAttribute& classAttribute)
 {
   _classAttributeList.push_back(classAttribute);
+}
+
+void
+AttributeDefinition::_unlinkClassAttributeList(ClassAttribute& classAttribute)
+{
+  _classAttributeList.unlink(classAttribute);
 }
 
 } // namespace ServerModel

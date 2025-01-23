@@ -279,6 +279,11 @@ private:
   AttributeDefinitionModuleList _attributeDefinitionModuleList;
 
   /// UnorderedSet of ClassAttribute instances indexed by attributeHandle
+  friend class ClassAttribute;
+  /// Insert classAttribute into attributeHandleClassAttributeMap
+  void _insertAttributeHandleClassAttributeMap(ClassAttribute& classAttribute);
+  /// Unlink classAttribute from attributeHandleClassAttributeMap
+  void _unlinkAttributeHandleClassAttributeMap(ClassAttribute& classAttribute);
   AttributeHandleClassAttributeMap _attributeHandleClassAttributeMap;
 
   /// List of ObjectInstance instances belonging to this ObjectClass

@@ -67,7 +67,6 @@ public:
   { return _classAttributeList; }
   ClassAttributeList& getClassAttributeList()
   { return _classAttributeList; }
-  void insert(ClassAttribute& classAttribute);
 
   // FIXME temporarily in this way
   DimensionHandleSet _dimensionHandleSet;
@@ -101,6 +100,11 @@ private:
   TransportationType _transportationType;
 
   /// List of ClassAttribute instances belonging to this AttributeDefinition
+  friend class ClassAttribute;
+  /// Insert classAttribute into classAttributeList
+  void _insertClassAttributeList(ClassAttribute& classAttribute);
+  /// Unlink classAttribute from classAttributeList
+  void _unlinkClassAttributeList(ClassAttribute& classAttribute);
   ClassAttributeList _classAttributeList;
 };
 
