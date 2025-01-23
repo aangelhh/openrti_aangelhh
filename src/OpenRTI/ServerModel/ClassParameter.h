@@ -32,8 +32,8 @@ class InteractionClass;
 class ParameterDefinition;
 
 class OPENRTI_LOCAL ClassParameter :
-    public IntrusiveUnorderedMap<ParameterHandle const, ClassParameter>::Hook,
-    public IntrusiveList<ClassParameter, 0>::Hook
+    public Intrusive::UnorderedSetLink<ClassParameter, Intrusive::ParentTag<InteractionClass> >,
+    public Intrusive::ListLink<ClassParameter, Intrusive::ParentTag<ParameterDefinition> >
 {
 public:
   ClassParameter(InteractionClass& interactionClass, ParameterDefinition& parameterDefinition);
@@ -50,7 +50,10 @@ public:
   { return _parameterDefinition; }
 
   ParameterHandle const& getParameterHandle() const
-  { return IntrusiveUnorderedMap<ParameterHandle const, ClassParameter>::Hook::getKey(); }
+  { return _parameterHandle; }
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -70,6 +73,14 @@ private:
   InteractionClass& _interactionClass;
 
   ParameterDefinition& _parameterDefinition;
+
+  ParameterHandle const _parameterHandle;
+};
+
+template<>
+struct ClassParameter::IntrusiveKey<Intrusive::UnorderedSetLink<ClassParameter, Intrusive::ParentTag<InteractionClass> > > {
+  static ParameterHandle const& get(ClassParameter const& classParameter)
+  { return classParameter.getParameterHandle(); }
 };
 
 } // namespace ServerModel

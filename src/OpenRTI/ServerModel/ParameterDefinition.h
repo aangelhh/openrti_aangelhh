@@ -51,7 +51,7 @@ public:
   { return _name; }
 
   /// List of ClassParameter instances belonging to this ParameterDefinition
-  typedef IntrusiveList<ClassParameter, 0> ClassParameterList;
+  typedef Intrusive::List<Intrusive::ListLink<ClassParameter, Intrusive::ParentTag<ParameterDefinition> > > ClassParameterList;
   /// Get the list of ClassParameter instances
   ClassParameterList const& getClassParameterList() const
   { return _classParameterList; }

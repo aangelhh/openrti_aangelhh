@@ -19,15 +19,16 @@
 
 #include "ClassParameter.h"
 
+#include "InteractionClass.h"
 #include "ParameterDefinition.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 ClassParameter::ClassParameter(InteractionClass& interactionClass, ParameterDefinition& parameterDefinition) :
-  IntrusiveUnorderedMap<ParameterHandle const, ClassParameter>::Hook(parameterDefinition.getParameterHandle()),
   _interactionClass(interactionClass),
-  _parameterDefinition(parameterDefinition)
+  _parameterDefinition(parameterDefinition),
+  _parameterHandle(parameterDefinition.getParameterHandle())
 {
 }
 
