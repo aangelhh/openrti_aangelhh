@@ -58,7 +58,6 @@ public:
   { return _classParameterList; }
   ClassParameterList& getClassParameterList()
   { return _classParameterList; }
-  void insert(ClassParameter& classParameter);
 
   template<typename Link>
   struct IntrusiveKey;
@@ -85,6 +84,11 @@ private:
   std::string const _name;
 
   /// List of ClassParameter instances belonging to this ParameterDefinition
+  friend class ClassParameter;
+  /// Insert classParameter into classParameterList
+  void _insertClassParameterList(ClassParameter& classParameter);
+  /// Unlink classParameter from classParameterList
+  void _unlinkClassParameterList(ClassParameter& classParameter);
   ClassParameterList _classParameterList;
 };
 

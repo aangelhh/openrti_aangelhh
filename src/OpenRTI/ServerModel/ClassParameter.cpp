@@ -30,10 +30,14 @@ ClassParameter::ClassParameter(InteractionClass& interactionClass, ParameterDefi
   _parameterDefinition(parameterDefinition),
   _parameterHandle(parameterDefinition.getParameterHandle())
 {
+  _interactionClass._insertParameterHandleClassParameterMap(*this);
+  _parameterDefinition._insertClassParameterList(*this);
 }
 
 ClassParameter::~ClassParameter()
 {
+  _parameterDefinition._unlinkClassParameterList(*this);
+  _interactionClass._unlinkParameterHandleClassParameterMap(*this);
 }
 
 } // namespace ServerModel

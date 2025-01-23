@@ -45,9 +45,15 @@ ParameterDefinition::~ParameterDefinition()
 }
 
 void
-ParameterDefinition::insert(ClassParameter& classParameter)
+ParameterDefinition::_insertClassParameterList(ClassParameter& classParameter)
 {
   _classParameterList.push_back(classParameter);
+}
+
+void
+ParameterDefinition::_unlinkClassParameterList(ClassParameter& classParameter)
+{
+  _classParameterList.unlink(classParameter);
 }
 
 } // namespace ServerModel

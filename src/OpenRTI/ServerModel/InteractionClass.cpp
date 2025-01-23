@@ -193,8 +193,6 @@ void
 InteractionClass::insertClassParameterFor(ParameterDefinition& parameterDefinition)
 {
   ClassParameter* classParameter = new ClassParameter(*this, parameterDefinition);
-  _parameterHandleClassParameterMap.insert(*classParameter);
-  parameterDefinition.insert(*classParameter);
 
   for (ChildInteractionClassList::iterator i = _childInteractionClassList.begin(); i != _childInteractionClassList.end(); ++i)
     i->insertClassParameterFor(parameterDefinition);
@@ -258,6 +256,18 @@ void
 InteractionClass::_unlinkParameterDefinitionModuleList(ParameterDefinitionModule& parameterDefinitionModule)
 {
   _parameterDefinitionModuleList.unlink(parameterDefinitionModule);
+}
+
+void
+InteractionClass::_insertParameterHandleClassParameterMap(ClassParameter& classParameter)
+{
+  _parameterHandleClassParameterMap.insert(classParameter);
+}
+
+void
+InteractionClass::_unlinkParameterHandleClassParameterMap(ClassParameter& classParameter)
+{
+  _parameterHandleClassParameterMap.unlink(classParameter);
 }
 
 } // namespace ServerModel

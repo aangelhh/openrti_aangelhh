@@ -231,6 +231,11 @@ private:
   ParameterDefinitionModuleList _parameterDefinitionModuleList;
 
   /// UnorderedSet of ClassParameter instances indexed by parameterHandle
+  friend class ClassParameter;
+  /// Insert classParameter into parameterHandleClassParameterMap
+  void _insertParameterHandleClassParameterMap(ClassParameter& classParameter);
+  /// Unlink classParameter from parameterHandleClassParameterMap
+  void _unlinkParameterHandleClassParameterMap(ClassParameter& classParameter);
   ParameterHandleClassParameterMap _parameterHandleClassParameterMap;
 };
 
