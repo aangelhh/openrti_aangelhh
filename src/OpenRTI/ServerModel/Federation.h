@@ -190,7 +190,6 @@ public:
   /// Get one InteractionClass instance matching name
   InteractionClass const* getInteractionClass(StringVector const& name) const;
   InteractionClass* getInteractionClass(StringVector const& name);
-  void insert(InteractionClass& interactionClass);
   InteractionClass* resolveParentInteractionClass(StringVector const& interactionClassName);
 
   /// UnorderedSet of ObjectClass instances indexed by objectClassHandle
@@ -410,12 +409,21 @@ private:
   UpdateRateNameUpdateRateMap _updateRateNameUpdateRateMap;
 
   /// UnorderedSet of InteractionClass instances indexed by interactionClassHandle
+  friend class InteractionClass;
+  /// Insert interactionClass into interactionClassHandleInteractionClassMap
+  void _insertInteractionClassHandleInteractionClassMap(InteractionClass& interactionClass);
+  /// Unlink interactionClass from interactionClassHandleInteractionClassMap
+  void _unlinkInteractionClassHandleInteractionClassMap(InteractionClass& interactionClass);
   InteractionClassHandleInteractionClassMap _interactionClassHandleInteractionClassMap;
 
   /// The appropriate HandleAllocator
   HandleAllocator<InteractionClassHandle> _interactionClassHandleAllocator;
 
   /// UnorderedSet of InteractionClass instances indexed by name
+  /// Insert interactionClass into interactionClassNameInteractionClassMap
+  void _insertInteractionClassNameInteractionClassMap(InteractionClass& interactionClass);
+  /// Unlink interactionClass from interactionClassNameInteractionClassMap
+  void _unlinkInteractionClassNameInteractionClassMap(InteractionClass& interactionClass);
   InteractionClassNameInteractionClassMap _interactionClassNameInteractionClassMap;
 
   /// UnorderedSet of ObjectClass instances indexed by objectClassHandle

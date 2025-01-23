@@ -190,6 +190,10 @@ private:
   InteractionClass* const _parentInteractionClass;
 
   /// List of InteractionClass instances belonging to this InteractionClass
+  /// Insert interactionClass into childInteractionClassList
+  void _insertChildInteractionClassList(InteractionClass& interactionClass);
+  /// Unlink interactionClass from childInteractionClassList
+  void _unlinkChildInteractionClassList(InteractionClass& interactionClass);
   ChildInteractionClassList _childInteractionClassList;
 
   /// The list of Modules referencing this InteractionClass

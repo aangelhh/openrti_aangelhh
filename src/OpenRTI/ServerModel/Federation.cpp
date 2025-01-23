@@ -477,13 +477,6 @@ Federation::getInteractionClass(StringVector const& name)
   return i.get();
 }
 
-void
-Federation::insert(InteractionClass& interactionClass)
-{
-  _interactionClassNameInteractionClassMap.insert(interactionClass);
-  _interactionClassHandleInteractionClassMap.insert(interactionClass);
-}
-
 InteractionClass*
 Federation::resolveParentInteractionClass(StringVector const& interactionClassName)
 {
@@ -669,7 +662,6 @@ Federation::insertOrCheck(Module& module, FOMStringInteractionClass const& strin
     if (!parentInteractionClass && 1 < stringInteractionClass.getName().size())
       throw MessageError("Cannot resolve parent interaction class name!");
     InteractionClass* interactionClass = new InteractionClass(*this, _interactionClassHandleAllocator.get(), stringInteractionClass.getName(), parentInteractionClass);
-    insert(*interactionClass);
     module.insert(*interactionClass);
 
     interactionClass->setOrderType(resolveOrderType(stringInteractionClass.getOrderType()));
@@ -994,7 +986,6 @@ Federation::insert(Module& module, FOMInteractionClass const& fomInteractionClas
     name.push_back(fomInteractionClass.getName());
     _interactionClassHandleAllocator.take(fomInteractionClass.getInteractionClassHandle());
     InteractionClass* interactionClass = new InteractionClass(*this, fomInteractionClass.getInteractionClassHandle(), name, parentInteractionClass);
-    insert(*interactionClass);
     module.insert(*interactionClass);
     interactionClass->setOrderType(fomInteractionClass.getOrderType());
     interactionClass->setTransportationType(fomInteractionClass.getTransportationType());
@@ -1492,6 +1483,30 @@ void
 Federation::_unlinkUpdateRateNameUpdateRateMap(UpdateRate& updateRate)
 {
   _updateRateNameUpdateRateMap.unlink(updateRate);
+}
+
+void
+Federation::_insertInteractionClassHandleInteractionClassMap(InteractionClass& interactionClass)
+{
+  _interactionClassHandleInteractionClassMap.insert(interactionClass);
+}
+
+void
+Federation::_unlinkInteractionClassHandleInteractionClassMap(InteractionClass& interactionClass)
+{
+  _interactionClassHandleInteractionClassMap.unlink(interactionClass);
+}
+
+void
+Federation::_insertInteractionClassNameInteractionClassMap(InteractionClass& interactionClass)
+{
+  _interactionClassNameInteractionClassMap.insert(interactionClass);
+}
+
+void
+Federation::_unlinkInteractionClassNameInteractionClassMap(InteractionClass& interactionClass)
+{
+  _interactionClassNameInteractionClassMap.unlink(interactionClass);
 }
 
 } // namespace ServerModel

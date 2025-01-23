@@ -36,8 +36,10 @@ InteractionClass::InteractionClass(Federation& federation, InteractionClassHandl
   _transportationType(RELIABLE),
   _parentInteractionClass(parentInteractionClass)
 {
+  _federation._insertInteractionClassHandleInteractionClassMap(*this);
+  _federation._insertInteractionClassNameInteractionClassMap(*this);
   if (_parentInteractionClass) {
-    _parentInteractionClass->_childInteractionClassList.push_back(*this);
+    _parentInteractionClass->_insertChildInteractionClassList(*this);
 
     for (ParameterHandleClassParameterMap::iterator i = _parentInteractionClass->_parameterHandleClassParameterMap.begin();
          i != _parentInteractionClass->_parameterHandleClassParameterMap.end(); ++i) {
@@ -50,6 +52,11 @@ InteractionClass::~InteractionClass()
 {
   _parameterHandleClassParameterMap.clear();
   eraseParameterDefinitions();
+
+  if (InteractionClass* parentInteractionClass = _parentInteractionClass)
+    _parentInteractionClass->_unlinkChildInteractionClassList(*this);
+  _federation._unlinkInteractionClassNameInteractionClassMap(*this);
+  _federation._unlinkInteractionClassHandleInteractionClassMap(*this);
 
   OpenRTIAssert(_parameterHandleClassParameterMap.empty());
   OpenRTIAssert(_parameterDefinitionModuleList.empty());
@@ -205,6 +212,18 @@ InteractionClass::insertClassParameterFor(ParameterDefinition& parameterDefiniti
 
   for (ChildInteractionClassList::iterator i = _childInteractionClassList.begin(); i != _childInteractionClassList.end(); ++i)
     i->insertClassParameterFor(parameterDefinition);
+}
+
+void
+InteractionClass::_insertChildInteractionClassList(InteractionClass& interactionClass)
+{
+  _childInteractionClassList.push_back(interactionClass);
+}
+
+void
+InteractionClass::_unlinkChildInteractionClassList(InteractionClass& interactionClass)
+{
+  _childInteractionClassList.unlink(interactionClass);
 }
 
 } // namespace ServerModel
