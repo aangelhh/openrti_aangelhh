@@ -19,13 +19,16 @@
 
 #include "Dimension.h"
 
+#include "DimensionModule.h"
+#include "Federation.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 
 Dimension::Dimension(Federation& federation, DimensionHandle const& dimensionHandle, std::string const& name) :
-  IntrusiveUnorderedMap<DimensionHandle const, Dimension>::Hook(dimensionHandle),
-  IntrusiveUnorderedMap<std::string const, Dimension>::Hook(name),
   _federation(federation),
+  _dimensionHandle(dimensionHandle),
+  _name(name),
   _upperBound(~Unsigned(0))
 {
 }
@@ -45,6 +48,12 @@ bool
 Dimension::getIsReferencedByAnyModule() const
 {
   return !_dimensionModuleList.empty();
+}
+
+void
+Dimension::insert(DimensionModule& dimensionModule)
+{
+  _dimensionModuleList.push_back(dimensionModule);
 }
 
 } // namespace ServerModel

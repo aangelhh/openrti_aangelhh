@@ -133,7 +133,7 @@ public:
   TransportationType resolveTransportationType(std::string const& transportationType);
 
   /// UnorderedSet of Dimension instances indexed by dimensionHandle
-  typedef IntrusiveUnorderedMap<DimensionHandle const, Dimension> DimensionHandleDimensionMap;
+  typedef Intrusive::UnorderedSet<DimensionHandle, Intrusive::UnorderedSetLink<Dimension, Intrusive::ParentTag<Federation> > > DimensionHandleDimensionMap;
   /// Get the set of Dimension instances
   DimensionHandleDimensionMap const& getDimensionHandleDimensionMap() const
   { return _dimensionHandleDimensionMap; }
@@ -144,7 +144,7 @@ public:
   Dimension* getDimension(DimensionHandle const& dimensionHandle);
 
   /// UnorderedSet of Dimension instances indexed by name
-  typedef IntrusiveUnorderedMap<std::string const, Dimension> DimensionNameDimensionMap;
+  typedef Intrusive::UnorderedSet<std::string, Intrusive::UnorderedSetLink<Dimension, Intrusive::ParentTag<Federation, 1> > > DimensionNameDimensionMap;
   /// Get one Dimension instance matching name
   Dimension const* getDimension(std::string const& name) const;
   Dimension* getDimension(std::string const& name);

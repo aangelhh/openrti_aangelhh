@@ -23,18 +23,18 @@
 #include "IntrusiveList.h"
 #include "IntrusiveUnorderedMap.h"
 
-#include "DimensionModule.h"
 #include "Handle.h"
 #include "Message.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
+class DimensionModule;
 class Federation;
 
 class OPENRTI_LOCAL Dimension :
-    public IntrusiveUnorderedMap<DimensionHandle const, Dimension>::Hook,
-    public IntrusiveUnorderedMap<std::string const, Dimension>::Hook
+    public Intrusive::UnorderedSetLink<Dimension, Intrusive::ParentTag<Federation> >,
+    public Intrusive::UnorderedSetLink<Dimension, Intrusive::ParentTag<Federation, 1> >
 {
 public:
   Dimension(Federation& federation, DimensionHandle const& dimensionHandle, std::string const& name);
@@ -46,10 +46,10 @@ public:
   { return _federation; }
 
   DimensionHandle const& getDimensionHandle() const
-  { return IntrusiveUnorderedMap<DimensionHandle const, Dimension>::Hook::getKey(); }
+  { return _dimensionHandle; }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string const, Dimension>::Hook::getKey(); }
+  { return _name; }
 
   /// The upper bound
   Unsigned getUpperBound() const
@@ -59,8 +59,10 @@ public:
   /// The list of Modules referencing this Dimension
   typedef IntrusiveList<DimensionModule, 1> DimensionModuleList;
   bool getIsReferencedByAnyModule() const;
-  void insert(DimensionModule& dimensionModule)
-  { _dimensionModuleList.push_back(dimensionModule); }
+  void insert(DimensionModule& dimensionModule);
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -79,11 +81,27 @@ private:
 
   Federation& _federation;
 
+  DimensionHandle const _dimensionHandle;
+
+  std::string const _name;
+
   /// The upper bound
   Unsigned _upperBound;
 
   /// The list of Modules referencing this Dimension
   DimensionModuleList _dimensionModuleList;
+};
+
+template<>
+struct Dimension::IntrusiveKey<Intrusive::UnorderedSetLink<Dimension, Intrusive::ParentTag<Federation> > > {
+  static DimensionHandle const& get(Dimension const& dimension)
+  { return dimension.getDimensionHandle(); }
+};
+
+template<>
+struct Dimension::IntrusiveKey<Intrusive::UnorderedSetLink<Dimension, Intrusive::ParentTag<Federation, 1> > > {
+  static std::string const& get(Dimension const& dimension)
+  { return dimension.getName(); }
 };
 
 } // namespace ServerModel
