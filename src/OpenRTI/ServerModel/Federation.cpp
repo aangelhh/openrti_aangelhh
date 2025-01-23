@@ -623,7 +623,7 @@ Federation::insertOrCheck(Module& module, FOMStringInteractionClass const& strin
       }
     }
 
-    module.insert(*i);
+    module.createInteractionClassModule(*i);
     if (!stringInteractionClass.getParameterList().empty())
       module.insertParameters(*i);
 
@@ -635,7 +635,7 @@ Federation::insertOrCheck(Module& module, FOMStringInteractionClass const& strin
     if (!parentInteractionClass && 1 < stringInteractionClass.getName().size())
       throw MessageError("Cannot resolve parent interaction class name!");
     InteractionClass* interactionClass = createInteractionClass(_interactionClassHandleAllocator.get(), stringInteractionClass.getName(), parentInteractionClass);
-    module.insert(*interactionClass);
+    module.createInteractionClassModule(*interactionClass);
 
     interactionClass->setOrderType(resolveOrderType(stringInteractionClass.getOrderType()));
     interactionClass->setTransportationType(resolveTransportationType(stringInteractionClass.getTransportationType()));
@@ -946,7 +946,7 @@ Federation::insert(Module& module, FOMInteractionClass const& fomInteractionClas
           throw MessageError("InteractionClass parameter lists do not match.");
       }
     }
-    module.insert(*i);
+    module.createInteractionClassModule(*i);
   } else {
     InteractionClass* parentInteractionClass;
     parentInteractionClass = getInteractionClass(fomInteractionClass.getParentInteractionClassHandle());
@@ -958,7 +958,7 @@ Federation::insert(Module& module, FOMInteractionClass const& fomInteractionClas
     name.push_back(fomInteractionClass.getName());
     _interactionClassHandleAllocator.take(fomInteractionClass.getInteractionClassHandle());
     InteractionClass* interactionClass = createInteractionClass(fomInteractionClass.getInteractionClassHandle(), name, parentInteractionClass);
-    module.insert(*interactionClass);
+    module.createInteractionClassModule(*interactionClass);
     interactionClass->setOrderType(fomInteractionClass.getOrderType());
     interactionClass->setTransportationType(fomInteractionClass.getTransportationType());
     interactionClass->_dimensionHandleSet = fomInteractionClass.getDimensionHandleSet();

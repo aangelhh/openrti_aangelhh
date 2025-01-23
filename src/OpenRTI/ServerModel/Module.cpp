@@ -174,12 +174,6 @@ Module::getModule(FOMModule& module) const
   }
 }
 
-InteractionClassModule*
-Module::insert(InteractionClass& interactionClass)
-{
-  return new InteractionClassModule(interactionClass, *this);
-}
-
 ParameterDefinitionModule*
 Module::insertParameters(InteractionClass& interactionClass)
 {
@@ -208,6 +202,12 @@ UpdateRateModule*
 Module::createUpdateRateModule(UpdateRate& updateRate)
 {
   return new UpdateRateModule(updateRate, *this);
+}
+
+InteractionClassModule*
+Module::createInteractionClassModule(InteractionClass& interactionClass)
+{
+  return new InteractionClassModule(interactionClass, *this);
 }
 
 void

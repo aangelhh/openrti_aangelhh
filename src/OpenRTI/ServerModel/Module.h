@@ -121,7 +121,6 @@ public:
   void getModule(FOMModule& module) const;
 
   /// insert into this Module
-  InteractionClassModule* insert(InteractionClass& interactionClass);
   ParameterDefinitionModule* insertParameters(InteractionClass& interactionClass);
   ObjectClassModule* insert(ObjectClass& objectClass);
   AttributeDefinitionModule* insertAttributes(ObjectClass& objectClass);
@@ -135,6 +134,11 @@ public:
   ///
   /// Create a new UpdateRateModule instance
   UpdateRateModule* createUpdateRateModule(UpdateRate& updateRate);
+
+  /// Create a reference of the Module into the InteractionClass.
+  ///
+  /// Create a new InteractionClassModule instance
+  InteractionClassModule* createInteractionClassModule(InteractionClass& interactionClass);
 
   template<typename Link>
   struct IntrusiveKey;
