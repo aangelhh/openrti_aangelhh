@@ -87,7 +87,7 @@ public:
   void setLogicalTimeFactoryName(std::string const& logicalTimeFactoryName);
 
   /// UnorderedSet of FederationConnect instances indexed by connectHandle
-  typedef IntrusiveUnorderedMap<ConnectHandle, FederationConnect> ConnectHandleFederationConnectMap;
+  typedef Intrusive::UnorderedSet<ConnectHandle, Intrusive::UnorderedSetLink<FederationConnect, Intrusive::ParentTag<Federation> > > ConnectHandleFederationConnectMap;
   /// Get the set of FederationConnect instances
   ConnectHandleFederationConnectMap const& getConnectHandleFederationConnectMap() const
   { return _connectHandleFederationConnectMap; }
@@ -108,7 +108,7 @@ public:
   void broadcastToChildren(ConnectHandle const& connectHandle, const SharedPtr<const AbstractMessage>& message);
 
   /// Links those FederationConnects that contain time regulating federates
-  typedef IntrusiveList<FederationConnect, 1> TimeRegulatingFederationConnectList;
+  typedef Intrusive::List<Intrusive::ListLink<FederationConnect, Intrusive::ParentTag<Federation> > > TimeRegulatingFederationConnectList;
   /// Get the list of FederationConnect instances
   TimeRegulatingFederationConnectList const& getTimeRegulatingFederationConnectList() const
   { return _timeRegulatingFederationConnectList; }

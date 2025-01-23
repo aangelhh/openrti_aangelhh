@@ -19,16 +19,19 @@
 
 #include "FederationConnect.h"
 
+#include "Federate.h"
 #include "Federation.h"
 #include "NodeConnect.h"
+#include "ObjectInstanceConnect.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 FederationConnect::FederationConnect(Federation& federation, NodeConnect& nodeConnect) :
-  IntrusiveUnorderedMap<ConnectHandle, FederationConnect>::Hook(nodeConnect.getConnectHandle()),
   _federation(federation),
   _nodeConnect(nodeConnect),
+  _federationHandle(federation.getFederationHandle()),
+  _connectHandle(nodeConnect.getConnectHandle()),
   _active(false),
   _permitTimeRegulation(true)
 {
@@ -42,18 +45,6 @@ FederationConnect::~FederationConnect()
 
   OpenRTIAssert(_objectInstanceConnectList.empty());
   OpenRTIAssert(_timeRegulatingFederateList.empty());
-}
-
-FederationHandle const&
-FederationConnect::getFederationHandle() const
-{
-  return getFederation().getFederationHandle();
-}
-
-ConnectHandle const&
-FederationConnect::getConnectHandle() const
-{
-  return IntrusiveUnorderedMap<ConnectHandle, FederationConnect>::Hook::getKey();
 }
 
 bool
@@ -88,12 +79,30 @@ FederationConnect::setPermitTimeRegulation(bool permitTimeRegulation)
   _permitTimeRegulation = permitTimeRegulation;
 }
 
+void
+FederationConnect::insert(Federate& federate)
+{
+  OpenRTIAssert(!federate.getFederationConnect());
+  _federateList.push_back(federate);
+  federate.setFederationConnect(this);
+}
+
+void
+FederationConnect::erase(Federate& federate)
+{
+  if (!federate.getFederationConnect())
+    return;
+  OpenRTIAssert(this == federate.getFederationConnect());
+  _federateList.unlink(federate);
+  federate.setFederationConnect(0);
+}
+
 bool
 FederationConnect::getIsTimeRegulating() const
 {
-  OpenRTIAssert(_timeRegulatingFederateList.empty() != Federation::TimeRegulatingFederationConnectList::Hook::is_linked());
-  OpenRTIAssert(!Federation::TimeRegulatingFederationConnectList::Hook::is_linked() || _permitTimeRegulation);
-  return Federation::TimeRegulatingFederationConnectList::Hook::is_linked();
+  OpenRTIAssert(_timeRegulatingFederateList.empty() != Federation::TimeRegulatingFederationConnectList::link_type::is_linked());
+  OpenRTIAssert(!Federation::TimeRegulatingFederationConnectList::link_type::is_linked() || _permitTimeRegulation);
+  return Federation::TimeRegulatingFederationConnectList::link_type::is_linked();
 }
 
 void
@@ -114,6 +123,12 @@ FederationConnect::send(const SharedPtr<const AbstractMessage>& message)
   if (!_active)
     return;
   _nodeConnect.send(message);
+}
+
+void
+FederationConnect::insert(ObjectInstanceConnect& objectInstanceConnect)
+{
+  _objectInstanceConnectList.push_back(objectInstanceConnect);
 }
 
 } // namespace ServerModel

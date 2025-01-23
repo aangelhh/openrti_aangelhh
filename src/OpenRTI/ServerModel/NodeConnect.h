@@ -66,7 +66,7 @@ public:
   void setOptions(StringStringListMap const& options);
 
   /// List of FederationConnect instances belonging to this NodeConnect
-  typedef IntrusiveList<FederationConnect, 0> FederationConnectList;
+  typedef Intrusive::List<Intrusive::ListLink<FederationConnect, Intrusive::ParentTag<NodeConnect> > > FederationConnectList;
   /// Get the list of FederationConnect instances
   FederationConnectList const& getFederationConnectList() const
   { return _federationConnectList; }

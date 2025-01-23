@@ -23,20 +23,21 @@
 #include "IntrusiveList.h"
 #include "IntrusiveUnorderedMap.h"
 
-#include "Federate.h"
 #include "Handle.h"
-#include "ObjectInstanceConnect.h"
+#include "Message.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
+class Federate;
 class Federation;
 class NodeConnect;
+class ObjectInstanceConnect;
 
 class OPENRTI_LOCAL FederationConnect :
-    public IntrusiveList<FederationConnect, 0>::Hook,
-    public IntrusiveUnorderedMap<ConnectHandle, FederationConnect>::Hook,
-    public IntrusiveList<FederationConnect, 1>::Hook
+    public Intrusive::ListLink<FederationConnect, Intrusive::ParentTag<NodeConnect> >,
+    public Intrusive::UnorderedSetLink<FederationConnect, Intrusive::ParentTag<Federation> >,
+    public Intrusive::ListLink<FederationConnect, Intrusive::ParentTag<Federation> >
 {
 public:
   FederationConnect(Federation& federation, NodeConnect& nodeConnect);
@@ -55,10 +56,12 @@ public:
   { return _nodeConnect; }
 
   /// Retrieve the handles to the referenced data structures
-  FederationHandle const& getFederationHandle() const;
+  FederationHandle const& getFederationHandle() const
+  { return _federationHandle; }
 
   /// The connect handle to identify this connect
-  ConnectHandle const& getConnectHandle() const;
+  ConnectHandle const& getConnectHandle() const
+  { return _connectHandle; }
 
   /// True if this is the parent connect
   bool getIsParentConnect() const;
@@ -83,16 +86,8 @@ public:
   { return _federateList; }
   FederateList& getFederateList()
   { return _federateList; }
-  void insert(Federate& federate)
-  { OpenRTIAssert(!federate.getFederationConnect()); _federateList.push_back(federate); federate.setFederationConnect(this); }
-  void erase(Federate& federate)
-  {
-    if (!federate.getFederationConnect())
-      return;
-    OpenRTIAssert(this == federate.getFederationConnect());
-    _federateList.unlink(federate);
-    federate.setFederationConnect(0);
-  }
+  void insert(Federate& federate);
+  void erase(Federate& federate);
 
   /// List of Time Regulating Federate instances belonging to this FederationConnect
   typedef IntrusiveList<Federate, 1> TimeRegulatingFederateList;
@@ -112,11 +107,13 @@ public:
   { return _objectInstanceConnectList; }
   ObjectInstanceConnectList& getObjectInstanceConnectList()
   { return _objectInstanceConnectList; }
-  void insert(ObjectInstanceConnect& objectInstanceConnect)
-  { _objectInstanceConnectList.push_back(objectInstanceConnect); }
+  void insert(ObjectInstanceConnect& objectInstanceConnect);
 
   /// We can actually send something there
   void send(const SharedPtr<const AbstractMessage>& message);
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -139,6 +136,12 @@ private:
   /// The NodeConnect backward reference
   NodeConnect& _nodeConnect;
 
+  /// Retrieve the handles to the referenced data structures
+  FederationHandle const _federationHandle;
+
+  /// The connect handle to identify this connect
+  ConnectHandle const _connectHandle;
+
   bool _active;
 
   /// If the federates behind this connect are allowed to get time regulating
@@ -152,6 +155,12 @@ private:
 
   /// List of ObjectInstanceConnect instances belonging to this FederationConnect
   ObjectInstanceConnectList _objectInstanceConnectList;
+};
+
+template<>
+struct FederationConnect::IntrusiveKey<Intrusive::UnorderedSetLink<FederationConnect, Intrusive::ParentTag<Federation> > > {
+  static ConnectHandle const& get(FederationConnect const& federationConnect)
+  { return federationConnect.getConnectHandle(); }
 };
 
 } // namespace ServerModel
