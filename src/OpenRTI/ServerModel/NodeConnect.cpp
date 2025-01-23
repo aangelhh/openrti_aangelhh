@@ -30,6 +30,7 @@ NodeConnect::NodeConnect(Node& serverNode, ConnectHandle const& connectHandle) :
   _connectHandle(connectHandle),
   _isParentConnect(false)
 {
+  _serverNode._insertConnectHandleNodeConnectMap(*this);
 }
 
 NodeConnect::~NodeConnect()
@@ -37,6 +38,8 @@ NodeConnect::~NodeConnect()
   // We need to make sure that this list got processed before deletion.
   // FIXME, should be empty at this time
   _federationConnectList.clear();
+
+  _serverNode._unlinkConnectHandleNodeConnectMap(*this);
 
   OpenRTIAssert(_federationConnectList.empty());
 }

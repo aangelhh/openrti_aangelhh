@@ -85,7 +85,6 @@ public:
   NodeConnect* getNodeConnect(ConnectHandle const& connectHandle);
   NodeConnect* insertNodeConnect(const SharedPtr<AbstractMessageSender>& messageSender, StringStringListMap const& options);
   NodeConnect* insertParentNodeConnect(const SharedPtr<AbstractMessageSender>& messageSender, StringStringListMap const& options);
-  void insert(NodeConnect& nodeConnect);
   void erase(ConnectHandle const& connectHandle);
   void erase(NodeConnect& nodeConnect);
 
@@ -139,6 +138,11 @@ protected:
   SharedPtr<ServerOptions> _serverOptions;
 
   /// UnorderedSet of NodeConnect instances indexed by connectHandle
+  friend class NodeConnect;
+  /// Insert nodeConnect into connectHandleNodeConnectMap
+  void _insertConnectHandleNodeConnectMap(NodeConnect& nodeConnect);
+  /// Unlink nodeConnect from connectHandleNodeConnectMap
+  void _unlinkConnectHandleNodeConnectMap(NodeConnect& nodeConnect);
   ConnectHandleNodeConnectMap _connectHandleNodeConnectMap;
 
   /// The appropriate HandleAllocator

@@ -84,7 +84,6 @@ NodeConnect*
 Node::insertNodeConnect(const SharedPtr<AbstractMessageSender>& messageSender, StringStringListMap const& options)
 {
   NodeConnect* nodeConnect = new NodeConnect(*this, _connectHandleAllocator.get());
-  insert(*nodeConnect);
   nodeConnect->setMessageSender(messageSender);
   nodeConnect->setOptions(options);
   return nodeConnect;
@@ -98,12 +97,6 @@ Node::insertParentNodeConnect(const SharedPtr<AbstractMessageSender>& messageSen
   nodeConnect->setIsParentConnect(true);
   _parentConnectHandle = nodeConnect->getConnectHandle();
   return nodeConnect;
-}
-
-void
-Node::insert(NodeConnect& nodeConnect)
-{
-  _connectHandleNodeConnectMap.insert(nodeConnect);
 }
 
 void
@@ -240,6 +233,18 @@ void
 Node::broadcastToChildren(const SharedPtr<const AbstractMessage>& message)
 {
   broadcast(_parentConnectHandle, message);
+}
+
+void
+Node::_insertConnectHandleNodeConnectMap(NodeConnect& nodeConnect)
+{
+  _connectHandleNodeConnectMap.insert(nodeConnect);
+}
+
+void
+Node::_unlinkConnectHandleNodeConnectMap(NodeConnect& nodeConnect)
+{
+  _connectHandleNodeConnectMap.unlink(nodeConnect);
 }
 
 } // namespace ServerModel
