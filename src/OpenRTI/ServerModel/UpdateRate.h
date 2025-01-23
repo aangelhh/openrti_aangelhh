@@ -24,16 +24,16 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "Handle.h"
-#include "UpdateRateModule.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 class Federation;
+class UpdateRateModule;
 
 class OPENRTI_LOCAL UpdateRate :
-    public IntrusiveUnorderedMap<UpdateRateHandle const, UpdateRate>::Hook,
-    public IntrusiveUnorderedMap<std::string const, UpdateRate>::Hook
+    public Intrusive::UnorderedSetLink<UpdateRate, Intrusive::ParentTag<Federation> >,
+    public Intrusive::UnorderedSetLink<UpdateRate, Intrusive::ParentTag<Federation, 1> >
 {
 public:
   UpdateRate(Federation& federation, UpdateRateHandle const& updateRateHandle, std::string const& name);
@@ -45,10 +45,10 @@ public:
   { return _federation; }
 
   UpdateRateHandle const& getUpdateRateHandle() const
-  { return IntrusiveUnorderedMap<UpdateRateHandle const, UpdateRate>::Hook::getKey(); }
+  { return _updateRateHandle; }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string const, UpdateRate>::Hook::getKey(); }
+  { return _name; }
 
   double getRate() const
   { return _rate; }
@@ -58,8 +58,10 @@ public:
   typedef IntrusiveList<UpdateRateModule, 1> UpdateRateModuleList;
   bool getIsReferencedByAnyModule() const;
 
-  void insert(UpdateRateModule& updateRateModule)
-  { _updateRateModuleList.push_back(updateRateModule); }
+  void insert(UpdateRateModule& updateRateModule);
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -78,10 +80,26 @@ private:
 
   Federation& _federation;
 
+  UpdateRateHandle const _updateRateHandle;
+
+  std::string const _name;
+
   double _rate;
 
   /// The list of Modules referencing this UpdateRate
   UpdateRateModuleList _updateRateModuleList;
+};
+
+template<>
+struct UpdateRate::IntrusiveKey<Intrusive::UnorderedSetLink<UpdateRate, Intrusive::ParentTag<Federation> > > {
+  static UpdateRateHandle const& get(UpdateRate const& updateRate)
+  { return updateRate.getUpdateRateHandle(); }
+};
+
+template<>
+struct UpdateRate::IntrusiveKey<Intrusive::UnorderedSetLink<UpdateRate, Intrusive::ParentTag<Federation, 1> > > {
+  static std::string const& get(UpdateRate const& updateRate)
+  { return updateRate.getName(); }
 };
 
 } // namespace ServerModel

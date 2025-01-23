@@ -19,13 +19,16 @@
 
 #include "UpdateRate.h"
 
+#include "Federation.h"
+#include "UpdateRateModule.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 
 UpdateRate::UpdateRate(Federation& federation, UpdateRateHandle const& updateRateHandle, std::string const& name) :
-  IntrusiveUnorderedMap<UpdateRateHandle const, UpdateRate>::Hook(updateRateHandle),
-  IntrusiveUnorderedMap<std::string const, UpdateRate>::Hook(name),
   _federation(federation),
+  _updateRateHandle(updateRateHandle),
+  _name(name),
   _rate(0)
 {
 }
@@ -45,6 +48,12 @@ bool
 UpdateRate::getIsReferencedByAnyModule() const
 {
   return !_updateRateModuleList.empty();
+}
+
+void
+UpdateRate::insert(UpdateRateModule& updateRateModule)
+{
+  _updateRateModuleList.push_back(updateRateModule);
 }
 
 } // namespace ServerModel
