@@ -51,7 +51,7 @@ struct OPENRTI_LOCAL ClockWin32 {
     }
     return tv;
   }
-  
+
   static DWORD toMsec(const uint64_t& nsec)
   {
     if (std::numeric_limits<uint64_t>::max() - 500000 <= nsec)

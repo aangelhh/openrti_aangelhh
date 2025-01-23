@@ -47,7 +47,7 @@ Options::next(const char *opts)
   if (_argc <= _optIndex) {
     return false;
   }
-  
+
   // We are past a -- argument
   if (_optCharIndex == 0) {
     _argument.assign(_argv[_optIndex++]);
@@ -76,7 +76,7 @@ Options::next(const char *opts)
     _argument.assign(_argv[_optIndex++]);
     return true;
   }
-    
+
   // Now we try to match an option
   _optChar = _argv[_optIndex][_optCharIndex];
   const char* optionPosition;

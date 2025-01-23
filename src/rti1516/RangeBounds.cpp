@@ -68,7 +68,7 @@ RangeBounds::getUpperBound() const
   return _upperBound;
 }
 
-void 
+void
 RangeBounds::setLowerBound(unsigned long lowerBound)
 {
   _lowerBound = lowerBound;

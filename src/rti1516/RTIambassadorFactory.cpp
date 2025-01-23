@@ -32,12 +32,12 @@ namespace rti1516
 RTIambassadorFactory::RTIambassadorFactory()
 {
 }
-    
+
 RTIambassadorFactory::~RTIambassadorFactory()
   RTI_NOEXCEPT
 {
 }
-    
+
 RTI_UNIQUE_PTR<RTIambassador>
 RTIambassadorFactory::createRTIambassador(std::vector<std::wstring>& args)
   RTI_THROW ((BadInitializationParameter,

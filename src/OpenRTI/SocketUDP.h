@@ -32,7 +32,7 @@ public:
   // void disconnect();
   // void sendTo(const void *buffer, int bufferLen, const std::string &foreignAddress,
   //           unsigned short foreignPort);
-  // int recvFrom(void *buffer, int bufferLen, std::string &sourceAddress, 
+  // int recvFrom(void *buffer, int bufferLen, std::string &sourceAddress,
   //              unsigned short &sourcePort);
   // void setMulticastTTL(unsigned char multicastTTL);
   // void joinGroup(const std::string &multicastGroup);

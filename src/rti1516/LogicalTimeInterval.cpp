@@ -37,7 +37,7 @@ LogicalTimeInterval::~LogicalTimeInterval()
 std::wostream&
 operator<<(std::wostream& stream, LogicalTimeInterval const& logicalTimeInterval)
 {
-  return stream << logicalTimeInterval.toString(); 
+  return stream << logicalTimeInterval.toString();
 }
 
 }

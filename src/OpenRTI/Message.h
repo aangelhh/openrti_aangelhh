@@ -725,7 +725,7 @@ typedef std::map<String, StringVector> ConfigurationParameterMap;
 
 class OPENRTI_API FOMStringTransportationType {
 public:
-  FOMStringTransportationType() : 
+  FOMStringTransportationType() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -794,7 +794,7 @@ typedef std::vector<FOMStringTransportationType> FOMStringTransportationTypeList
 
 class OPENRTI_API FOMStringDimension {
 public:
-  FOMStringDimension() : 
+  FOMStringDimension() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -879,7 +879,7 @@ typedef std::vector<FOMStringDimension> FOMStringDimensionList;
 
 class OPENRTI_API FOMStringRoutingSpace {
 public:
-  FOMStringRoutingSpace() : 
+  FOMStringRoutingSpace() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -964,7 +964,7 @@ typedef std::vector<FOMStringRoutingSpace> FOMStringRoutingSpaceList;
 
 class OPENRTI_API FOMStringParameter {
 public:
-  FOMStringParameter() : 
+  FOMStringParameter() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -1033,7 +1033,7 @@ typedef std::vector<FOMStringParameter> FOMStringParameterList;
 
 class OPENRTI_API FOMStringInteractionClass {
 public:
-  FOMStringInteractionClass() : 
+  FOMStringInteractionClass() :
     _impl(new Implementation())
   { }
   void setName(const StringVector& value)
@@ -1182,7 +1182,7 @@ typedef std::vector<FOMStringInteractionClass> FOMStringInteractionClassList;
 
 class OPENRTI_API FOMStringAttribute {
 public:
-  FOMStringAttribute() : 
+  FOMStringAttribute() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -1315,7 +1315,7 @@ typedef std::vector<FOMStringAttribute> FOMStringAttributeList;
 
 class OPENRTI_API FOMStringObjectClass {
 public:
-  FOMStringObjectClass() : 
+  FOMStringObjectClass() :
     _impl(new Implementation())
   { }
   void setName(const StringVector& value)
@@ -1400,7 +1400,7 @@ typedef std::vector<FOMStringObjectClass> FOMStringObjectClassList;
 
 class OPENRTI_API FOMStringUpdateRate {
 public:
-  FOMStringUpdateRate() : 
+  FOMStringUpdateRate() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -1485,7 +1485,7 @@ typedef std::vector<FOMStringUpdateRate> FOMStringUpdateRateList;
 
 class OPENRTI_API FOMStringSwitch {
 public:
-  FOMStringSwitch() : 
+  FOMStringSwitch() :
     _impl(new Implementation())
   { }
   void setSwitchesType(const SwitchesType& value)
@@ -1570,7 +1570,7 @@ typedef std::vector<FOMStringSwitch> FOMStringSwitchList;
 
 class OPENRTI_API FOMStringModule {
 public:
-  FOMStringModule() : 
+  FOMStringModule() :
     _impl(new Implementation())
   { }
   void setContent(const String& value)
@@ -1783,7 +1783,7 @@ typedef std::vector<FOMStringModule> FOMStringModuleList;
 
 class OPENRTI_API FOMTransportationType {
 public:
-  FOMTransportationType() : 
+  FOMTransportationType() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -1868,7 +1868,7 @@ typedef std::vector<FOMTransportationType> FOMTransportationTypeList;
 
 class OPENRTI_API FOMDimension {
 public:
-  FOMDimension() : 
+  FOMDimension() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -1969,7 +1969,7 @@ typedef std::vector<FOMDimension> FOMDimensionList;
 
 class OPENRTI_API FOMRoutingSpace {
 public:
-  FOMRoutingSpace() : 
+  FOMRoutingSpace() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -2070,7 +2070,7 @@ typedef std::vector<FOMRoutingSpace> FOMRoutingSpaceList;
 
 class OPENRTI_API FOMParameter {
 public:
-  FOMParameter() : 
+  FOMParameter() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -2155,7 +2155,7 @@ typedef std::vector<FOMParameter> FOMParameterList;
 
 class OPENRTI_API FOMInteractionClass {
 public:
-  FOMInteractionClass() : 
+  FOMInteractionClass() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -2320,7 +2320,7 @@ typedef std::vector<FOMInteractionClass> FOMInteractionClassList;
 
 class OPENRTI_API FOMAttribute {
 public:
-  FOMAttribute() : 
+  FOMAttribute() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -2453,7 +2453,7 @@ typedef std::vector<FOMAttribute> FOMAttributeList;
 
 class OPENRTI_API FOMObjectClass {
 public:
-  FOMObjectClass() : 
+  FOMObjectClass() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -2570,7 +2570,7 @@ typedef std::vector<FOMObjectClass> FOMObjectClassList;
 
 class OPENRTI_API FOMUpdateRate {
 public:
-  FOMUpdateRate() : 
+  FOMUpdateRate() :
     _impl(new Implementation())
   { }
   void setName(const String& value)
@@ -2671,7 +2671,7 @@ typedef std::vector<FOMUpdateRate> FOMUpdateRateList;
 
 class OPENRTI_API FOMSwitch {
 public:
-  FOMSwitch() : 
+  FOMSwitch() :
     _impl(new Implementation())
   { }
   void setSwitchesType(const SwitchesType& value)
@@ -2756,7 +2756,7 @@ typedef std::vector<FOMSwitch> FOMSwitchList;
 
 class OPENRTI_API FOMModule {
 public:
-  FOMModule() : 
+  FOMModule() :
     _impl(new Implementation())
   { }
   void setModuleHandle(const ModuleHandle& value)

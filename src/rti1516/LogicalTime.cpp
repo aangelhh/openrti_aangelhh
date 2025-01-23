@@ -37,7 +37,7 @@ LogicalTime::~LogicalTime()
 std::wostream&
 operator<<(std::wostream& stream, LogicalTime const& logicalTime)
 {
-  return stream << logicalTime.toString(); 
+  return stream << logicalTime.toString();
 }
 
 }

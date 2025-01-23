@@ -524,7 +524,7 @@ class StructDataType(DataType):
         sourceStream.pushIndent()
 
         if self.__cow:
-            sourceStream.writeline('{name}() : '.format(name = self.getName()))
+            sourceStream.writeline('{name}() :'.format(name = self.getName()))
             sourceStream.writeline('  _impl(new Implementation())')
             sourceStream.writeline('{ }')
             valuePrefix = 'getImpl().'
@@ -619,8 +619,8 @@ class StructDataType(DataType):
                 sourceStream.writeline(line)
             sourceStream.popIndent()
             sourceStream.writeline('{ }')
- 
-            
+
+
         for field in self.__fieldList:
             field.writeMemberInstance(sourceStream)
 
@@ -675,7 +675,7 @@ class MessageDataType(StructDataType):
         StructDataType.__init__(self, name, parentTypeName)
         self.__reliableExpression = None
         self.__objectInstanceExpression = None
-         
+
     def isMessage(self):
         return True
 

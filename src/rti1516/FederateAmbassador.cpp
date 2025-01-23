@@ -24,7 +24,7 @@
 #include <RTI/FederateAmbassador.h>
 
 namespace rti1516
-{  
+{
 
 FederateAmbassador::FederateAmbassador()
   RTI_THROW ((FederateInternalError))

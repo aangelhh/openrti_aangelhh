@@ -44,7 +44,7 @@ public:
   // Returns true as long as there are options to process.
   // Takes the current list of arguments on getopt style
   bool next(const char *opts);
-  
+
 private:
   int _argc;
   const char* const* _argv;
