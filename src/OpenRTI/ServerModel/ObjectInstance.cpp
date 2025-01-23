@@ -19,6 +19,7 @@
 
 #include "ObjectInstance.h"
 
+#include "ClassAttribute.h"
 #include "Federation.h"
 #include "FederationConnect.h"
 #include "InstanceAttribute.h"
@@ -67,7 +68,7 @@ ObjectInstance::setObjectClass(ObjectClass* objectClass)
   ObjectClass::AttributeHandleClassAttributeMap& attributeHandleClassAttributeMap = objectClass->getAttributeHandleClassAttributeMap();
   for (ObjectClass::AttributeHandleClassAttributeMap::iterator i = attributeHandleClassAttributeMap.begin();
        i != attributeHandleClassAttributeMap.end(); ++i) {
-    InstanceAttribute* instanceAttribute = new InstanceAttribute(*this, *i);
+    InstanceAttribute* instanceAttribute = createInstanceAttribute(*i);
   }
 }
 
@@ -147,6 +148,12 @@ ObjectInstance::getPrivilegeToDeleteInstanceAttribute()
     return 0;
   OpenRTIAssert(i->getAttributeHandle() == AttributeHandle(0));
   return i.get();
+}
+
+InstanceAttribute*
+ObjectInstance::createInstanceAttribute(ClassAttribute& classAttribute)
+{
+  return new InstanceAttribute(*this, classAttribute);
 }
 
 void

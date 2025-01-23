@@ -29,6 +29,7 @@
 namespace OpenRTI {
 namespace ServerModel {
 
+class ClassAttribute;
 class Federation;
 class FederationConnect;
 class InstanceAttribute;
@@ -91,6 +92,10 @@ public:
   InstanceAttribute const* getInstanceAttribute(AttributeHandle const& attributeHandle) const;
   InstanceAttribute* getInstanceAttribute(AttributeHandle const& attributeHandle);
   InstanceAttribute* getPrivilegeToDeleteInstanceAttribute();
+
+  ///
+  /// Create a new InstanceAttribute instance
+  InstanceAttribute* createInstanceAttribute(ClassAttribute& classAttribute);
 
   template<typename Link>
   struct IntrusiveKey;
