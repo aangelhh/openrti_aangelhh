@@ -737,7 +737,7 @@ Federation::insertOrCheck(Module& module, FOMStringObjectClass const& stringObje
       }
     }
 
-    module.insert(*i);
+    module.createObjectClassModule(*i);
     if (!stringObjectClass.getAttributeList().empty())
       module.insertAttributes(*i);
 
@@ -749,7 +749,7 @@ Federation::insertOrCheck(Module& module, FOMStringObjectClass const& stringObje
     if (!parentObjectClass && 1 < stringObjectClass.getName().size())
       throw MessageError("Cannot resolve parent object class name!");
     ObjectClass* objectClass = createObjectClass(_objectClassHandleAllocator.get(), stringObjectClass.getName(), parentObjectClass);
-    module.insert(*objectClass);
+    module.createObjectClassModule(*objectClass);
 
     if (!stringObjectClass.getAttributeList().empty())
       module.insertAttributes(*objectClass);
@@ -1026,7 +1026,7 @@ Federation::insert(Module& module, FOMObjectClass const& fomObjectClass)
           throw MessageError("ObjectClass attribute lists do not match.");
       }
     }
-    module.insert(*i);
+    module.createObjectClassModule(*i);
   } else {
     ObjectClass* parentObjectClass;
     parentObjectClass = getObjectClass(fomObjectClass.getParentObjectClassHandle());
@@ -1038,7 +1038,7 @@ Federation::insert(Module& module, FOMObjectClass const& fomObjectClass)
     name.push_back(fomObjectClass.getName());
     _objectClassHandleAllocator.take(fomObjectClass.getObjectClassHandle());
     ObjectClass* objectClass = createObjectClass(fomObjectClass.getObjectClassHandle(), name, parentObjectClass);
-    module.insert(*objectClass);
+    module.createObjectClassModule(*objectClass);
     if (!fomObjectClass.getAttributeList().empty())
       module.insertAttributes(*objectClass);
     for (FOMAttributeList::const_iterator j = fomObjectClass.getAttributeList().begin();

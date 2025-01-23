@@ -174,12 +174,6 @@ Module::getModule(FOMModule& module) const
   }
 }
 
-ObjectClassModule*
-Module::insert(ObjectClass& objectClass)
-{
-  return new ObjectClassModule(objectClass, *this);
-}
-
 AttributeDefinitionModule*
 Module::insertAttributes(ObjectClass& objectClass)
 {
@@ -208,6 +202,12 @@ ParameterDefinitionModule*
 Module::createParameterDefinitionModule(InteractionClass& interactionClass)
 {
   return new ParameterDefinitionModule(interactionClass, *this);
+}
+
+ObjectClassModule*
+Module::createObjectClassModule(ObjectClass& objectClass)
+{
+  return new ObjectClassModule(objectClass, *this);
 }
 
 void

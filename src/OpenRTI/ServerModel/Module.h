@@ -121,7 +121,6 @@ public:
   void getModule(FOMModule& module) const;
 
   /// insert into this Module
-  ObjectClassModule* insert(ObjectClass& objectClass);
   AttributeDefinitionModule* insertAttributes(ObjectClass& objectClass);
 
   /// Create a reference of the Module into the Dimension.
@@ -143,6 +142,11 @@ public:
   ///
   /// Create a new ParameterDefinitionModule instance
   ParameterDefinitionModule* createParameterDefinitionModule(InteractionClass& interactionClass);
+
+  /// Create a reference of the Module into the ObjectClass.
+  ///
+  /// Create a new ObjectClassModule instance
+  ObjectClassModule* createObjectClassModule(ObjectClass& objectClass);
 
   template<typename Link>
   struct IntrusiveKey;
