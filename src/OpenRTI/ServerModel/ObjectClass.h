@@ -212,6 +212,10 @@ public:
     }
   }
 
+  ///
+  /// Create a new AttributeDefinition instance
+  AttributeDefinition* createAttributeDefinition(AttributeHandle const& attributeHandle, std::string const& name);
+
   template<typename Link>
   struct IntrusiveKey;
 

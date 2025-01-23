@@ -764,8 +764,7 @@ Federation::insertOrCheck(Module& module, FOMStringObjectClass const& stringObje
         throw InconsistentFDD(ss.str());
       }
 
-      AttributeDefinition* attributeDefinition;
-      attributeDefinition = new AttributeDefinition(*objectClass, nextAttributeHandle, i->getName());
+      AttributeDefinition* attributeDefinition = objectClass->createAttributeDefinition(nextAttributeHandle, i->getName());
       objectClass->insertClassAttributeFor(*attributeDefinition);
 
       attributeDefinition->setOrderType(resolveOrderType(i->getOrderType()));
@@ -995,8 +994,7 @@ Federation::insert(Module& module, FOMObjectClass const& fomObjectClass)
             throw MessageError("Duplicate ObjectClass attribute names.");
           if (i->getAttributeDefinition(j->getAttributeHandle()))
             throw MessageError("Duplicate ObjectClass attribute handles.");
-          AttributeDefinition* attributeDefinition;
-          attributeDefinition = new AttributeDefinition(*i, j->getAttributeHandle(), j->getName());
+          AttributeDefinition* attributeDefinition = i->createAttributeDefinition(j->getAttributeHandle(), j->getName());
           i->insertClassAttributeFor(*attributeDefinition);
           attributeDefinition->setOrderType(j->getOrderType());
           attributeDefinition->setTransportationType(j->getTransportationType());
@@ -1047,8 +1045,7 @@ Federation::insert(Module& module, FOMObjectClass const& fomObjectClass)
         throw MessageError("Duplicate ObjectClass attribute names.");
       if (objectClass->getAttributeDefinition(j->getAttributeHandle()))
         throw MessageError("Duplicate ObjectClass attribute handles.");
-      AttributeDefinition* attributeDefinition;
-      attributeDefinition = new AttributeDefinition(*objectClass, j->getAttributeHandle(), j->getName());
+      AttributeDefinition* attributeDefinition = objectClass->createAttributeDefinition(j->getAttributeHandle(), j->getName());
       objectClass->insertClassAttributeFor(*attributeDefinition);
       attributeDefinition->setOrderType(j->getOrderType());
       attributeDefinition->setTransportationType(j->getTransportationType());

@@ -203,6 +203,12 @@ ObjectClass::removeConnect(ConnectHandle const& connectHandle)
     i->removeConnect(connectHandle);
 }
 
+AttributeDefinition*
+ObjectClass::createAttributeDefinition(AttributeHandle const& attributeHandle, std::string const& name)
+{
+  return new AttributeDefinition(*this, attributeHandle, name);
+}
+
 void
 ObjectClass::_insertChildObjectClassList(ObjectClass& objectClass)
 {
