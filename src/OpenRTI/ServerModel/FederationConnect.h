@@ -71,8 +71,6 @@ public:
   /// True if this is the parent connect
   bool getIsParentConnect() const;
 
-  bool getHasFederates() const;
-
   /// If we should really send messages there.
   /// Also an initial connect is not active to signal that we need to push the
   /// federations context into this connect. Once this is done, the connect is marked active.
@@ -91,8 +89,9 @@ public:
   { return _federateList; }
   FederateList& getFederateList()
   { return _federateList; }
-  void insert(Federate& federate);
-  void erase(Federate& federate);
+  /// Return if the FederationConnect has Federates.
+  bool getHasFederates() const
+  { return !_federateList.empty(); }
 
   /// List of Time Regulating Federate instances belonging to this FederationConnect
   typedef Intrusive::List<Intrusive::ListLink<Federate, Intrusive::ParentTag<FederationConnect, 1> > > TimeRegulatingFederateList;
@@ -101,8 +100,6 @@ public:
   { return _timeRegulatingFederateList; }
   TimeRegulatingFederateList& getTimeRegulatingFederateList()
   { return _timeRegulatingFederateList; }
-  void insertTimeRegulating(Federate& federate);
-  void eraseTimeRegulating(Federate& federate);
 
   /// List of ObjectInstanceConnect instances belonging to this FederationConnect
   typedef Intrusive::List<Intrusive::ListLink<ObjectInstanceConnect, Intrusive::ParentTag<FederationConnect> > > ObjectInstanceConnectList;
@@ -152,9 +149,18 @@ private:
   bool _permitTimeRegulation;
 
   /// List of Federate instances belonging to this FederationConnect
+  friend class Federate;
+  /// Insert federate into federateList
+  void _insertFederateList(Federate& federate);
+  /// Unlink federate from federateList
+  void _unlinkFederateList(Federate& federate);
   FederateList _federateList;
 
   /// List of Time Regulating Federate instances belonging to this FederationConnect
+  /// Insert federate into timeRegulatingFederateList
+  void _insertTimeRegulatingFederateList(Federate& federate);
+  /// Unlink federate from timeRegulatingFederateList
+  void _unlinkTimeRegulatingFederateList(Federate& federate);
   TimeRegulatingFederateList _timeRegulatingFederateList;
 
   /// List of ObjectInstanceConnect instances belonging to this FederationConnect

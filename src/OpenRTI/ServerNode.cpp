@@ -112,14 +112,13 @@ public:
     // ... insert a new federate ...
     ServerModel::Federate* federate = createFederate(FederateHandle(), message->getFederateName());
     federate->setFederateType(message->getFederateType());
-    insert(*federate);
 
     // Survived so far, insert a new federation connect
     ServerModel::NodeConnect* nodeConnect = getServerNode().getNodeConnect(connectHandle);
     OpenRTIAssert(nodeConnect);
     ServerModel::FederationConnect* federationConnect = getOrInsertConnect(*nodeConnect);
     OpenRTIAssert(federationConnect);
-    federationConnect->insert(*federate);
+    federate->setFederationConnect(federationConnect);
     pushFederation(connectHandle);
 
     // Respond with Success
@@ -197,7 +196,7 @@ public:
 
     // remove from time management
     if (federate->getIsTimeRegulating()) {
-      eraseTimeRegulating(*federate);
+      federate->setIsTimeRegulating(false);
       SharedPtr<DisableTimeRegulationRequestMessage> request = new DisableTimeRegulationRequestMessage;
       request->setFederationHandle(getFederationHandle());
       request->setFederateHandle(federateHandle);
@@ -643,7 +642,7 @@ public:
 
       if (federate->getIsTimeRegulating())
         throw MessageError("EnableTimeRegulationRequestMessage for already time regulaitng federate!");
-      insertTimeRegulating(*federate);
+      federate->setIsTimeRegulating(true);
       federate->setTimeAdvanceTimeStamp(message->getTimeStamp());
       federate->setNextMessageTimeStamp(message->getTimeStamp());
       federate->setCommitId(message->getCommitId());
@@ -669,7 +668,7 @@ public:
       throw MessageError("DisableTimeRegulationRequestMessage for non time regulating Federate!");
     // Don't bail out on anything. If the federate dies in between, we might need to clean up somehow
     broadcast(connectHandle, message);
-    eraseTimeRegulating(*federate);
+    federate->setIsTimeRegulating(false);
   }
   void accept(const ConnectHandle& connectHandle, const CommitLowerBoundTimeStampMessage* message)
   {
@@ -1774,7 +1773,7 @@ public:
 
         // Remove from time management, needs to happen before the federation connect is removed
         if (federate->getIsTimeRegulating()) {
-          eraseTimeRegulating(*federate);
+          federate->setIsTimeRegulating(false);
           SharedPtr<DisableTimeRegulationRequestMessage> request = new DisableTimeRegulationRequestMessage;
           request->setFederationHandle(getFederationHandle());
           request->setFederateHandle(federate->getFederateHandle());
@@ -1797,7 +1796,7 @@ public:
         }
 
         // Remove from connects
-        federationConnect->erase(*federate);
+        federate->setFederationConnect(0);
         Log(ServerFederate, Info) << getServerPath() << ": Resigning federate " << federate->getFederateHandle()
                                   << " because of closed connection!" << std::endl;
         SharedPtr<ResignFederationExecutionRequestMessage> message = new ResignFederationExecutionRequestMessage;
@@ -1834,11 +1833,10 @@ public:
 
     // Register that we reach this federate through this connect
     ServerModel::Federate* federate = createFederate(federateHandle, federateName);
-    ServerModel::Federation::insert(*federate);
 
     ServerModel::FederationConnect* federationConnect = getFederationConnect(connectHandle);
     if (federationConnect) {
-      federationConnect->insert(*federate);
+      federate->setFederationConnect(federationConnect);
     } else {
       federate->setResignPending(true);
     }
@@ -1850,12 +1848,12 @@ public:
   {
     // The time management stuff
     if (federate.getIsTimeRegulating())
-      eraseTimeRegulating(federate);
+      federate.setIsTimeRegulating(false);
 
     // Remove from connects
     ServerModel::FederationConnect* federationConnect = federate.getFederationConnect();
     if (federationConnect)
-      federationConnect->erase(federate);
+      federate.setFederationConnect(0);
 
     ServerModel::Federation::erase(federate);
   }

@@ -291,26 +291,6 @@ Federation::broadcastToChildren(ConnectHandle const& connectHandle, const Shared
   }
 }
 
-void
-Federation::insertTimeRegulating(Federate& federate)
-{
-  OpenRTIAssert(!federate.getIsTimeRegulating());
-  FederationConnect* federationConnect = federate.getFederationConnect();
-  OpenRTIAssert(federationConnect);
-  federationConnect->insertTimeRegulating(federate);
-}
-
-void
-Federation::eraseTimeRegulating(Federate& federate)
-{
-  OpenRTIAssert(federate.getIsTimeRegulating());
-  FederationConnect* federationConnect = federate.getFederationConnect();
-  // We can only be time regulating if this exists and provides us with a link
-  OpenRTIAssert(federationConnect);
-  OpenRTIAssert(federationConnect->getIsTimeRegulating());
-  federationConnect->eraseTimeRegulating(federate);
-}
-
 Module const*
 Federation::getModule(ModuleHandle const& moduleHandle) const
 {
@@ -1275,22 +1255,6 @@ Federation::isFederateNameInUse(std::string const& name) const
 }
 
 void
-Federation::insert(Federate& federate)
-{
-  OpenRTIAssert(!isFederateNameInUse(federate.getName()));
-  _federateNameFederateMap.insert(federate);
-  _federateHandleFederateMap.insert(federate);
-}
-
-void
-Federation::erase(FederateHandle const& federateHandle)
-{
-  FederateHandleFederateMap::iterator i = _federateHandleFederateMap.find(federateHandle);
-  OpenRTIAssert(i != _federateHandleFederateMap.end());
-  erase(*i);
-}
-
-void
 Federation::erase(Federate& federate)
 {
   _federateHandleAllocator.put(federate.getFederateHandle());
@@ -1554,6 +1518,30 @@ void
 Federation::_unlinkSynchronizationNameSynchronizationMap(Synchronization& synchronization)
 {
   _synchronizationNameSynchronizationMap.unlink(synchronization);
+}
+
+void
+Federation::_insertFederateHandleFederateMap(Federate& federate)
+{
+  _federateHandleFederateMap.insert(federate);
+}
+
+void
+Federation::_unlinkFederateHandleFederateMap(Federate& federate)
+{
+  _federateHandleFederateMap.unlink(federate);
+}
+
+void
+Federation::_insertFederateNameFederateMap(Federate& federate)
+{
+  _federateNameFederateMap.insert(federate);
+}
+
+void
+Federation::_unlinkFederateNameFederateMap(Federate& federate)
+{
+  _federateNameFederateMap.unlink(federate);
 }
 
 } // namespace ServerModel

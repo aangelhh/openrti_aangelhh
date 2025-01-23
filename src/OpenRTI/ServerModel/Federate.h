@@ -87,8 +87,6 @@ public:
   SynchronizationFederateList& getSynchronizationFederateList()
   { return _synchronizationFederateList; }
 
-  bool getIsTimeRegulating() const;
-
   /// Time constrained federates current state
   VariableLengthData const& getTimeAdvanceTimeStamp() const
   { return _timeAdvanceTimeStamp; }
@@ -101,6 +99,10 @@ public:
   Unsigned getCommitId() const
   { return _commitId; }
   void setCommitId(Unsigned commitId);
+
+  /// True if the FederationConnect is time regulating.
+  bool getIsTimeRegulating() const;
+  void setIsTimeRegulating(bool isTimeRegulating);
 
   /// UnorderedSet of Region instances indexed by regionHandle
   typedef Intrusive::UnorderedSet<LocalRegionHandle, Intrusive::UnorderedSetLink<Region, Intrusive::ParentTag<Federate> > > RegionHandleRegionMap;
@@ -116,6 +118,12 @@ public:
 
   template<typename Link>
   struct IntrusiveKey;
+
+protected:
+  /// The connect where this Federate is sitting behind
+  /// Insert and Unlink Federate from referencing containers.
+  void _insertContainerForFederationConnectChange();
+  void _unlinkContainerForFederationConnectChange();
 
 private:
 #if 201103L <= __cplusplus

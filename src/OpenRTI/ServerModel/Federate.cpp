@@ -36,13 +36,18 @@ Federate::Federate(Federation& federation, FederateHandle const& federateHandle,
   _federationConnect(0),
   _commitId(0)
 {
+  _federation._insertFederateHandleFederateMap(*this);
+  _federation._insertFederateNameFederateMap(*this);
 }
 
 Federate::~Federate()
 {
   _regionHandleRegionMap.clear();
   _synchronizationFederateList.clear();
-  _federationConnect = 0;
+
+  setFederationConnect(0);
+  _federation._unlinkFederateNameFederateMap(*this);
+  _federation._unlinkFederateHandleFederateMap(*this);
 
   OpenRTIAssert(_regionHandleRegionMap.empty());
   OpenRTIAssert(_synchronizationFederateList.empty());
@@ -70,7 +75,11 @@ void
 Federate::setFederationConnect(FederationConnect* federationConnect)
 {
   OpenRTIAssert(federationConnect || !getIsTimeRegulating());
+  if (federationConnect == getFederationConnect())
+    return;
+  _unlinkContainerForFederationConnectChange();
   _federationConnect = federationConnect;
+  _insertContainerForFederationConnectChange();
 }
 
 ConnectHandle
@@ -89,13 +98,6 @@ Federate::send(const SharedPtr<const AbstractMessage>& message)
   _federationConnect->send(message);
 }
 
-bool
-Federate::getIsTimeRegulating() const
-{
-  // OpenRTIAssert(!FederationConnect::TimeRegulatingFederateList::link_type::is_linked() || _federationConnect->_permitTimeRegulation);
-  return FederationConnect::TimeRegulatingFederateList::link_type::is_linked();
-}
-
 void
 Federate::setTimeAdvanceTimeStamp(VariableLengthData const& timeAdvanceTimeStamp)
 {
@@ -112,6 +114,25 @@ void
 Federate::setCommitId(Unsigned commitId)
 {
   _commitId = commitId;
+}
+
+bool
+Federate::getIsTimeRegulating() const
+{
+  return Intrusive::ListLink<Federate, Intrusive::ParentTag<FederationConnect, 1> >::is_linked();
+}
+
+void
+Federate::setIsTimeRegulating(bool isTimeRegulating)
+{
+  if (isTimeRegulating == getIsTimeRegulating())
+    return;
+  OpenRTIAssert(_federationConnect);
+  if (isTimeRegulating) {
+    _federationConnect->_insertTimeRegulatingFederateList(*this);
+  } else {
+    _federationConnect->_unlinkTimeRegulatingFederateList(*this);
+  }
 }
 
 Region const*
@@ -138,6 +159,20 @@ void
 Federate::insert(Region& region)
 {
   _regionHandleRegionMap.insert(region);
+}
+
+void
+Federate::_insertContainerForFederationConnectChange()
+{
+  if (FederationConnect* federationConnect = _federationConnect)
+    federationConnect->_insertFederateList(*this);
+}
+
+void
+Federate::_unlinkContainerForFederationConnectChange()
+{
+  if (FederationConnect* federationConnect = _federationConnect)
+    federationConnect->_unlinkFederateList(*this);
 }
 
 void

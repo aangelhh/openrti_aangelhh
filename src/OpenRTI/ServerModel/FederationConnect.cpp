@@ -43,7 +43,12 @@ FederationConnect::~FederationConnect()
 {
   /// FIXME
   _objectInstanceConnectList.clear();
-  _timeRegulatingFederateList.unlink();
+  for (TimeRegulatingFederateList::iterator i = _timeRegulatingFederateList.begin(), e = _timeRegulatingFederateList.end(); i != e;)
+    (i++)->setIsTimeRegulating(false);
+  OpenRTIAssert(_timeRegulatingFederateList.empty());
+  for (FederateList::iterator i = _federateList.begin(), e = _federateList.end(); i != e;)
+    (i++)->setFederationConnect(0);
+  OpenRTIAssert(_federateList.empty());
 
   if (getIsTimeRegulating())
     _federation._unlinkTimeRegulatingFederationConnectList(*this);
@@ -51,7 +56,6 @@ FederationConnect::~FederationConnect()
   _nodeConnect._unlinkFederationConnectList(*this);
 
   OpenRTIAssert(_objectInstanceConnectList.empty());
-  OpenRTIAssert(_timeRegulatingFederateList.empty());
 }
 
 bool
@@ -78,12 +82,6 @@ FederationConnect::getIsParentConnect() const
   return getNodeConnect().getIsParentConnect();
 }
 
-bool
-FederationConnect::getHasFederates() const
-{
-  return !_federateList.empty();
-}
-
 void
 FederationConnect::setActive(bool active)
 {
@@ -105,41 +103,6 @@ FederationConnect::setPermitTimeRegulation(bool permitTimeRegulation)
 }
 
 void
-FederationConnect::insert(Federate& federate)
-{
-  OpenRTIAssert(!federate.getFederationConnect());
-  _federateList.push_back(federate);
-  federate.setFederationConnect(this);
-}
-
-void
-FederationConnect::erase(Federate& federate)
-{
-  if (!federate.getFederationConnect())
-    return;
-  OpenRTIAssert(this == federate.getFederationConnect());
-  _federateList.unlink(federate);
-  federate.setFederationConnect(0);
-}
-
-void
-FederationConnect::insertTimeRegulating(Federate& federate)
-{
-  setIsTimeRegulating(true);
-  _timeRegulatingFederateList.push_back(federate);
-
-  OpenRTIAssert(_timeRegulatingFederateList.empty() != Federation::TimeRegulatingFederationConnectList::link_type::is_linked());
-  OpenRTIAssert(!Federation::TimeRegulatingFederationConnectList::link_type::is_linked() || _permitTimeRegulation);
-}
-
-void
-FederationConnect::eraseTimeRegulating(Federate& federate)
-{
-  _timeRegulatingFederateList.unlink(federate);
-  setIsTimeRegulating(!_timeRegulatingFederateList.empty());
-}
-
-void
 FederationConnect::send(const SharedPtr<const AbstractMessage>& message)
 {
   if (!_active)
@@ -151,6 +114,32 @@ void
 FederationConnect::insert(ObjectInstanceConnect& objectInstanceConnect)
 {
   _objectInstanceConnectList.push_back(objectInstanceConnect);
+}
+
+void
+FederationConnect::_insertFederateList(Federate& federate)
+{
+  _federateList.push_back(federate);
+}
+
+void
+FederationConnect::_unlinkFederateList(Federate& federate)
+{
+  _federateList.unlink(federate);
+}
+
+void
+FederationConnect::_insertTimeRegulatingFederateList(Federate& federate)
+{
+  setIsTimeRegulating(true);
+  _timeRegulatingFederateList.push_back(federate);
+}
+
+void
+FederationConnect::_unlinkTimeRegulatingFederateList(Federate& federate)
+{
+  _timeRegulatingFederateList.unlink(federate);
+  setIsTimeRegulating(!_timeRegulatingFederateList.empty());
 }
 
 } // namespace ServerModel

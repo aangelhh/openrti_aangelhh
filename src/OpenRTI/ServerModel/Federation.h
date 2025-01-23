@@ -119,8 +119,6 @@ public:
   { return _timeRegulatingFederationConnectList; }
   TimeRegulatingFederationConnectList& getTimeRegulatingFederationConnectList()
   { return _timeRegulatingFederationConnectList; }
-  void insertTimeRegulating(Federate& federate);
-  void eraseTimeRegulating(Federate& federate);
 
   /// UnorderedSet of Module instances indexed by moduleHandle
   typedef Intrusive::UnorderedSet<ModuleHandle, Intrusive::UnorderedSetLink<Module, Intrusive::ParentTag<Federation> > > ModuleHandleModuleMap;
@@ -268,8 +266,6 @@ public:
 
   bool isFederateNameInUse(std::string const& name) const;
 
-  void insert(Federate& federate);
-  void erase(FederateHandle const& federateHandle);
   void erase(Federate& federate);
 
   /// FIXME simplify region communication, only commit and erase is needed.
@@ -458,12 +454,21 @@ private:
   SynchronizationNameSynchronizationMap _synchronizationNameSynchronizationMap;
 
   /// UnorderedSet of Federate instances indexed by federateHandle
+  friend class Federate;
+  /// Insert federate into federateHandleFederateMap
+  void _insertFederateHandleFederateMap(Federate& federate);
+  /// Unlink federate from federateHandleFederateMap
+  void _unlinkFederateHandleFederateMap(Federate& federate);
   FederateHandleFederateMap _federateHandleFederateMap;
 
   /// The appropriate HandleAllocator
   HandleAllocator<FederateHandle> _federateHandleAllocator;
 
   /// UnorderedSet of Federate instances indexed by name
+  /// Insert federate into federateNameFederateMap
+  void _insertFederateNameFederateMap(Federate& federate);
+  /// Unlink federate from federateNameFederateMap
+  void _unlinkFederateNameFederateMap(Federate& federate);
   FederateNameFederateMap _federateNameFederateMap;
 
   /// UnorderedSet of ObjectInstance instances indexed by objectInstanceHandle
