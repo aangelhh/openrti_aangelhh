@@ -525,13 +525,6 @@ Federation::getObjectClass(StringVector const& name)
   return i.get();
 }
 
-void
-Federation::insert(ObjectClass& objectClass)
-{
-  _objectClassNameObjectClassMap.insert(objectClass);
-  _objectClassHandleObjectClassMap.insert(objectClass);
-}
-
 ObjectClass*
 Federation::resolveParentObjectClass(StringVector const& objectClassName)
 {
@@ -777,7 +770,6 @@ Federation::insertOrCheck(Module& module, FOMStringObjectClass const& stringObje
     if (!parentObjectClass && 1 < stringObjectClass.getName().size())
       throw MessageError("Cannot resolve parent object class name!");
     ObjectClass* objectClass = new ObjectClass(*this, _objectClassHandleAllocator.get(), stringObjectClass.getName(), parentObjectClass);
-    insert(*objectClass);
     module.insert(*objectClass);
 
     if (!stringObjectClass.getAttributeList().empty())
@@ -1069,7 +1061,6 @@ Federation::insert(Module& module, FOMObjectClass const& fomObjectClass)
     name.push_back(fomObjectClass.getName());
     _objectClassHandleAllocator.take(fomObjectClass.getObjectClassHandle());
     ObjectClass* objectClass = new ObjectClass(*this, fomObjectClass.getObjectClassHandle(), name, parentObjectClass);
-    insert(*objectClass);
     module.insert(*objectClass);
     if (!fomObjectClass.getAttributeList().empty())
       module.insertAttributes(*objectClass);
@@ -1507,6 +1498,30 @@ void
 Federation::_unlinkInteractionClassNameInteractionClassMap(InteractionClass& interactionClass)
 {
   _interactionClassNameInteractionClassMap.unlink(interactionClass);
+}
+
+void
+Federation::_insertObjectClassHandleObjectClassMap(ObjectClass& objectClass)
+{
+  _objectClassHandleObjectClassMap.insert(objectClass);
+}
+
+void
+Federation::_unlinkObjectClassHandleObjectClassMap(ObjectClass& objectClass)
+{
+  _objectClassHandleObjectClassMap.unlink(objectClass);
+}
+
+void
+Federation::_insertObjectClassNameObjectClassMap(ObjectClass& objectClass)
+{
+  _objectClassNameObjectClassMap.insert(objectClass);
+}
+
+void
+Federation::_unlinkObjectClassNameObjectClassMap(ObjectClass& objectClass)
+{
+  _objectClassNameObjectClassMap.unlink(objectClass);
 }
 
 } // namespace ServerModel

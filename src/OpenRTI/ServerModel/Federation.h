@@ -208,7 +208,6 @@ public:
   /// Get one ObjectClass instance matching name
   ObjectClass const* getObjectClass(StringVector const& name) const;
   ObjectClass* getObjectClass(StringVector const& name);
-  void insert(ObjectClass& objectClass);
   ObjectClass* resolveParentObjectClass(StringVector const& objectClassName);
 
   /// Either insert a new entity or checks if the provided entity is
@@ -427,12 +426,21 @@ private:
   InteractionClassNameInteractionClassMap _interactionClassNameInteractionClassMap;
 
   /// UnorderedSet of ObjectClass instances indexed by objectClassHandle
+  friend class ObjectClass;
+  /// Insert objectClass into objectClassHandleObjectClassMap
+  void _insertObjectClassHandleObjectClassMap(ObjectClass& objectClass);
+  /// Unlink objectClass from objectClassHandleObjectClassMap
+  void _unlinkObjectClassHandleObjectClassMap(ObjectClass& objectClass);
   ObjectClassHandleObjectClassMap _objectClassHandleObjectClassMap;
 
   /// The appropriate HandleAllocator
   HandleAllocator<ObjectClassHandle> _objectClassHandleAllocator;
 
   /// UnorderedSet of ObjectClass instances indexed by name
+  /// Insert objectClass into objectClassNameObjectClassMap
+  void _insertObjectClassNameObjectClassMap(ObjectClass& objectClass);
+  /// Unlink objectClass from objectClassNameObjectClassMap
+  void _unlinkObjectClassNameObjectClassMap(ObjectClass& objectClass);
   ObjectClassNameObjectClassMap _objectClassNameObjectClassMap;
 
   /// UnorderedSet of Federate instances indexed by federateHandle

@@ -33,8 +33,10 @@ ObjectClass::ObjectClass(Federation& federation, ObjectClassHandle const& object
   _name(name),
   _parentObjectClass(parentObjectClass)
 {
+  _federation._insertObjectClassHandleObjectClassMap(*this);
+  _federation._insertObjectClassNameObjectClassMap(*this);
   if (_parentObjectClass) {
-    _parentObjectClass->_childObjectClassList.push_back(*this);
+    _parentObjectClass->_insertChildObjectClassList(*this);
 
     for (AttributeHandleClassAttributeMap::iterator i = _parentObjectClass->_attributeHandleClassAttributeMap.begin();
          i != _parentObjectClass->_attributeHandleClassAttributeMap.end(); ++i) {
@@ -48,6 +50,11 @@ ObjectClass::~ObjectClass()
   _objectInstanceList.unlink();
   _attributeHandleClassAttributeMap.clear();
   eraseAttributeDefinitions();
+
+  if (ObjectClass* parentObjectClass = _parentObjectClass)
+    parentObjectClass->_unlinkChildObjectClassList(*this);
+  _federation._unlinkObjectClassNameObjectClassMap(*this);
+  _federation._unlinkObjectClassHandleObjectClassMap(*this);
 
   OpenRTIAssert(_attributeHandleClassAttributeMap.empty());
   OpenRTIAssert(_attributeDefinitionModuleList.empty());
@@ -216,6 +223,18 @@ ObjectClass::removeConnect(ConnectHandle const& connectHandle)
   for (AttributeHandleClassAttributeMap::iterator i = _attributeHandleClassAttributeMap.begin();
        i != _attributeHandleClassAttributeMap.end(); ++i)
     i->removeConnect(connectHandle);
+}
+
+void
+ObjectClass::_insertChildObjectClassList(ObjectClass& objectClass)
+{
+  _childObjectClassList.push_back(objectClass);
+}
+
+void
+ObjectClass::_unlinkChildObjectClassList(ObjectClass& objectClass)
+{
+  _childObjectClassList.unlink(objectClass);
 }
 
 } // namespace ServerModel

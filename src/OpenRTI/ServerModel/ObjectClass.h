@@ -238,6 +238,10 @@ private:
   ObjectClass* const _parentObjectClass;
 
   /// List of ObjectClass instances belonging to this ObjectClass
+  /// Insert objectClass into childObjectClassList
+  void _insertChildObjectClassList(ObjectClass& objectClass);
+  /// Unlink objectClass from childObjectClassList
+  void _unlinkChildObjectClassList(ObjectClass& objectClass);
   ChildObjectClassList _childObjectClassList;
 
   /// The list of Modules referencing this ObjectClass
