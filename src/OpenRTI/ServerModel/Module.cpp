@@ -174,12 +174,6 @@ Module::getModule(FOMModule& module) const
   }
 }
 
-UpdateRateModule*
-Module::insert(UpdateRate& updateRate)
-{
-  return new UpdateRateModule(updateRate, *this);
-}
-
 InteractionClassModule*
 Module::insert(InteractionClass& interactionClass)
 {
@@ -208,6 +202,12 @@ DimensionModule*
 Module::createDimensionModule(Dimension& dimension)
 {
   return new DimensionModule(dimension, *this);
+}
+
+UpdateRateModule*
+Module::createUpdateRateModule(UpdateRate& updateRate)
+{
+  return new UpdateRateModule(updateRate, *this);
 }
 
 void

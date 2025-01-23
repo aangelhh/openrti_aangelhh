@@ -549,12 +549,12 @@ Federation::insertOrCheck(Module& module, FOMStringUpdateRate const& stringUpdat
          << i->getRate() << "!";
       throw InconsistentFDD(ss.str());
     }
-    module.insert(*i);
+    module.createUpdateRateModule(*i);
     return false;
   } else {
     UpdateRate* updateRate = createUpdateRate(_updateRateHandleAllocator.get(), stringUpdateRate.getName());
     updateRate->setRate(stringUpdateRate.getRate());
-    module.insert(*updateRate);
+    module.createUpdateRateModule(*updateRate);
     return true;
   }
 }
@@ -888,12 +888,12 @@ Federation::insert(Module& module, FOMUpdateRate const& fomUpdateRate)
       throw MessageError("UpdateRate name does not match.");
     if (fomUpdateRate.getRate() != i->getRate())
       throw MessageError("UpdateRate rate does not match.");
-    module.insert(*i);
+    module.createUpdateRateModule(*i);
   } else {
     _updateRateHandleAllocator.take(fomUpdateRate.getUpdateRateHandle());
     UpdateRate* updateRate = createUpdateRate(fomUpdateRate.getUpdateRateHandle(), fomUpdateRate.getName());
     updateRate->setRate(fomUpdateRate.getRate());
-    module.insert(*updateRate);
+    module.createUpdateRateModule(*updateRate);
   }
 }
 
