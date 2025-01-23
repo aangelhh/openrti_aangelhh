@@ -23,22 +23,26 @@
 #include "IntrusiveList.h"
 #include "IntrusiveUnorderedMap.h"
 
-#include "AttributeDefinitionModule.h"
-#include "DimensionModule.h"
 #include "Handle.h"
-#include "InteractionClassModule.h"
 #include "Message.h"
-#include "ObjectClassModule.h"
-#include "ParameterDefinitionModule.h"
-#include "UpdateRateModule.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
+class AttributeDefinitionModule;
+class Dimension;
+class DimensionModule;
 class Federation;
+class InteractionClass;
+class InteractionClassModule;
+class ObjectClass;
+class ObjectClassModule;
+class ParameterDefinitionModule;
+class UpdateRate;
+class UpdateRateModule;
 
 class OPENRTI_LOCAL Module :
-    public IntrusiveUnorderedMap<ModuleHandle const, Module>::Hook
+    public Intrusive::UnorderedSetLink<Module, Intrusive::ParentTag<Federation> >
 {
 public:
   Module(Federation& federation, ModuleHandle const& moduleHandle);
@@ -50,7 +54,7 @@ public:
   { return _federation; }
 
   ModuleHandle const& getModuleHandle() const
-  { return IntrusiveUnorderedMap<ModuleHandle const, Module>::Hook::getKey(); }
+  { return _moduleHandle; }
 
   std::string const& getContent() const
   { return _content; }
@@ -71,8 +75,7 @@ public:
   { return _dimensionModuleList; }
   DimensionModuleList& getDimensionModuleList()
   { return _dimensionModuleList; }
-  void insert(DimensionModule& dimensionModule)
-  { _dimensionModuleList.push_back(dimensionModule); }
+  void insert(DimensionModule& dimensionModule);
 
   /// All UpdateRates that are referenced by this Module
   typedef IntrusiveList<UpdateRateModule, 0> UpdateRateModuleList;
@@ -81,8 +84,7 @@ public:
   { return _updateRateModuleList; }
   UpdateRateModuleList& getUpdateRateModuleList()
   { return _updateRateModuleList; }
-  void insert(UpdateRateModule& updateRateModule)
-  { _updateRateModuleList.push_back(updateRateModule); }
+  void insert(UpdateRateModule& updateRateModule);
 
   /// All InteractionClasses that are referenced by this Module
   typedef IntrusiveList<InteractionClassModule, 0> InteractionClassModuleList;
@@ -91,8 +93,7 @@ public:
   { return _interactionClassModuleList; }
   InteractionClassModuleList& getInteractionClassModuleList()
   { return _interactionClassModuleList; }
-  void insert(InteractionClassModule& interactionClassModule)
-  { _interactionClassModuleList.push_back(interactionClassModule); }
+  void insert(InteractionClassModule& interactionClassModule);
 
   /// All InteractionClasses whos ParameterDefinitions are referenced by this Module
   typedef IntrusiveList<ParameterDefinitionModule, 0> ParameterDefinitionModuleList;
@@ -101,8 +102,7 @@ public:
   { return _parameterDefinitionModuleList; }
   ParameterDefinitionModuleList& getParameterDefinitionModuleList()
   { return _parameterDefinitionModuleList; }
-  void insert(ParameterDefinitionModule& parameterDefinitionModule)
-  { _parameterDefinitionModuleList.push_back(parameterDefinitionModule); }
+  void insert(ParameterDefinitionModule& parameterDefinitionModule);
 
   /// All ObjectClasses that are referenced by this Module
   typedef IntrusiveList<ObjectClassModule, 0> ObjectClassModuleList;
@@ -111,8 +111,7 @@ public:
   { return _objectClassModuleList; }
   ObjectClassModuleList& getObjectClassModuleList()
   { return _objectClassModuleList; }
-  void insert(ObjectClassModule& objectClassModule)
-  { _objectClassModuleList.push_back(objectClassModule); }
+  void insert(ObjectClassModule& objectClassModule);
 
   /// All ObjectClasses whos AttributeDefinitions are referenced by this Module
   typedef IntrusiveList<AttributeDefinitionModule, 0> AttributeDefinitionModuleList;
@@ -121,8 +120,7 @@ public:
   { return _attributeDefinitionModuleList; }
   AttributeDefinitionModuleList& getAttributeDefinitionModuleList()
   { return _attributeDefinitionModuleList; }
-  void insert(AttributeDefinitionModule& attributeDefinitionModule)
-  { _attributeDefinitionModuleList.push_back(attributeDefinitionModule); }
+  void insert(AttributeDefinitionModule& attributeDefinitionModule);
 
   /// Read back the FOMModule context to send this with a message
   void getModule(FOMModule& module) const;
@@ -134,6 +132,9 @@ public:
   ParameterDefinitionModule* insertParameters(InteractionClass& interactionClass);
   ObjectClassModule* insert(ObjectClass& objectClass);
   AttributeDefinitionModule* insertAttributes(ObjectClass& objectClass);
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -151,6 +152,8 @@ private:
 #endif
 
   Federation& _federation;
+
+  ModuleHandle const _moduleHandle;
 
   std::string _content;
 
@@ -175,6 +178,12 @@ private:
 
   /// All ObjectClasses whos AttributeDefinitions are referenced by this Module
   AttributeDefinitionModuleList _attributeDefinitionModuleList;
+};
+
+template<>
+struct Module::IntrusiveKey<Intrusive::UnorderedSetLink<Module, Intrusive::ParentTag<Federation> > > {
+  static ModuleHandle const& get(Module const& module)
+  { return module.getModuleHandle(); }
 };
 
 } // namespace ServerModel

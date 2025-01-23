@@ -118,7 +118,7 @@ public:
   void eraseTimeRegulating(Federate& federate);
 
   /// UnorderedSet of Module instances indexed by moduleHandle
-  typedef IntrusiveUnorderedMap<ModuleHandle const, Module> ModuleHandleModuleMap;
+  typedef Intrusive::UnorderedSet<ModuleHandle, Intrusive::UnorderedSetLink<Module, Intrusive::ParentTag<Federation> > > ModuleHandleModuleMap;
   /// Get the set of Module instances
   ModuleHandleModuleMap const& getModuleHandleModuleMap() const
   { return _moduleHandleModuleMap; }

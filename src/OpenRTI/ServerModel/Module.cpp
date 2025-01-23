@@ -19,17 +19,26 @@
 
 #include "Module.h"
 
+#include "AttributeDefinition.h"
+#include "AttributeDefinitionModule.h"
 #include "Dimension.h"
+#include "DimensionModule.h"
+#include "Federation.h"
 #include "InteractionClass.h"
+#include "InteractionClassModule.h"
 #include "ObjectClass.h"
+#include "ObjectClassModule.h"
+#include "ParameterDefinition.h"
+#include "ParameterDefinitionModule.h"
 #include "UpdateRate.h"
+#include "UpdateRateModule.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 Module::Module(Federation& federation, ModuleHandle const& moduleHandle) :
-  IntrusiveUnorderedMap<ModuleHandle const, Module>::Hook(moduleHandle),
   _federation(federation),
+  _moduleHandle(moduleHandle),
   _artificialInteractionRoot(false),
   _artificialObjectRoot(false)
 {
@@ -61,6 +70,42 @@ void
 Module::setArtificialObjectRoot(bool artificialObjectRoot)
 {
   _artificialObjectRoot = artificialObjectRoot;
+}
+
+void
+Module::insert(DimensionModule& dimensionModule)
+{
+  _dimensionModuleList.push_back(dimensionModule);
+}
+
+void
+Module::insert(UpdateRateModule& updateRateModule)
+{
+  _updateRateModuleList.push_back(updateRateModule);
+}
+
+void
+Module::insert(InteractionClassModule& interactionClassModule)
+{
+  _interactionClassModuleList.push_back(interactionClassModule);
+}
+
+void
+Module::insert(ParameterDefinitionModule& parameterDefinitionModule)
+{
+  _parameterDefinitionModuleList.push_back(parameterDefinitionModule);
+}
+
+void
+Module::insert(ObjectClassModule& objectClassModule)
+{
+  _objectClassModuleList.push_back(objectClassModule);
+}
+
+void
+Module::insert(AttributeDefinitionModule& attributeDefinitionModule)
+{
+  _attributeDefinitionModuleList.push_back(attributeDefinitionModule);
 }
 
 void
