@@ -182,7 +182,7 @@ Federate::InteractionClass::insertParameter(const FOMParameter& fomParameter)
 
   parameter->setName(fomParameter.getName());
 
-  for (IntrusiveList<InteractionClass>::iterator i = _childInteractionClassList.begin();
+  for (ChildInteractionClassList::iterator i = _childInteractionClassList.begin();
        i != _childInteractionClassList.end(); ++i) {
     i->insertParameter(fomParameter);
   }
@@ -273,7 +273,7 @@ Federate::ObjectClass::insertAttribute(const FOMAttribute& fomAttribute)
   attribute->setTransportationType(fomAttribute.getTransportationType());
   attribute->setDimensionHandleSet(fomAttribute.getDimensionHandleSet());
 
-  for (IntrusiveList<ObjectClass>::iterator i = _childObjectClassList.begin();
+  for (ChildObjectClassList::iterator i = _childObjectClassList.begin();
        i != _childObjectClassList.end(); ++i) {
     i->insertAttribute(fomAttribute);
   }

@@ -22,6 +22,7 @@
 
 #include "Export.h"
 #include "IntrusiveList.h"
+#include "IntrusiveUnorderedMap.h"
 #include "HandleAllocator.h"
 #include "LogStream.h"
 #include "Message.h"
@@ -233,9 +234,9 @@ public:
   typedef std::vector<SharedPtr<Parameter> > ParameterVector;
 
   struct InteractionClass;
-  typedef IntrusiveList<InteractionClass> ChildInteractionClassList;
+  typedef Intrusive::List<Intrusive::ListLink<InteractionClass, Intrusive::NumericTag<0> > > ChildInteractionClassList;
 
-  struct OPENRTI_API InteractionClass : public PublishSubscribe, public ChildInteractionClassList::Hook {
+  struct OPENRTI_API InteractionClass : public PublishSubscribe, public Intrusive::ListLink<InteractionClass, Intrusive::NumericTag<0> > {
     InteractionClass();
     ~InteractionClass();
 
@@ -284,9 +285,9 @@ public:
   typedef std::vector<SharedPtr<Attribute> > AttributeVector;
 
   struct ObjectClass;
-  typedef IntrusiveList<ObjectClass> ChildObjectClassList;
+  typedef Intrusive::List<Intrusive::ListLink<ObjectClass, Intrusive::NumericTag<0> > > ChildObjectClassList;
 
-  struct OPENRTI_API ObjectClass : public Referenced, public ChildObjectClassList::Hook {
+  struct OPENRTI_API ObjectClass : public Referenced, public Intrusive::ListLink<ObjectClass, Intrusive::NumericTag<0> > {
     ObjectClass();
     ~ObjectClass();
 
