@@ -84,7 +84,7 @@ public:
   bool getIsReferencedByAnyModule() const;
 
   /// UnorderedSet of AttributeDefinition instances indexed by attributeHandle
-  typedef IntrusiveUnorderedMap<AttributeHandle const, AttributeDefinition> AttributeHandleAttributeDefinitionMap;
+  typedef Intrusive::UnorderedSet<AttributeHandle, Intrusive::UnorderedSetLink<AttributeDefinition, Intrusive::ParentTag<ObjectClass> > > AttributeHandleAttributeDefinitionMap;
   /// Get the set of AttributeDefinition instances
   AttributeHandleAttributeDefinitionMap const& getAttributeHandleAttributeDefinitionMap() const
   { return _attributeHandleAttributeDefinitionMap; }
@@ -95,7 +95,7 @@ public:
   AttributeDefinition* getAttributeDefinition(AttributeHandle const& attributeHandle);
 
   /// UnorderedSet of AttributeDefinition instances indexed by name
-  typedef IntrusiveUnorderedMap<std::string const, AttributeDefinition> AttributeNameAttributeDefinitionMap;
+  typedef Intrusive::UnorderedSet<std::string, Intrusive::UnorderedSetLink<AttributeDefinition, Intrusive::ParentTag<ObjectClass, 1> > > AttributeNameAttributeDefinitionMap;
   /// Get one AttributeDefinition instance matching name
   AttributeDefinition const* getAttributeDefinition(std::string const& name) const;
   AttributeDefinition* getAttributeDefinition(std::string const& name);

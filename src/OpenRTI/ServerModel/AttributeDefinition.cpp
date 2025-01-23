@@ -19,13 +19,16 @@
 
 #include "AttributeDefinition.h"
 
+#include "ClassAttribute.h"
+#include "ObjectClass.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 
 AttributeDefinition::AttributeDefinition(ObjectClass& objectClass, AttributeHandle const& attributeHandle, std::string const& name) :
-  IntrusiveUnorderedMap<AttributeHandle const, AttributeDefinition>::Hook(attributeHandle),
-  IntrusiveUnorderedMap<std::string const, AttributeDefinition>::Hook(name),
   _objectClass(objectClass),
+  _attributeHandle(attributeHandle),
+  _name(name),
   _orderType(RECEIVE),
   _transportationType(RELIABLE)
 {
@@ -48,6 +51,12 @@ void
 AttributeDefinition::setTransportationType(TransportationType transportationType)
 {
   _transportationType = transportationType;
+}
+
+void
+AttributeDefinition::insert(ClassAttribute& classAttribute)
+{
+  _classAttributeList.push_back(classAttribute);
 }
 
 } // namespace ServerModel

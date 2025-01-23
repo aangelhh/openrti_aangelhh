@@ -23,18 +23,18 @@
 #include "IntrusiveList.h"
 #include "IntrusiveUnorderedMap.h"
 
-#include "ClassAttribute.h"
 #include "Handle.h"
 #include "Message.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
+class ClassAttribute;
 class ObjectClass;
 
 class OPENRTI_LOCAL AttributeDefinition :
-    public IntrusiveUnorderedMap<AttributeHandle const, AttributeDefinition>::Hook,
-    public IntrusiveUnorderedMap<std::string const, AttributeDefinition>::Hook
+    public Intrusive::UnorderedSetLink<AttributeDefinition, Intrusive::ParentTag<ObjectClass> >,
+    public Intrusive::UnorderedSetLink<AttributeDefinition, Intrusive::ParentTag<ObjectClass, 1> >
 {
 public:
   AttributeDefinition(ObjectClass& objectClass, AttributeHandle const& attributeHandle, std::string const& name);
@@ -46,10 +46,10 @@ public:
   { return _objectClass; }
 
   AttributeHandle const& getAttributeHandle() const
-  { return IntrusiveUnorderedMap<AttributeHandle const, AttributeDefinition>::Hook::getKey(); }
+  { return _attributeHandle; }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string const, AttributeDefinition>::Hook::getKey(); }
+  { return _name; }
 
   OrderType getOrderType() const
   { return _orderType; }
@@ -66,11 +66,13 @@ public:
   { return _classAttributeList; }
   ClassAttributeList& getClassAttributeList()
   { return _classAttributeList; }
-  void insert(ClassAttribute& classAttribute)
-  { _classAttributeList.push_back(classAttribute); }
+  void insert(ClassAttribute& classAttribute);
 
   // FIXME temporarily in this way
   DimensionHandleSet _dimensionHandleSet;
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -89,12 +91,28 @@ private:
 
   ObjectClass& _objectClass;
 
+  AttributeHandle const _attributeHandle;
+
+  std::string const _name;
+
   OrderType _orderType;
 
   TransportationType _transportationType;
 
   /// List of ClassAttribute instances belonging to this AttributeDefinition
   ClassAttributeList _classAttributeList;
+};
+
+template<>
+struct AttributeDefinition::IntrusiveKey<Intrusive::UnorderedSetLink<AttributeDefinition, Intrusive::ParentTag<ObjectClass> > > {
+  static AttributeHandle const& get(AttributeDefinition const& attributeDefinition)
+  { return attributeDefinition.getAttributeHandle(); }
+};
+
+template<>
+struct AttributeDefinition::IntrusiveKey<Intrusive::UnorderedSetLink<AttributeDefinition, Intrusive::ParentTag<ObjectClass, 1> > > {
+  static std::string const& get(AttributeDefinition const& attributeDefinition)
+  { return attributeDefinition.getName(); }
 };
 
 } // namespace ServerModel
