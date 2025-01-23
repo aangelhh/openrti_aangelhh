@@ -163,12 +163,6 @@ InteractionClass::getFirstUnusedParameterHandle()
   return ParameterHandle(numParameters);
 }
 
-void
-InteractionClass::insert(ParameterDefinitionModule& parameterDefinitionModule)
-{
-  _parameterDefinitionModuleList.push_back(parameterDefinitionModule);
-}
-
 bool
 InteractionClass::getAreParametersReferencedByAnyModule() const
 {
@@ -252,6 +246,18 @@ void
 InteractionClass::_unlinkParameterNameParameterDefinitionMap(ParameterDefinition& parameterDefinition)
 {
   _parameterNameParameterDefinitionMap.unlink(parameterDefinition);
+}
+
+void
+InteractionClass::_insertParameterDefinitionModuleList(ParameterDefinitionModule& parameterDefinitionModule)
+{
+  _parameterDefinitionModuleList.push_back(parameterDefinitionModule);
+}
+
+void
+InteractionClass::_unlinkParameterDefinitionModuleList(ParameterDefinitionModule& parameterDefinitionModule)
+{
+  _parameterDefinitionModuleList.unlink(parameterDefinitionModule);
 }
 
 } // namespace ServerModel

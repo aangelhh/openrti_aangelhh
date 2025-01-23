@@ -124,7 +124,7 @@ public:
   { return _parameterDefinitionModuleList; }
   ParameterDefinitionModuleList& getParameterDefinitionModuleList()
   { return _parameterDefinitionModuleList; }
-  void insert(ParameterDefinitionModule& parameterDefinitionModule);
+  /// Returns if the ParameterDefitions are referenced by a module.
   bool getAreParametersReferencedByAnyModule() const;
 
   /// UnorderedSet of ClassParameter instances indexed by parameterHandle
@@ -223,6 +223,11 @@ private:
   ParameterNameParameterDefinitionMap _parameterNameParameterDefinitionMap;
 
   /// The list of Modules referencing this InteractionClass set of ParameterDefinitions
+  friend class ParameterDefinitionModule;
+  /// Insert parameterDefinitionModule into parameterDefinitionModuleList
+  void _insertParameterDefinitionModuleList(ParameterDefinitionModule& parameterDefinitionModule);
+  /// Unlink parameterDefinitionModule from parameterDefinitionModuleList
+  void _unlinkParameterDefinitionModuleList(ParameterDefinitionModule& parameterDefinitionModule);
   ParameterDefinitionModuleList _parameterDefinitionModuleList;
 
   /// UnorderedSet of ClassParameter instances indexed by parameterHandle

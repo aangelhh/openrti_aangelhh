@@ -29,10 +29,14 @@ ParameterDefinitionModule::ParameterDefinitionModule(InteractionClass& interacti
   _interactionClass(interactionClass),
   _module(module)
 {
+  _module._insertParameterDefinitionModuleList(*this);
+  _interactionClass._insertParameterDefinitionModuleList(*this);
 }
 
 ParameterDefinitionModule::~ParameterDefinitionModule()
 {
+  _interactionClass._unlinkParameterDefinitionModuleList(*this);
+  _module._unlinkParameterDefinitionModuleList(*this);
 }
 
 } // namespace ServerModel
