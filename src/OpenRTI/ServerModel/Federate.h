@@ -86,7 +86,6 @@ public:
   { return _synchronizationFederateList; }
   SynchronizationFederateList& getSynchronizationFederateList()
   { return _synchronizationFederateList; }
-  void insert(SynchronizationFederate& synchronizationFederate);
 
   bool getIsTimeRegulating() const;
 
@@ -149,6 +148,11 @@ private:
   FederationConnect* _federationConnect;
 
   /// List of SynchronizationFederate instances belonging to this Federate
+  friend class SynchronizationFederate;
+  /// Insert synchronizationFederate into synchronizationFederateList
+  void _insertSynchronizationFederateList(SynchronizationFederate& synchronizationFederate);
+  /// Unlink synchronizationFederate from synchronizationFederateList
+  void _unlinkSynchronizationFederateList(SynchronizationFederate& synchronizationFederate);
   SynchronizationFederateList _synchronizationFederateList;
 
   /// Time constrained federates current state

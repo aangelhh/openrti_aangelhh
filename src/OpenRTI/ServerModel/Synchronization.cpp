@@ -64,15 +64,13 @@ Synchronization::getIsWaitingFor(FederateHandle const& federateHandle)
 }
 
 void
-Synchronization::insert(Federate& federate)
+Synchronization::addFederate(Federate& federate)
 {
   OpenRTIAssert(_waitingFederateSynchronizationMap.find(federate.getFederateHandle()) == _waitingFederateSynchronizationMap.end());
   OpenRTIAssert(_achievedFederateSynchronizationMap.find(federate.getFederateHandle()) == _achievedFederateSynchronizationMap.end());
   if (federate.getResignPending())
     return;
   SynchronizationFederate* synchronizationFederate = new SynchronizationFederate(*this, federate);
-  federate.insert(*synchronizationFederate);
-  _waitingFederateSynchronizationMap.insert(*synchronizationFederate);
 }
 
 void
@@ -86,8 +84,32 @@ Synchronization::achieved(FederateHandle const& federateHandle, bool successful)
   // OpenRTIAssert(_achievedFederateSynchronizationMap.find(i->getFederateHandle()) == _achievedFederateSynchronizationMap.end());
   // Note that no matter where we are currently linked,
   // this removes the entry from one of the maps
-  WaitingFederateSynchronizationMap::unlink(*i);
-  _achievedFederateSynchronizationMap.insert(*i);
+  _unlinkWaitingFederateSynchronizationMap(*i);
+  _insertAchievedFederateSynchronizationMap(*i);
+}
+
+void
+Synchronization::_insertWaitingFederateSynchronizationMap(SynchronizationFederate& synchronizationFederate)
+{
+  _waitingFederateSynchronizationMap.insert(synchronizationFederate);
+}
+
+void
+Synchronization::_unlinkWaitingFederateSynchronizationMap(SynchronizationFederate& synchronizationFederate)
+{
+  _waitingFederateSynchronizationMap.unlink(synchronizationFederate);
+}
+
+void
+Synchronization::_insertAchievedFederateSynchronizationMap(SynchronizationFederate& synchronizationFederate)
+{
+  _achievedFederateSynchronizationMap.insert(synchronizationFederate);
+}
+
+void
+Synchronization::_unlinkAchievedFederateSynchronizationMap(SynchronizationFederate& synchronizationFederate)
+{
+  _achievedFederateSynchronizationMap.unlink(synchronizationFederate);
 }
 
 } // namespace ServerModel

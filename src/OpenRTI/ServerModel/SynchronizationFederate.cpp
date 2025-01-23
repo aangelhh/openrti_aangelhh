@@ -31,10 +31,14 @@ SynchronizationFederate::SynchronizationFederate(Synchronization& synchronizatio
   _federateHandle(federate.getFederateHandle()),
   _successful(false)
 {
+  _synchronization._insertWaitingFederateSynchronizationMap(*this);
+  _federate._insertSynchronizationFederateList(*this);
 }
 
 SynchronizationFederate::~SynchronizationFederate()
 {
+  _federate._unlinkSynchronizationFederateList(*this);
+  Intrusive::UnorderedSetLink<SynchronizationFederate, Intrusive::ParentTag<Synchronization> >::unlink();
 }
 
 void

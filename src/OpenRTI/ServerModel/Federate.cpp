@@ -89,12 +89,6 @@ Federate::send(const SharedPtr<const AbstractMessage>& message)
   _federationConnect->send(message);
 }
 
-void
-Federate::insert(SynchronizationFederate& synchronizationFederate)
-{
-  _synchronizationFederateList.push_back(synchronizationFederate);
-}
-
 bool
 Federate::getIsTimeRegulating() const
 {
@@ -144,6 +138,18 @@ void
 Federate::insert(Region& region)
 {
   _regionHandleRegionMap.insert(region);
+}
+
+void
+Federate::_insertSynchronizationFederateList(SynchronizationFederate& synchronizationFederate)
+{
+  _synchronizationFederateList.push_back(synchronizationFederate);
+}
+
+void
+Federate::_unlinkSynchronizationFederateList(SynchronizationFederate& synchronizationFederate)
+{
+  _synchronizationFederateList.unlink(synchronizationFederate);
 }
 
 } // namespace ServerModel

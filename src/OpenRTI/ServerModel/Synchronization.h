@@ -59,22 +59,31 @@ public:
 
   bool getIsWaitingFor(FederateHandle const& federateHandle);
 
-  void insert(Federate& federate);
+  void addFederate(Federate& federate);
   void achieved(FederateHandle const& federateHandle, bool successful);
-
-  // private:
 
   /// The FederateHandle to SynchronizationFederate map of federates
   /// UnorderedSet of SynchronizationFederate instances indexed by federateHandle
   /// waiting for this synchronization point
+
+  /// UnorderedSet of SynchronizationFederate instances indexed by federateHandle
   typedef Intrusive::UnorderedSet<FederateHandle, Intrusive::UnorderedSetLink<SynchronizationFederate, Intrusive::ParentTag<Synchronization> > > WaitingFederateSynchronizationMap;
-  WaitingFederateSynchronizationMap _waitingFederateSynchronizationMap;
+  /// Get the set of SynchronizationFederate instances
+  WaitingFederateSynchronizationMap const& getWaitingFederateSynchronizationMap() const
+  { return _waitingFederateSynchronizationMap; }
+  WaitingFederateSynchronizationMap& getWaitingFederateSynchronizationMap()
+  { return _waitingFederateSynchronizationMap; }
+
+  /// The FederateHandle to SynchronizationFederate map of federates
+  /// that have achieved the synchronization point
 
   /// UnorderedSet of SynchronizationFederate instances indexed by federateHandle
   typedef Intrusive::UnorderedSet<FederateHandle, Intrusive::UnorderedSetLink<SynchronizationFederate, Intrusive::ParentTag<Synchronization> > > AchievedFederateSynchronizationMap;
-  /// The FederateHandle to SynchronizationFederate map of federates
-  /// that have achieved the synchronization point
-  AchievedFederateSynchronizationMap _achievedFederateSynchronizationMap;
+  /// Get the set of SynchronizationFederate instances
+  AchievedFederateSynchronizationMap const& getAchievedFederateSynchronizationMap() const
+  { return _achievedFederateSynchronizationMap; }
+  AchievedFederateSynchronizationMap& getAchievedFederateSynchronizationMap()
+  { return _achievedFederateSynchronizationMap; }
 
   template<typename Link>
   struct IntrusiveKey;
@@ -101,6 +110,21 @@ private:
   VariableLengthData _tag;
 
   bool _addJoiningFederates;
+
+  /// UnorderedSet of SynchronizationFederate instances indexed by federateHandle
+  friend class SynchronizationFederate;
+  /// Insert synchronizationFederate into waitingFederateSynchronizationMap
+  void _insertWaitingFederateSynchronizationMap(SynchronizationFederate& synchronizationFederate);
+  /// Unlink synchronizationFederate from waitingFederateSynchronizationMap
+  void _unlinkWaitingFederateSynchronizationMap(SynchronizationFederate& synchronizationFederate);
+  WaitingFederateSynchronizationMap _waitingFederateSynchronizationMap;
+
+  /// UnorderedSet of SynchronizationFederate instances indexed by federateHandle
+  /// Insert synchronizationFederate into achievedFederateSynchronizationMap
+  void _insertAchievedFederateSynchronizationMap(SynchronizationFederate& synchronizationFederate);
+  /// Unlink synchronizationFederate from achievedFederateSynchronizationMap
+  void _unlinkAchievedFederateSynchronizationMap(SynchronizationFederate& synchronizationFederate);
+  AchievedFederateSynchronizationMap _achievedFederateSynchronizationMap;
 };
 
 template<>
