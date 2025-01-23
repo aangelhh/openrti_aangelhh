@@ -1360,6 +1360,12 @@ Federation::createObjectClass(ObjectClassHandle const& objectClassHandle, String
   return new ObjectClass(*this, objectClassHandle, name, parentObjectClass);
 }
 
+Synchronization*
+Federation::createSynchronization(std::string const& label)
+{
+  return new Synchronization(*this, label);
+}
+
 Federate*
 Federation::createFederate(FederateHandle const& federateHandle, std::string const& name)
 {

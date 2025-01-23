@@ -312,6 +312,10 @@ public:
   ObjectClass* createObjectClass(ObjectClassHandle const& objectClassHandle, StringVector const& name, ObjectClass* parentObjectClass);
 
   ///
+  /// Create a new Synchronization instance
+  Synchronization* createSynchronization(std::string const& label);
+
+  ///
   /// Create a new Federate instance
   Federate* createFederate(FederateHandle const& federateHandle, std::string const& name);
 

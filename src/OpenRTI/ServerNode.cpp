@@ -410,7 +410,7 @@ public:
       }
 
       ServerModel::Synchronization* synchronization;
-      synchronization = new ServerModel::Synchronization(*this, message->getLabel());
+      synchronization = createSynchronization(message->getLabel());
 
       if (message->getFederateHandleVector().empty()) {
         // In this case add all known federates and the future ones also
@@ -491,7 +491,7 @@ public:
     ServerModel::Synchronization* synchronization = getSynchronization(message->getLabel());
     if (!synchronization) {
       // label is new, create one
-      synchronization = new ServerModel::Synchronization(*this, message->getLabel());
+      synchronization = createSynchronization(message->getLabel());
       synchronization->setTag(message->getTag());
       synchronization->setAddJoiningFederates(message->getAddJoiningFederates());
     } else {
