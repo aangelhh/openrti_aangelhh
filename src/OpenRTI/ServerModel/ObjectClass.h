@@ -130,7 +130,7 @@ public:
   void insertClassAttributeFor(AttributeDefinition& attributeDefinition);
 
   /// List of ObjectInstance instances belonging to this ObjectClass
-  typedef IntrusiveList<ObjectInstance, 0> ObjectInstanceList;
+  typedef Intrusive::List<Intrusive::ListLink<ObjectInstance, Intrusive::ParentTag<ObjectClass> > > ObjectInstanceList;
   /// Get the list of ObjectInstance instances
   ObjectInstanceList const& getObjectInstanceList() const
   { return _objectInstanceList; }

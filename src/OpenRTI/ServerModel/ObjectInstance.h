@@ -24,20 +24,20 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "Handle.h"
-#include "InstanceAttribute.h"
-#include "ObjectInstanceConnect.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 class Federation;
+class FederationConnect;
 class InstanceAttribute;
 class ObjectClass;
+class ObjectInstanceConnect;
 
 class OPENRTI_LOCAL ObjectInstance :
-    public IntrusiveUnorderedMap<ObjectInstanceHandle const, ObjectInstance>::Hook,
-    public IntrusiveUnorderedMap<std::string const, ObjectInstance>::Hook,
-    public IntrusiveList<ObjectInstance, 0>::Hook
+    public Intrusive::UnorderedSetLink<ObjectInstance, Intrusive::ParentTag<Federation> >,
+    public Intrusive::UnorderedSetLink<ObjectInstance, Intrusive::ParentTag<Federation, 1> >,
+    public Intrusive::ListLink<ObjectInstance, Intrusive::ParentTag<ObjectClass> >
 {
 public:
   ObjectInstance(Federation& federation, ObjectInstanceHandle const& objectInstanceHandle, std::string const& name);
@@ -49,10 +49,10 @@ public:
   { return _federation; }
 
   ObjectInstanceHandle const& getObjectInstanceHandle() const
-  { return IntrusiveUnorderedMap<ObjectInstanceHandle const, ObjectInstance>::Hook::getKey(); }
+  { return _objectInstanceHandle; }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string const, ObjectInstance>::Hook::getKey(); }
+  { return _name; }
 
   /// The pointer to the object class this object is an instance of, can be zero
   ObjectClass const* getObjectClass() const
@@ -69,8 +69,7 @@ public:
   ConnectHandleObjectInstanceConnectMap& getConnectHandleObjectInstanceConnectMap()
   { return _connectHandleObjectInstanceConnectMap; }
   /// List of object instance handle/name references at this connect.
-  void insert(ObjectInstanceConnect& objectInstanceConnect)
-  { _connectHandleObjectInstanceConnectMap.insert(objectInstanceConnect); }
+  void insert(ObjectInstanceConnect& objectInstanceConnect);
   /// Mark the name handle pair also represented with this as used in the federationConnect
   void reference(FederationConnect& federationConnect);
   /// Releases the ObjectInstanceConnect entry belonging to the connectHandle
@@ -79,20 +78,8 @@ public:
   void removeConnect(ConnectHandle const& connectHandle);
 
   /// Return the connect that owns this object
-  ConnectHandle getOwnerConnectHandle()
-  {
-    InstanceAttribute* instanceAttribute = getInstanceAttribute(AttributeHandle(0));
-    if (!instanceAttribute)
-      return ConnectHandle();
-    return instanceAttribute->getOwnerConnectHandle();
-  }
-  void setOwnerConnectHandle(ConnectHandle const& connectHandle)
-  {
-    InstanceAttribute* instanceAttribute = getInstanceAttribute(AttributeHandle(0));
-    if (!instanceAttribute)
-      return;
-    instanceAttribute->setOwnerConnectHandle(connectHandle);
-  }
+  ConnectHandle getOwnerConnectHandle();
+  void setOwnerConnectHandle(ConnectHandle const& connectHandle);
 
   /// UnorderedSet of InstanceAttribute instances indexed by attributeHandle
   typedef IntrusiveUnorderedMap<AttributeHandle, InstanceAttribute> AttributeHandleInstanceAttributeMap;
@@ -106,6 +93,9 @@ public:
   InstanceAttribute* getInstanceAttribute(AttributeHandle const& attributeHandle);
   InstanceAttribute* getPrivilegeToDeleteInstanceAttribute();
   void insert(InstanceAttribute& instanceAttribute);
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -124,6 +114,10 @@ private:
 
   Federation& _federation;
 
+  ObjectInstanceHandle const _objectInstanceHandle;
+
+  std::string const _name;
+
   /// The pointer to the object class this object is an instance of, can be zero
   ObjectClass* _objectClass;
 
@@ -132,6 +126,18 @@ private:
 
   /// UnorderedSet of InstanceAttribute instances indexed by attributeHandle
   AttributeHandleInstanceAttributeMap _attributeHandleInstanceAttributeMap;
+};
+
+template<>
+struct ObjectInstance::IntrusiveKey<Intrusive::UnorderedSetLink<ObjectInstance, Intrusive::ParentTag<Federation> > > {
+  static ObjectInstanceHandle const& get(ObjectInstance const& objectInstance)
+  { return objectInstance.getObjectInstanceHandle(); }
+};
+
+template<>
+struct ObjectInstance::IntrusiveKey<Intrusive::UnorderedSetLink<ObjectInstance, Intrusive::ParentTag<Federation, 1> > > {
+  static std::string const& get(ObjectInstance const& objectInstance)
+  { return objectInstance.getName(); }
 };
 
 } // namespace ServerModel

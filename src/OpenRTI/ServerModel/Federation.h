@@ -271,7 +271,7 @@ public:
   Region* getRegion(RegionHandle const& regionHandle);
 
   /// UnorderedSet of ObjectInstance instances indexed by objectInstanceHandle
-  typedef IntrusiveUnorderedMap<ObjectInstanceHandle const, ObjectInstance> ObjectInstanceHandleObjectInstanceMap;
+  typedef Intrusive::UnorderedSet<ObjectInstanceHandle, Intrusive::UnorderedSetLink<ObjectInstance, Intrusive::ParentTag<Federation> > > ObjectInstanceHandleObjectInstanceMap;
   /// Get the set of ObjectInstance instances
   ObjectInstanceHandleObjectInstanceMap const& getObjectInstanceHandleObjectInstanceMap() const
   { return _objectInstanceHandleObjectInstanceMap; }
@@ -282,7 +282,7 @@ public:
   ObjectInstance* getObjectInstance(ObjectInstanceHandle const& objectInstanceHandle);
 
   /// UnorderedSet of ObjectInstance instances indexed by name
-  typedef IntrusiveUnorderedMap<std::string const, ObjectInstance> ObjectInstanceNameObjectInstanceMap;
+  typedef Intrusive::UnorderedSet<std::string, Intrusive::UnorderedSetLink<ObjectInstance, Intrusive::ParentTag<Federation, 1> > > ObjectInstanceNameObjectInstanceMap;
   /// Get one ObjectInstance instance matching name
   ObjectInstance const* getObjectInstance(std::string const& name) const;
   ObjectInstance* getObjectInstance(std::string const& name);

@@ -19,17 +19,19 @@
 
 #include "ObjectInstance.h"
 
-#include "ClassAttribute.h"
+#include "Federation.h"
 #include "FederationConnect.h"
+#include "InstanceAttribute.h"
 #include "ObjectClass.h"
+#include "ObjectInstanceConnect.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 ObjectInstance::ObjectInstance(Federation& federation, ObjectInstanceHandle const& objectInstanceHandle, std::string const& name) :
-  IntrusiveUnorderedMap<ObjectInstanceHandle const, ObjectInstance>::Hook(objectInstanceHandle),
-  IntrusiveUnorderedMap<std::string const, ObjectInstance>::Hook(name),
   _federation(federation),
+  _objectInstanceHandle(objectInstanceHandle),
+  _name(name),
   _objectClass(0)
 {
 }
@@ -58,6 +60,12 @@ ObjectInstance::setObjectClass(ObjectClass* objectClass)
     InstanceAttribute* instanceAttribute = new InstanceAttribute(*this, *i);
     insert(*instanceAttribute);
   }
+}
+
+void
+ObjectInstance::insert(ObjectInstanceConnect& objectInstanceConnect)
+{
+  _connectHandleObjectInstanceConnectMap.insert(objectInstanceConnect);
 }
 
 void
@@ -90,6 +98,24 @@ ObjectInstance::removeConnect(ConnectHandle const& connectHandle)
        i != _attributeHandleInstanceAttributeMap.end(); ++i) {
     i->removeConnect(connectHandle);
   }
+}
+
+ConnectHandle
+ObjectInstance::getOwnerConnectHandle()
+{
+  InstanceAttribute* instanceAttribute = getInstanceAttribute(AttributeHandle(0));
+  if (!instanceAttribute)
+    return ConnectHandle();
+  return instanceAttribute->getOwnerConnectHandle();
+}
+
+void
+ObjectInstance::setOwnerConnectHandle(ConnectHandle const& connectHandle)
+{
+  InstanceAttribute* instanceAttribute = getInstanceAttribute(AttributeHandle(0));
+  if (!instanceAttribute)
+    return;
+  instanceAttribute->setOwnerConnectHandle(connectHandle);
 }
 
 InstanceAttribute const*
