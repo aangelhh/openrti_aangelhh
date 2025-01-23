@@ -20,13 +20,15 @@
 #include "Synchronization.h"
 
 #include "Federate.h"
+#include "Federation.h"
+#include "SynchronizationFederate.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 Synchronization::Synchronization(Federation& federation, std::string const& label) :
-  IntrusiveUnorderedMap<std::string const, Synchronization>::Hook(label),
   _federation(federation),
+  _label(label),
   _addJoiningFederates(true)
 {
 }

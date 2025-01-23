@@ -24,18 +24,17 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "Handle.h"
-#include "SynchronizationFederate.h"
 #include "VariableLengthData.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 class Federate;
-
 class Federation;
+class SynchronizationFederate;
 
 class OPENRTI_LOCAL Synchronization :
-    public IntrusiveUnorderedMap<std::string const, Synchronization>::Hook
+    public Intrusive::UnorderedSetLink<Synchronization, Intrusive::ParentTag<Federation> >
 {
 public:
   Synchronization(Federation& federation, std::string const& label);
@@ -47,7 +46,7 @@ public:
   { return _federation; }
 
   std::string const& getLabel() const
-  { return IntrusiveUnorderedMap<std::string const, Synchronization>::Hook::getKey(); }
+  { return _label; }
 
   VariableLengthData const& getTag() const
   { return _tag; }
@@ -73,6 +72,9 @@ public:
   typedef IntrusiveUnorderedMap<FederateHandle const, SynchronizationFederate> AchievedFederateSynchronizationMap;
   AchievedFederateSynchronizationMap _achievedFederateSynchronizationMap;
 
+  template<typename Link>
+  struct IntrusiveKey;
+
 private:
 #if 201103L <= __cplusplus
   Synchronization(Synchronization const&) = delete;
@@ -90,9 +92,17 @@ private:
 
   Federation& _federation;
 
+  std::string const _label;
+
   VariableLengthData _tag;
 
   bool _addJoiningFederates;
+};
+
+template<>
+struct Synchronization::IntrusiveKey<Intrusive::UnorderedSetLink<Synchronization, Intrusive::ParentTag<Federation> > > {
+  static std::string const& get(Synchronization const& synchronization)
+  { return synchronization.getLabel(); }
 };
 
 } // namespace ServerModel
