@@ -19,13 +19,19 @@
 
 #include "InteractionClass.h"
 
+#include "ClassParameter.h"
+#include "Federation.h"
+#include "InteractionClassModule.h"
+#include "ParameterDefinition.h"
+#include "ParameterDefinitionModule.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 
 InteractionClass::InteractionClass(Federation& federation, InteractionClassHandle const& interactionClassHandle, StringVector const& name, InteractionClass* parentInteractionClass) :
-  IntrusiveUnorderedMap<InteractionClassHandle const, InteractionClass>::Hook(interactionClassHandle),
-  IntrusiveUnorderedMap<StringVector const, InteractionClass>::Hook(name),
   _federation(federation),
+  _interactionClassHandle(interactionClassHandle),
+  _name(name),
   _orderType(RECEIVE),
   _transportationType(RELIABLE),
   _parentInteractionClass(parentInteractionClass)
@@ -71,6 +77,12 @@ InteractionClass::getParentInteractionClassHandle() const
   if (!_parentInteractionClass)
     return InteractionClassHandle();
   return _parentInteractionClass->getInteractionClassHandle();
+}
+
+void
+InteractionClass::insert(InteractionClassModule& interactionClassModule)
+{
+  _interactionClassModuleList.push_back(interactionClassModule);
 }
 
 bool
@@ -150,6 +162,12 @@ InteractionClass::insert(ParameterDefinition& parameterDefinition)
   _parameterHandleParameterDefinitionMap.insert(parameterDefinition);
   _parameterNameParameterDefinitionMap.insert(parameterDefinition);
   insertClassParameterFor(parameterDefinition);
+}
+
+void
+InteractionClass::insert(ParameterDefinitionModule& parameterDefinitionModule)
+{
+  _parameterDefinitionModuleList.push_back(parameterDefinitionModule);
 }
 
 bool

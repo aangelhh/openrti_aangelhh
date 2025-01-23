@@ -24,24 +24,23 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "Handle.h"
-#include "InteractionClassModule.h"
-#include "ParameterDefinition.h"
-#include "ParameterDefinitionModule.h"
+#include "Message.h"
 #include "PublishSubscribe.h"
 #include "StringUtils.h"
-#include "Message.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 class ClassParameter;
 class Federation;
+class InteractionClassModule;
 class ParameterDefinition;
+class ParameterDefinitionModule;
 
 class OPENRTI_LOCAL InteractionClass :
-    public IntrusiveUnorderedMap<InteractionClassHandle const, InteractionClass>::Hook,
-    public IntrusiveUnorderedMap<StringVector const, InteractionClass>::Hook,
-    public IntrusiveList<InteractionClass, 0>::Hook,
+    public Intrusive::UnorderedSetLink<InteractionClass, Intrusive::ParentTag<Federation> >,
+    public Intrusive::UnorderedSetLink<InteractionClass, Intrusive::ParentTag<Federation, 1> >,
+    public Intrusive::ListLink<InteractionClass, Intrusive::ParentTag<InteractionClass> >,
     public PublishSubscribe
 {
 public:
@@ -54,10 +53,10 @@ public:
   { return _federation; }
 
   InteractionClassHandle const& getInteractionClassHandle() const
-  { return IntrusiveUnorderedMap<InteractionClassHandle const, InteractionClass>::Hook::getKey(); }
+  { return _interactionClassHandle; }
 
   StringVector const& getName() const
-  { return IntrusiveUnorderedMap<StringVector const, InteractionClass>::Hook::getKey(); }
+  { return _name; }
 
   OrderType getOrderType() const
   { return _orderType; }
@@ -74,7 +73,7 @@ public:
   InteractionClassHandle getParentInteractionClassHandle() const;
 
   /// List of InteractionClass instances belonging to this InteractionClass
-  typedef IntrusiveList<InteractionClass, 0> ChildInteractionClassList;
+  typedef Intrusive::List<Intrusive::ListLink<InteractionClass, Intrusive::ParentTag<InteractionClass> > > ChildInteractionClassList;
   /// Get the list of InteractionClass instances
   ChildInteractionClassList const& getChildInteractionClassList() const
   { return _childInteractionClassList; }
@@ -88,8 +87,7 @@ public:
   { return _interactionClassModuleList; }
   InteractionClassModuleList& getInteractionClassModuleList()
   { return _interactionClassModuleList; }
-  void insert(InteractionClassModule& interactionClassModule)
-  { _interactionClassModuleList.push_back(interactionClassModule); }
+  void insert(InteractionClassModule& interactionClassModule);
   bool getIsReferencedByAnyModule() const;
 
   /// UnorderedSet of ParameterDefinition instances indexed by parameterHandle
@@ -122,8 +120,7 @@ public:
   { return _parameterDefinitionModuleList; }
   ParameterDefinitionModuleList& getParameterDefinitionModuleList()
   { return _parameterDefinitionModuleList; }
-  void insert(ParameterDefinitionModule& parameterDefinitionModule)
-  { _parameterDefinitionModuleList.push_back(parameterDefinitionModule); }
+  void insert(ParameterDefinitionModule& parameterDefinitionModule);
   bool getAreParametersReferencedByAnyModule() const;
 
   /// UnorderedSet of ClassParameter instances indexed by parameterHandle
@@ -161,6 +158,9 @@ public:
     }
   }
 
+  template<typename Link>
+  struct IntrusiveKey;
+
 private:
 #if 201103L <= __cplusplus
   InteractionClass(InteractionClass const&) = delete;
@@ -177,6 +177,10 @@ private:
 #endif
 
   Federation& _federation;
+
+  InteractionClassHandle const _interactionClassHandle;
+
+  StringVector const _name;
 
   OrderType _orderType;
 
@@ -201,6 +205,18 @@ private:
 
   /// UnorderedSet of ClassParameter instances indexed by parameterHandle
   ParameterHandleClassParameterMap _parameterHandleClassParameterMap;
+};
+
+template<>
+struct InteractionClass::IntrusiveKey<Intrusive::UnorderedSetLink<InteractionClass, Intrusive::ParentTag<Federation> > > {
+  static InteractionClassHandle const& get(InteractionClass const& interactionClass)
+  { return interactionClass.getInteractionClassHandle(); }
+};
+
+template<>
+struct InteractionClass::IntrusiveKey<Intrusive::UnorderedSetLink<InteractionClass, Intrusive::ParentTag<Federation, 1> > > {
+  static StringVector const& get(InteractionClass const& interactionClass)
+  { return interactionClass.getName(); }
 };
 
 } // namespace ServerModel

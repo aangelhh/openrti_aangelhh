@@ -173,7 +173,7 @@ public:
   void insert(UpdateRate& updateRate);
 
   /// UnorderedSet of InteractionClass instances indexed by interactionClassHandle
-  typedef IntrusiveUnorderedMap<InteractionClassHandle const, InteractionClass> InteractionClassHandleInteractionClassMap;
+  typedef Intrusive::UnorderedSet<InteractionClassHandle, Intrusive::UnorderedSetLink<InteractionClass, Intrusive::ParentTag<Federation> > > InteractionClassHandleInteractionClassMap;
   /// Get the set of InteractionClass instances
   InteractionClassHandleInteractionClassMap const& getInteractionClassHandleInteractionClassMap() const
   { return _interactionClassHandleInteractionClassMap; }
@@ -184,7 +184,7 @@ public:
   InteractionClass* getInteractionClass(InteractionClassHandle const& interactionClassHandle);
 
   /// UnorderedSet of InteractionClass instances indexed by name
-  typedef IntrusiveUnorderedMap<StringVector const, InteractionClass> InteractionClassNameInteractionClassMap;
+  typedef Intrusive::UnorderedSet<StringVector, Intrusive::UnorderedSetLink<InteractionClass, Intrusive::ParentTag<Federation, 1> > > InteractionClassNameInteractionClassMap;
   /// Get one InteractionClass instance matching name
   InteractionClass const* getInteractionClass(StringVector const& name) const;
   InteractionClass* getInteractionClass(StringVector const& name);
