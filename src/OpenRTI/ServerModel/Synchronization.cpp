@@ -70,7 +70,7 @@ Synchronization::addFederate(Federate& federate)
   OpenRTIAssert(_achievedFederateSynchronizationMap.find(federate.getFederateHandle()) == _achievedFederateSynchronizationMap.end());
   if (federate.getResignPending())
     return;
-  SynchronizationFederate* synchronizationFederate = new SynchronizationFederate(*this, federate);
+  SynchronizationFederate* synchronizationFederate = createSynchronizationFederate(federate);
 }
 
 void
@@ -86,6 +86,12 @@ Synchronization::achieved(FederateHandle const& federateHandle, bool successful)
   // this removes the entry from one of the maps
   _unlinkWaitingFederateSynchronizationMap(*i);
   _insertAchievedFederateSynchronizationMap(*i);
+}
+
+SynchronizationFederate*
+Synchronization::createSynchronizationFederate(Federate& federate)
+{
+  return new SynchronizationFederate(*this, federate);
 }
 
 void

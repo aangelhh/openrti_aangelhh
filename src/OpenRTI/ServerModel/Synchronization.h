@@ -85,6 +85,10 @@ public:
   AchievedFederateSynchronizationMap& getAchievedFederateSynchronizationMap()
   { return _achievedFederateSynchronizationMap; }
 
+  ///
+  /// Create a new SynchronizationFederate instance
+  SynchronizationFederate* createSynchronizationFederate(Federate& federate);
+
   template<typename Link>
   struct IntrusiveKey;
 
