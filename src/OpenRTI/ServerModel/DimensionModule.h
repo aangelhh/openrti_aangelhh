@@ -30,8 +30,8 @@ class Dimension;
 class Module;
 
 class OPENRTI_LOCAL DimensionModule :
-    public IntrusiveList<DimensionModule, 0>::Hook,
-    public IntrusiveList<DimensionModule, 1>::Hook
+    public Intrusive::ListLink<DimensionModule, Intrusive::ParentTag<Module> >,
+    public Intrusive::ListLink<DimensionModule, Intrusive::ParentTag<Dimension> >
 {
 public:
   DimensionModule(Dimension& dimension, Module& module);

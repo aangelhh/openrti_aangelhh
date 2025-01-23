@@ -57,7 +57,7 @@ public:
   void setUpperBound(Unsigned upperBound);
 
   /// The list of Modules referencing this Dimension
-  typedef IntrusiveList<DimensionModule, 1> DimensionModuleList;
+  typedef Intrusive::List<Intrusive::ListLink<DimensionModule, Intrusive::ParentTag<Dimension> > > DimensionModuleList;
   bool getIsReferencedByAnyModule() const;
   void insert(DimensionModule& dimensionModule);
 

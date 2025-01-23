@@ -19,6 +19,9 @@
 
 #include "DimensionModule.h"
 
+#include "Dimension.h"
+#include "Module.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 

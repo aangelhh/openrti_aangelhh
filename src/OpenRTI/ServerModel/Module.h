@@ -69,7 +69,7 @@ public:
   void setArtificialObjectRoot(bool artificialObjectRoot);
 
   /// All Dimensions that are referenced by this Module
-  typedef IntrusiveList<DimensionModule, 0> DimensionModuleList;
+  typedef Intrusive::List<Intrusive::ListLink<DimensionModule, Intrusive::ParentTag<Module> > > DimensionModuleList;
   /// Get the list of DimensionModule instances
   DimensionModuleList const& getDimensionModuleList() const
   { return _dimensionModuleList; }
