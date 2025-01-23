@@ -32,7 +32,7 @@ class ClassAttribute;
 class ObjectInstance;
 
 class OPENRTI_LOCAL InstanceAttribute :
-    public IntrusiveUnorderedMap<AttributeHandle, InstanceAttribute>::Hook
+    public Intrusive::UnorderedSetLink<InstanceAttribute, Intrusive::ParentTag<ObjectInstance> >
 {
 public:
   InstanceAttribute(ObjectInstance& objectInstance, ClassAttribute& classAttribute);
@@ -49,7 +49,7 @@ public:
   { return _classAttribute; }
 
   AttributeHandle const& getAttributeHandle() const
-  { return IntrusiveUnorderedMap<AttributeHandle, InstanceAttribute>::Hook::getKey(); }
+  { return _attributeHandle; }
 
   /// Get the ConnectHandle this attribute is owned
   ConnectHandle const& getOwnerConnectHandle() const
@@ -74,6 +74,9 @@ public:
   /// The connect this attribute is owned by
   ConnectHandle _ownerConnectHandle;
 
+  template<typename Link>
+  struct IntrusiveKey;
+
 private:
 #if 201103L <= __cplusplus
   InstanceAttribute(InstanceAttribute const&) = delete;
@@ -92,6 +95,14 @@ private:
   ObjectInstance& _objectInstance;
 
   ClassAttribute& _classAttribute;
+
+  AttributeHandle const _attributeHandle;
+};
+
+template<>
+struct InstanceAttribute::IntrusiveKey<Intrusive::UnorderedSetLink<InstanceAttribute, Intrusive::ParentTag<ObjectInstance> > > {
+  static AttributeHandle const& get(InstanceAttribute const& instanceAttribute)
+  { return instanceAttribute.getAttributeHandle(); }
 };
 
 } // namespace ServerModel

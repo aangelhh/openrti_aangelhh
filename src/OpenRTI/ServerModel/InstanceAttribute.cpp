@@ -20,14 +20,15 @@
 #include "InstanceAttribute.h"
 
 #include "ClassAttribute.h"
+#include "ObjectInstance.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 InstanceAttribute::InstanceAttribute(ObjectInstance& objectInstance, ClassAttribute& classAttribute) :
-  IntrusiveUnorderedMap<AttributeHandle, InstanceAttribute>::Hook(classAttribute.getAttributeHandle()),
   _objectInstance(objectInstance),
-  _classAttribute(classAttribute)
+  _classAttribute(classAttribute),
+  _attributeHandle(classAttribute.getAttributeHandle())
 {
   /// FIXME
   _receivingConnects = _classAttribute._cumulativeSubscribedConnectHandleSet;

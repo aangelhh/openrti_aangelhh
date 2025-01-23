@@ -82,7 +82,7 @@ public:
   void setOwnerConnectHandle(ConnectHandle const& connectHandle);
 
   /// UnorderedSet of InstanceAttribute instances indexed by attributeHandle
-  typedef IntrusiveUnorderedMap<AttributeHandle, InstanceAttribute> AttributeHandleInstanceAttributeMap;
+  typedef Intrusive::UnorderedSet<AttributeHandle, Intrusive::UnorderedSetLink<InstanceAttribute, Intrusive::ParentTag<ObjectInstance> > > AttributeHandleInstanceAttributeMap;
   /// Get the set of InstanceAttribute instances
   AttributeHandleInstanceAttributeMap const& getAttributeHandleInstanceAttributeMap() const
   { return _attributeHandleInstanceAttributeMap; }
