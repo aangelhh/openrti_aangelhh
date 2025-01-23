@@ -1574,8 +1574,6 @@ public:
       return federationConnect;
 
     federationConnect = new ServerModel::FederationConnect(*this, nodeConnect);
-    ServerModel::Federation::insert(*federationConnect);
-    nodeConnect.insert(*federationConnect);
     if (nodeConnect.getIsParentConnect())
       federationConnect->setActive(true);
     return federationConnect;

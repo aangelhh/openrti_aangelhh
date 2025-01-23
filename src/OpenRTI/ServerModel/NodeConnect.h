@@ -73,7 +73,6 @@ public:
   { return _federationConnectList; }
   FederationConnectList& getFederationConnectList()
   { return _federationConnectList; }
-  void insert(FederationConnect& federationConnect);
 
   /// The message send callback
   const SharedPtr<AbstractMessageSender>& getMessageSender() const;
@@ -116,6 +115,11 @@ private:
   StringStringListMap _options;
 
   /// List of FederationConnect instances belonging to this NodeConnect
+  friend class FederationConnect;
+  /// Insert federationConnect into federationConnectList
+  void _insertFederationConnectList(FederationConnect& federationConnect);
+  /// Unlink federationConnect from federationConnectList
+  void _unlinkFederationConnectList(FederationConnect& federationConnect);
   FederationConnectList _federationConnectList;
 
   SharedPtr<AbstractMessageSender> _messageSender;

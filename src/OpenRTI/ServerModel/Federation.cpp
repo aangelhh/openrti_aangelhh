@@ -207,12 +207,6 @@ Federation::getFederationConnect(ConnectHandle const& connectHandle)
 }
 
 void
-Federation::insert(FederationConnect& federationConnect)
-{
-  _connectHandleFederationConnectMap.insert(federationConnect);
-}
-
-void
 Federation::removeConnect(ConnectHandle const& connectHandle)
 {
   for (ObjectInstanceHandleObjectInstanceMap::iterator i = _objectInstanceHandleObjectInstanceMap.begin();
@@ -303,8 +297,6 @@ Federation::insertTimeRegulating(Federate& federate)
   OpenRTIAssert(!federate.getIsTimeRegulating());
   FederationConnect* federationConnect = federate.getFederationConnect();
   OpenRTIAssert(federationConnect);
-  if (!federationConnect->getIsTimeRegulating())
-    _timeRegulatingFederationConnectList.push_back(*federationConnect);
   federationConnect->insertTimeRegulating(federate);
 }
 
@@ -317,9 +309,6 @@ Federation::eraseTimeRegulating(Federate& federate)
   OpenRTIAssert(federationConnect);
   OpenRTIAssert(federationConnect->getIsTimeRegulating());
   federationConnect->eraseTimeRegulating(federate);
-  if (!federationConnect->getTimeRegulatingFederateList().empty())
-    return;
-  _timeRegulatingFederationConnectList.unlink(*federationConnect);
 }
 
 Module const*
@@ -1445,6 +1434,30 @@ Federation::createObjectInstance(ObjectInstanceHandle const& objectInstanceHandl
     return new ObjectInstance(*this, objectInstanceHandle2, objectInstanceHandle2.getReservedName("HLAobjectInstance"));
   else
     return new ObjectInstance(*this, objectInstanceHandle2, name);
+}
+
+void
+Federation::_insertConnectHandleFederationConnectMap(FederationConnect& federationConnect)
+{
+  _connectHandleFederationConnectMap.insert(federationConnect);
+}
+
+void
+Federation::_unlinkConnectHandleFederationConnectMap(FederationConnect& federationConnect)
+{
+  _connectHandleFederationConnectMap.unlink(federationConnect);
+}
+
+void
+Federation::_insertTimeRegulatingFederationConnectList(FederationConnect& federationConnect)
+{
+  _timeRegulatingFederationConnectList.push_back(federationConnect);
+}
+
+void
+Federation::_unlinkTimeRegulatingFederationConnectList(FederationConnect& federationConnect)
+{
+  _timeRegulatingFederationConnectList.unlink(federationConnect);
 }
 
 } // namespace ServerModel

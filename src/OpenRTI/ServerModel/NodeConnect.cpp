@@ -68,12 +68,6 @@ NodeConnect::setOptions(StringStringListMap const& options)
     _name.clear();
 }
 
-void
-NodeConnect::insert(FederationConnect& federationConnect)
-{
-  _federationConnectList.push_back(federationConnect);
-}
-
 const SharedPtr<AbstractMessageSender>&
 NodeConnect::getMessageSender() const
 {
@@ -92,6 +86,18 @@ NodeConnect::send(const SharedPtr<const AbstractMessage>& message)
   if (!_messageSender.valid())
     return;
   _messageSender->send(message);
+}
+
+void
+NodeConnect::_insertFederationConnectList(FederationConnect& federationConnect)
+{
+  _federationConnectList.push_back(federationConnect);
+}
+
+void
+NodeConnect::_unlinkFederationConnectList(FederationConnect& federationConnect)
+{
+  _federationConnectList.unlink(federationConnect);
 }
 
 } // namespace ServerModel

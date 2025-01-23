@@ -64,6 +64,10 @@ public:
   ConnectHandle const& getConnectHandle() const
   { return _connectHandle; }
 
+  /// True if the FederationConnect is time regulating.
+  bool getIsTimeRegulating() const;
+  void setIsTimeRegulating(bool isTimeRegulating);
+
   /// True if this is the parent connect
   bool getIsParentConnect() const;
 
@@ -97,7 +101,6 @@ public:
   { return _timeRegulatingFederateList; }
   TimeRegulatingFederateList& getTimeRegulatingFederateList()
   { return _timeRegulatingFederateList; }
-  bool getIsTimeRegulating() const;
   void insertTimeRegulating(Federate& federate);
   void eraseTimeRegulating(Federate& federate);
 

@@ -102,7 +102,6 @@ public:
   /// Get one FederationConnect instance matching connectHandle
   FederationConnect const* getFederationConnect(ConnectHandle const& connectHandle) const;
   FederationConnect* getFederationConnect(ConnectHandle const& connectHandle);
-  void insert(FederationConnect& federationConnect);
   void removeConnect(ConnectHandle const& connectHandle);
 
   void send(ConnectHandle const& connectHandle, const SharedPtr<const AbstractMessage>& message);
@@ -342,9 +341,18 @@ private:
   /// federation is already known at this connect and we do this by asking
   /// the federation for a valid connect for a given connect handle.
   /// Here a fast index keyed by connect handle helps a lot, so we have a map here.
+  friend class FederationConnect;
+  /// Insert federationConnect into connectHandleFederationConnectMap
+  void _insertConnectHandleFederationConnectMap(FederationConnect& federationConnect);
+  /// Unlink federationConnect from connectHandleFederationConnectMap
+  void _unlinkConnectHandleFederationConnectMap(FederationConnect& federationConnect);
   ConnectHandleFederationConnectMap _connectHandleFederationConnectMap;
 
   /// Links those FederationConnects that contain time regulating federates
+  /// Insert federationConnect into timeRegulatingFederationConnectList
+  void _insertTimeRegulatingFederationConnectList(FederationConnect& federationConnect);
+  /// Unlink federationConnect from timeRegulatingFederationConnectList
+  void _unlinkTimeRegulatingFederationConnectList(FederationConnect& federationConnect);
   TimeRegulatingFederationConnectList _timeRegulatingFederationConnectList;
 
   /// UnorderedSet of Module instances indexed by moduleHandle

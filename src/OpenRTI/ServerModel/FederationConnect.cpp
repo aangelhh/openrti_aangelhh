@@ -35,6 +35,8 @@ FederationConnect::FederationConnect(Federation& federation, NodeConnect& nodeCo
   _active(false),
   _permitTimeRegulation(true)
 {
+  _nodeConnect._insertFederationConnectList(*this);
+  _federation._insertConnectHandleFederationConnectMap(*this);
 }
 
 FederationConnect::~FederationConnect()
@@ -43,8 +45,31 @@ FederationConnect::~FederationConnect()
   _objectInstanceConnectList.clear();
   _timeRegulatingFederateList.unlink();
 
+  if (getIsTimeRegulating())
+    _federation._unlinkTimeRegulatingFederationConnectList(*this);
+  _federation._unlinkConnectHandleFederationConnectMap(*this);
+  _nodeConnect._unlinkFederationConnectList(*this);
+
   OpenRTIAssert(_objectInstanceConnectList.empty());
   OpenRTIAssert(_timeRegulatingFederateList.empty());
+}
+
+bool
+FederationConnect::getIsTimeRegulating() const
+{
+  return Intrusive::ListLink<FederationConnect, Intrusive::ParentTag<Federation> >::is_linked();
+}
+
+void
+FederationConnect::setIsTimeRegulating(bool isTimeRegulating)
+{
+  if (isTimeRegulating == getIsTimeRegulating())
+    return;
+  if (isTimeRegulating) {
+    _federation._insertTimeRegulatingFederationConnectList(*this);
+  } else {
+    _federation._unlinkTimeRegulatingFederationConnectList(*this);
+  }
 }
 
 bool
@@ -97,24 +122,21 @@ FederationConnect::erase(Federate& federate)
   federate.setFederationConnect(0);
 }
 
-bool
-FederationConnect::getIsTimeRegulating() const
-{
-  OpenRTIAssert(_timeRegulatingFederateList.empty() != Federation::TimeRegulatingFederationConnectList::link_type::is_linked());
-  OpenRTIAssert(!Federation::TimeRegulatingFederationConnectList::link_type::is_linked() || _permitTimeRegulation);
-  return Federation::TimeRegulatingFederationConnectList::link_type::is_linked();
-}
-
 void
 FederationConnect::insertTimeRegulating(Federate& federate)
 {
+  setIsTimeRegulating(true);
   _timeRegulatingFederateList.push_back(federate);
+
+  OpenRTIAssert(_timeRegulatingFederateList.empty() != Federation::TimeRegulatingFederationConnectList::link_type::is_linked());
+  OpenRTIAssert(!Federation::TimeRegulatingFederationConnectList::link_type::is_linked() || _permitTimeRegulation);
 }
 
 void
 FederationConnect::eraseTimeRegulating(Federate& federate)
 {
   _timeRegulatingFederateList.unlink(federate);
+  setIsTimeRegulating(!_timeRegulatingFederateList.empty());
 }
 
 void
