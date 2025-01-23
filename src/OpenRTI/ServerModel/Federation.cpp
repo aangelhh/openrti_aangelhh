@@ -437,13 +437,6 @@ Federation::getUpdateRate(std::string const& name)
   return i.get();
 }
 
-void
-Federation::insert(UpdateRate& updateRate)
-{
-  _updateRateNameUpdateRateMap.insert(updateRate);
-  _updateRateHandleUpdateRateMap.insert(updateRate);
-}
-
 InteractionClass const*
 Federation::getInteractionClass(InteractionClassHandle const& interactionClassHandle) const
 {
@@ -595,7 +588,6 @@ Federation::insertOrCheck(Module& module, FOMStringUpdateRate const& stringUpdat
   } else {
     UpdateRate* updateRate = new UpdateRate(*this, _updateRateHandleAllocator.get(), stringUpdateRate.getName());
     updateRate->setRate(stringUpdateRate.getRate());
-    insert(*updateRate);
     module.insert(*updateRate);
     return true;
   }
@@ -937,7 +929,6 @@ Federation::insert(Module& module, FOMUpdateRate const& fomUpdateRate)
     _updateRateHandleAllocator.take(fomUpdateRate.getUpdateRateHandle());
     UpdateRate* updateRate = new UpdateRate(*this, fomUpdateRate.getUpdateRateHandle(), fomUpdateRate.getName());
     updateRate->setRate(fomUpdateRate.getRate());
-    insert(*updateRate);
     module.insert(*updateRate);
   }
 }
@@ -1477,6 +1468,30 @@ void
 Federation::_unlinkDimensionNameDimensionMap(Dimension& dimension)
 {
   _dimensionNameDimensionMap.unlink(dimension);
+}
+
+void
+Federation::_insertUpdateRateHandleUpdateRateMap(UpdateRate& updateRate)
+{
+  _updateRateHandleUpdateRateMap.insert(updateRate);
+}
+
+void
+Federation::_unlinkUpdateRateHandleUpdateRateMap(UpdateRate& updateRate)
+{
+  _updateRateHandleUpdateRateMap.unlink(updateRate);
+}
+
+void
+Federation::_insertUpdateRateNameUpdateRateMap(UpdateRate& updateRate)
+{
+  _updateRateNameUpdateRateMap.insert(updateRate);
+}
+
+void
+Federation::_unlinkUpdateRateNameUpdateRateMap(UpdateRate& updateRate)
+{
+  _updateRateNameUpdateRateMap.unlink(updateRate);
 }
 
 } // namespace ServerModel

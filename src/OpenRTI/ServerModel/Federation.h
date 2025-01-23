@@ -173,7 +173,6 @@ public:
   UpdateRate* getUpdateRate(std::string const& name);
   UpdateRate* resolveUpdateRate(std::string const& updateRateName)
   { return getUpdateRate(updateRateName); }
-  void insert(UpdateRate& updateRate);
 
   /// UnorderedSet of InteractionClass instances indexed by interactionClassHandle
   typedef Intrusive::UnorderedSet<InteractionClassHandle, Intrusive::UnorderedSetLink<InteractionClass, Intrusive::ParentTag<Federation> > > InteractionClassHandleInteractionClassMap;
@@ -393,12 +392,21 @@ private:
   DimensionNameDimensionMap _dimensionNameDimensionMap;
 
   /// UnorderedSet of UpdateRate instances indexed by updateRateHandle
+  friend class UpdateRate;
+  /// Insert updateRate into updateRateHandleUpdateRateMap
+  void _insertUpdateRateHandleUpdateRateMap(UpdateRate& updateRate);
+  /// Unlink updateRate from updateRateHandleUpdateRateMap
+  void _unlinkUpdateRateHandleUpdateRateMap(UpdateRate& updateRate);
   UpdateRateHandleUpdateRateMap _updateRateHandleUpdateRateMap;
 
   /// The appropriate HandleAllocator
   HandleAllocator<UpdateRateHandle> _updateRateHandleAllocator;
 
   /// UnorderedSet of UpdateRate instances indexed by name
+  /// Insert updateRate into updateRateNameUpdateRateMap
+  void _insertUpdateRateNameUpdateRateMap(UpdateRate& updateRate);
+  /// Unlink updateRate from updateRateNameUpdateRateMap
+  void _unlinkUpdateRateNameUpdateRateMap(UpdateRate& updateRate);
   UpdateRateNameUpdateRateMap _updateRateNameUpdateRateMap;
 
   /// UnorderedSet of InteractionClass instances indexed by interactionClassHandle

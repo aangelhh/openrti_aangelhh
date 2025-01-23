@@ -31,10 +31,15 @@ UpdateRate::UpdateRate(Federation& federation, UpdateRateHandle const& updateRat
   _name(name),
   _rate(0)
 {
+  _federation._insertUpdateRateHandleUpdateRateMap(*this);
+  _federation._insertUpdateRateNameUpdateRateMap(*this);
 }
 
 UpdateRate::~UpdateRate()
 {
+  _federation._unlinkUpdateRateNameUpdateRateMap(*this);
+  _federation._unlinkUpdateRateHandleUpdateRateMap(*this);
+
   OpenRTIAssert(_updateRateModuleList.empty());
 }
 
