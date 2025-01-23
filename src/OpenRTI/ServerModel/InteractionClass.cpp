@@ -86,16 +86,16 @@ InteractionClass::getParentInteractionClassHandle() const
   return _parentInteractionClass->getInteractionClassHandle();
 }
 
-void
-InteractionClass::insert(InteractionClassModule& interactionClassModule)
+bool
+InteractionClass::getInteractionClassIsReferencedByAnyModule() const
 {
-  _interactionClassModuleList.push_back(interactionClassModule);
+  return !_interactionClassModuleList.empty();
 }
 
 bool
 InteractionClass::getIsReferencedByAnyModule() const
 {
-  return !_interactionClassModuleList.empty() || !_parameterDefinitionModuleList.empty();
+  return getInteractionClassIsReferencedByAnyModule() || getAreParametersReferencedByAnyModule();
 }
 
 ParameterDefinition const*
@@ -224,6 +224,18 @@ void
 InteractionClass::_unlinkChildInteractionClassList(InteractionClass& interactionClass)
 {
   _childInteractionClassList.unlink(interactionClass);
+}
+
+void
+InteractionClass::_insertInteractionClassModuleList(InteractionClassModule& interactionClassModule)
+{
+  _interactionClassModuleList.push_back(interactionClassModule);
+}
+
+void
+InteractionClass::_unlinkInteractionClassModuleList(InteractionClassModule& interactionClassModule)
+{
+  _interactionClassModuleList.unlink(interactionClassModule);
 }
 
 } // namespace ServerModel

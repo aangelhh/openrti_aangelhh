@@ -29,10 +29,14 @@ InteractionClassModule::InteractionClassModule(InteractionClass& interactionClas
   _interactionClass(interactionClass),
   _module(module)
 {
+  _module._insertInteractionClassModuleList(*this);
+  _interactionClass._insertInteractionClassModuleList(*this);
 }
 
 InteractionClassModule::~InteractionClassModule()
 {
+  _interactionClass._unlinkInteractionClassModuleList(*this);
+  _module._unlinkInteractionClassModuleList(*this);
 }
 
 } // namespace ServerModel

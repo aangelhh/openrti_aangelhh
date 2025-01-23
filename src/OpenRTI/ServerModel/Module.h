@@ -92,7 +92,6 @@ public:
   { return _interactionClassModuleList; }
   InteractionClassModuleList& getInteractionClassModuleList()
   { return _interactionClassModuleList; }
-  void insert(InteractionClassModule& interactionClassModule);
 
   /// All InteractionClasses whos ParameterDefinitions are referenced by this Module
   typedef Intrusive::List<Intrusive::ListLink<ParameterDefinitionModule, Intrusive::ParentTag<Module> > > ParameterDefinitionModuleList;
@@ -177,6 +176,11 @@ private:
   UpdateRateModuleList _updateRateModuleList;
 
   /// All InteractionClasses that are referenced by this Module
+  friend class InteractionClassModule;
+  /// Insert interactionClassModule into interactionClassModuleList
+  void _insertInteractionClassModuleList(InteractionClassModule& interactionClassModule);
+  /// Unlink interactionClassModule from interactionClassModuleList
+  void _unlinkInteractionClassModuleList(InteractionClassModule& interactionClassModule);
   InteractionClassModuleList _interactionClassModuleList;
 
   /// All InteractionClasses whos ParameterDefinitions are referenced by this Module

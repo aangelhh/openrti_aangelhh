@@ -76,12 +76,6 @@ Module::setArtificialObjectRoot(bool artificialObjectRoot)
 }
 
 void
-Module::insert(InteractionClassModule& interactionClassModule)
-{
-  _interactionClassModuleList.push_back(interactionClassModule);
-}
-
-void
 Module::insert(ParameterDefinitionModule& parameterDefinitionModule)
 {
   _parameterDefinitionModuleList.push_back(parameterDefinitionModule);
@@ -213,11 +207,7 @@ Module::insert(UpdateRate& updateRate)
 InteractionClassModule*
 Module::insert(InteractionClass& interactionClass)
 {
-  InteractionClassModule* interactionClassModule;
-  interactionClassModule = new InteractionClassModule(interactionClass, *this);
-  interactionClass.insert(*interactionClassModule);
-  insert(*interactionClassModule);
-  return interactionClassModule;
+  return new InteractionClassModule(interactionClass, *this);
 }
 
 ParameterDefinitionModule*
@@ -272,6 +262,18 @@ void
 Module::_unlinkUpdateRateModuleList(UpdateRateModule& updateRateModule)
 {
   _updateRateModuleList.unlink(updateRateModule);
+}
+
+void
+Module::_insertInteractionClassModuleList(InteractionClassModule& interactionClassModule)
+{
+  _interactionClassModuleList.push_back(interactionClassModule);
+}
+
+void
+Module::_unlinkInteractionClassModuleList(InteractionClassModule& interactionClassModule)
+{
+  _interactionClassModuleList.unlink(interactionClassModule);
 }
 
 } // namespace ServerModel

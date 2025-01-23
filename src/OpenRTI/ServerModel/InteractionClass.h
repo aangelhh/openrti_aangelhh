@@ -88,7 +88,9 @@ public:
   { return _interactionClassModuleList; }
   InteractionClassModuleList& getInteractionClassModuleList()
   { return _interactionClassModuleList; }
-  void insert(InteractionClassModule& interactionClassModule);
+  /// Returns if the InteractionClass is referenced by a module.
+  bool getInteractionClassIsReferencedByAnyModule() const;
+  /// Returns if the InteractionClass or the ParameterDefinitions is referenced by a module.
   bool getIsReferencedByAnyModule() const;
 
   /// UnorderedSet of ParameterDefinition instances indexed by parameterHandle
@@ -197,6 +199,11 @@ private:
   ChildInteractionClassList _childInteractionClassList;
 
   /// The list of Modules referencing this InteractionClass
+  friend class InteractionClassModule;
+  /// Insert interactionClassModule into interactionClassModuleList
+  void _insertInteractionClassModuleList(InteractionClassModule& interactionClassModule);
+  /// Unlink interactionClassModule from interactionClassModuleList
+  void _unlinkInteractionClassModuleList(InteractionClassModule& interactionClassModule);
   InteractionClassModuleList _interactionClassModuleList;
 
   /// UnorderedSet of ParameterDefinition instances indexed by parameterHandle
