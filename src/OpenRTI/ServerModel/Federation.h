@@ -238,10 +238,16 @@ public:
   void getModuleList(FOMModuleList& moduleList) const;
   void getModuleList(FOMModuleList& moduleList, ModuleHandleVector const& moduleHandleVector) const;
 
-  /// Synchronization state FIXME
   /// UnorderedSet of Synchronization instances indexed by label
   typedef Intrusive::UnorderedSet<std::string, Intrusive::UnorderedSetLink<Synchronization, Intrusive::ParentTag<Federation> > > SynchronizationNameSynchronizationMap;
-  SynchronizationNameSynchronizationMap _synchronizationNameSynchronizationMap;
+  /// Get the set of Synchronization instances
+  SynchronizationNameSynchronizationMap const& getSynchronizationNameSynchronizationMap() const
+  { return _synchronizationNameSynchronizationMap; }
+  SynchronizationNameSynchronizationMap& getSynchronizationNameSynchronizationMap()
+  { return _synchronizationNameSynchronizationMap; }
+  /// Get one Synchronization instance matching label
+  Synchronization const* getSynchronization(std::string const& label) const;
+  Synchronization* getSynchronization(std::string const& label);
 
   /// UnorderedSet of Federate instances indexed by federateHandle
   typedef Intrusive::UnorderedSet<FederateHandle, Intrusive::UnorderedSetLink<Federate, Intrusive::ParentTag<Federation> > > FederateHandleFederateMap;
@@ -442,6 +448,14 @@ private:
   /// Unlink objectClass from objectClassNameObjectClassMap
   void _unlinkObjectClassNameObjectClassMap(ObjectClass& objectClass);
   ObjectClassNameObjectClassMap _objectClassNameObjectClassMap;
+
+  /// UnorderedSet of Synchronization instances indexed by label
+  friend class Synchronization;
+  /// Insert synchronization into synchronizationNameSynchronizationMap
+  void _insertSynchronizationNameSynchronizationMap(Synchronization& synchronization);
+  /// Unlink synchronization from synchronizationNameSynchronizationMap
+  void _unlinkSynchronizationNameSynchronizationMap(Synchronization& synchronization);
+  SynchronizationNameSynchronizationMap _synchronizationNameSynchronizationMap;
 
   /// UnorderedSet of Federate instances indexed by federateHandle
   FederateHandleFederateMap _federateHandleFederateMap;

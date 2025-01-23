@@ -31,12 +31,15 @@ Synchronization::Synchronization(Federation& federation, std::string const& labe
   _label(label),
   _addJoiningFederates(true)
 {
+  _federation._insertSynchronizationNameSynchronizationMap(*this);
 }
 
 Synchronization::~Synchronization()
 {
   _achievedFederateSynchronizationMap.clear();
   _waitingFederateSynchronizationMap.clear();
+
+  _federation._unlinkSynchronizationNameSynchronizationMap(*this);
 
   OpenRTIAssert(_achievedFederateSynchronizationMap.empty());
   OpenRTIAssert(_waitingFederateSynchronizationMap.empty());

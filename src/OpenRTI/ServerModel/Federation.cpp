@@ -1208,6 +1208,26 @@ Federation::getModuleList(FOMModuleList& moduleList, ModuleHandleVector const& m
   }
 }
 
+Synchronization const*
+Federation::getSynchronization(std::string const& label) const
+{
+  SynchronizationNameSynchronizationMap::const_iterator i;
+  i = _synchronizationNameSynchronizationMap.find(label);
+  if (i == _synchronizationNameSynchronizationMap.end())
+    return 0;
+  return i.get();
+}
+
+Synchronization*
+Federation::getSynchronization(std::string const& label)
+{
+  SynchronizationNameSynchronizationMap::iterator i;
+  i = _synchronizationNameSynchronizationMap.find(label);
+  if (i == _synchronizationNameSynchronizationMap.end())
+    return 0;
+  return i.get();
+}
+
 Federate const*
 Federation::getFederate(FederateHandle const& federateHandle) const
 {
@@ -1522,6 +1542,18 @@ void
 Federation::_unlinkObjectClassNameObjectClassMap(ObjectClass& objectClass)
 {
   _objectClassNameObjectClassMap.unlink(objectClass);
+}
+
+void
+Federation::_insertSynchronizationNameSynchronizationMap(Synchronization& synchronization)
+{
+  _synchronizationNameSynchronizationMap.insert(synchronization);
+}
+
+void
+Federation::_unlinkSynchronizationNameSynchronizationMap(Synchronization& synchronization)
+{
+  _synchronizationNameSynchronizationMap.unlink(synchronization);
 }
 
 } // namespace ServerModel
