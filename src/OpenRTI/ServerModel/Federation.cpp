@@ -1371,9 +1371,9 @@ Federation::createFederate(FederateHandle const& federateHandle, std::string con
 {
   FederateHandle federateHandle2 = _federateHandleAllocator.getOrTake(federateHandle);
   if (name.empty())
-    return new Federate(*this, federateHandle2, federateHandle2.getReservedName("HLAfederate"));
+    return _createFederate(federateHandle2, federateHandle2.getReservedName("HLAfederate"));
   else
-    return new Federate(*this, federateHandle2, name);
+    return _createFederate(federateHandle2, name);
 }
 
 ObjectInstance*
@@ -1384,6 +1384,12 @@ Federation::createObjectInstance(ObjectInstanceHandle const& objectInstanceHandl
     return new ObjectInstance(*this, objectInstanceHandle2, objectInstanceHandle2.getReservedName("HLAobjectInstance"));
   else
     return new ObjectInstance(*this, objectInstanceHandle2, name);
+}
+
+Federate*
+Federation::_createFederate(FederateHandle const& federateHandle, std::string const& name)
+{
+  return new Federate(*this, federateHandle, name);
 }
 
 void

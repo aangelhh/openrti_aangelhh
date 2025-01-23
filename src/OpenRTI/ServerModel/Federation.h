@@ -326,6 +326,11 @@ public:
   template<typename Link>
   struct IntrusiveKey;
 
+protected:
+  ///
+  /// Create a new Federate instance
+  Federate* _createFederate(FederateHandle const& federateHandle, std::string const& name);
+
 private:
 #if 201103L <= __cplusplus
   Federation(Federation const&) = delete;
