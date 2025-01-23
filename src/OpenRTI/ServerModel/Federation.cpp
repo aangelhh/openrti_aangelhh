@@ -19,6 +19,8 @@
 
 #include "Federation.h"
 
+#include "LogStream.h"
+
 #include "AttributeDefinition.h"
 #include "AttributeDefinitionModule.h"
 #include "Dimension.h"
@@ -47,6 +49,8 @@ Federation::Federation(Node& serverNode, FederationHandle const& federationHandl
   _name(name),
   _objectInstanceHandleObjectInstanceMap(16384/*hash size*/)
 {
+  _serverNode._insertFederationHandleFederationMap(*this);
+  _serverNode._insertFederationNameFederationMap(*this);
 }
 
 Federation::~Federation()
@@ -68,6 +72,10 @@ Federation::~Federation()
   OpenRTIAssert(!hasChildConnects());
   OpenRTIAssert(_connectHandleFederationConnectMap.size() <= 1);
   _connectHandleFederationConnectMap.clear();
+
+  if (getNameIsLinked())
+    _serverNode._unlinkFederationNameFederationMap(*this);
+  _serverNode._unlinkFederationHandleFederationMap(*this);
 
   OpenRTIAssert(_objectInstanceNameObjectInstanceMap.empty());
   OpenRTIAssert(_objectInstanceHandleObjectInstanceMap.empty());
@@ -155,6 +163,21 @@ Federation::hasJoinedChildren() /*const*/
     return true;
   }
   return false;
+}
+
+void
+Federation::setNameIsLinked(bool nameIsLinked)
+{
+  if (nameIsLinked == getNameIsLinked())
+    return;
+  if (nameIsLinked) {
+    _serverNode._insertFederationNameFederationMap(*this);
+  } else {
+    OpenRTIAssert(!hasJoinedChildren());
+    Log(ServerFederation, Info) << getServerPath() << ": Destroyed federation execution in child server for \""
+                                << getName() << "\"!" << std::endl;
+    _serverNode._unlinkFederationNameFederationMap(*this);
+  }
 }
 
 void

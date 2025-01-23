@@ -82,6 +82,11 @@ public:
   std::string const& getName() const
   { return _name; }
 
+  /// True if the federation name is registered in the Node
+  bool getNameIsLinked() const
+  { return Intrusive::UnorderedSetLink<Federation, Intrusive::ParentTag<Node, 1> >::is_linked(); }
+  void setNameIsLinked(bool nameIsLinked);
+
   /// The name of the logical time factory
   std::string const& getLogicalTimeFactoryName() const
   { return _logicalTimeFactoryName; }

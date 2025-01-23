@@ -98,7 +98,6 @@ public:
   /// Get one Federation instance matching federationHandle
   Federation const* getFederation(FederationHandle const& federationHandle) const;
   Federation* getFederation(FederationHandle const& federationHandle);
-  void insert(Federation& federation);
   void erase(Federation& federation);
 
   /// UnorderedSet of Federation instances indexed by name
@@ -107,8 +106,6 @@ public:
   Federation const* getFederation(std::string const& name) const;
   Federation* getFederation(std::string const& name);
   bool getFederationExecutionAlreadyExists(std::string const& name) const;
-  void insertName(Federation& federation);
-  void eraseName(Federation& federation);
 
   void send(ConnectHandle const& connectHandle, const SharedPtr<const AbstractMessage>& message);
   void sendToParent(const SharedPtr<const AbstractMessage>& message);
@@ -149,12 +146,21 @@ protected:
   HandleAllocator<ConnectHandle> _connectHandleAllocator;
 
   /// UnorderedSet of Federation instances indexed by federationHandle
+  friend class Federation;
+  /// Insert federation into federationHandleFederationMap
+  void _insertFederationHandleFederationMap(Federation& federation);
+  /// Unlink federation from federationHandleFederationMap
+  void _unlinkFederationHandleFederationMap(Federation& federation);
   FederationHandleFederationMap _federationHandleFederationMap;
 
   /// The appropriate HandleAllocator
   FederationHandleAllocator _federationHandleAllocator;
 
   /// UnorderedSet of Federation instances indexed by name
+  /// Insert federation into federationNameFederationMap
+  void _insertFederationNameFederationMap(Federation& federation);
+  /// Unlink federation from federationNameFederationMap
+  void _unlinkFederationNameFederationMap(Federation& federation);
   FederationNameFederationMap _federationNameFederationMap;
 };
 

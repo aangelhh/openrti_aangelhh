@@ -1986,9 +1986,6 @@ public:
         federationServer->setLogicalTimeFactoryName(message->getLogicalTimeFactoryName());
         federationServer->insert(message->getFOMStringModuleList());
 
-        // register this one
-        insert(*federationServer);
-
         Log(ServerFederation, Info) << getServerPath() << ": Create federation execution \""
                                     << message->getFederationExecution() << "\"." << std::endl;
 
@@ -2071,7 +2068,7 @@ public:
           // ... we are not the lower most server node that still knows that federation,
           // so forward this to all children.
           federationServer->broadcastEraseFederationExecution();
-          eraseName(*federationServer);
+          federationServer->setNameIsLinked(false);
         } else {
           // ... we are the lower most server node that still knows about that federation,
           // so just throw away the federation handle.
@@ -2133,7 +2130,7 @@ public:
     //   throw MessageError("Received InsertFederationExecutionMessage for an already existing federation!");
     if (federationServer) {
       // reinsert the already existing datastructure to get the index by name back
-      insertName(*federationServer);
+      federationServer->setNameIsLinked(true);
       return;
     }
 
@@ -2197,7 +2194,7 @@ public:
       // ... we are not the lower most server node that still knows that federation,
       // so forward this to all children.
       federationServer->broadcastEraseFederationExecution();
-      eraseName(*federationServer);
+      federationServer->setNameIsLinked(false);
     } else {
       // ... we are the lower most server node that still knows about that federation,
       // so respond with releasing the federation handle.
@@ -2566,8 +2563,6 @@ private:
 
     FederationServer* federationServer = createFederation(federationHandle, name);
     federationServer->getOrInsertConnect(*connect);
-
-    insert(*federationServer);
 
     return federationServer;
   }

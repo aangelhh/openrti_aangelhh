@@ -137,13 +137,6 @@ Node::getFederation(FederationHandle const& federationHandle)
 }
 
 void
-Node::insert(Federation& federation)
-{
-  _federationNameFederationMap.insert(federation);
-  _federationHandleFederationMap.insert(federation);
-}
-
-void
 Node::erase(Federation& federation)
 {
   OpenRTIAssert(!federation.hasJoinedChildren());
@@ -177,21 +170,6 @@ bool
 Node::getFederationExecutionAlreadyExists(std::string const& name) const
 {
   return _federationNameFederationMap.find(name) != _federationNameFederationMap.end();
-}
-
-void
-Node::insertName(Federation& federation)
-{
-  _federationNameFederationMap.insert(federation);
-}
-
-void
-Node::eraseName(Federation& federation)
-{
-  OpenRTIAssert(!federation.hasJoinedChildren());
-  Log(ServerFederation, Info) << getServerPath() << ": Destroyed federation execution in child server for \""
-                              << federation.getName() << "\"!" << std::endl;
-  _federationNameFederationMap.unlink(federation);
 }
 
 void
@@ -245,6 +223,30 @@ void
 Node::_unlinkConnectHandleNodeConnectMap(NodeConnect& nodeConnect)
 {
   _connectHandleNodeConnectMap.unlink(nodeConnect);
+}
+
+void
+Node::_insertFederationHandleFederationMap(Federation& federation)
+{
+  _federationHandleFederationMap.insert(federation);
+}
+
+void
+Node::_unlinkFederationHandleFederationMap(Federation& federation)
+{
+  _federationHandleFederationMap.unlink(federation);
+}
+
+void
+Node::_insertFederationNameFederationMap(Federation& federation)
+{
+  _federationNameFederationMap.insert(federation);
+}
+
+void
+Node::_unlinkFederationNameFederationMap(Federation& federation)
+{
+  _federationNameFederationMap.unlink(federation);
 }
 
 } // namespace ServerModel
