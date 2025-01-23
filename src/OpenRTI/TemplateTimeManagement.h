@@ -1164,24 +1164,25 @@ public:
 
   // Holds a message to be queued into a list
   struct OPENRTI_LOCAL _MessageListElement :
-         public IntrusiveList<_MessageListElement>::Hook,
-         public IntrusiveUnorderedMap<ObjectInstanceHandle, _MessageListElement>::Hook {
+         public Intrusive::ListLink<_MessageListElement, Intrusive::NumericTag<0> >,
+         public Intrusive::UnorderedSetLink<_MessageListElement, Intrusive::NumericTag<0> > {
     _MessageListElement(const AbstractMessage* message) : _message(message)
     { }
     void unlink()
     {
-      IntrusiveList<_MessageListElement>::unlink(*this);
-      if (IntrusiveUnorderedMap<ObjectInstanceHandle, _MessageListElement>::Hook::is_linked())
-        IntrusiveUnorderedMap<ObjectInstanceHandle, _MessageListElement>::unlink(*this);
-      IntrusiveUnorderedMap<ObjectInstanceHandle, _MessageListElement>::Hook::setKey(ObjectInstanceHandle());
+      Intrusive::ListLink<_MessageListElement, Intrusive::NumericTag<0> >::unlink();
+      if (Intrusive::UnorderedSetLink<_MessageListElement, Intrusive::NumericTag<0> >::is_linked())
+        Intrusive::UnorderedSetLink<_MessageListElement, Intrusive::NumericTag<0> >::unlink();
+      _objectInstanceHandle = ObjectInstanceHandle();
     }
     const ObjectInstanceHandle& getObjectInstanceHandle() const
-    { return IntrusiveUnorderedMap<ObjectInstanceHandle, _MessageListElement>::Hook::getKey(); }
+    { return _objectInstanceHandle; }
     void setObjectInstanceHandle(const ObjectInstanceHandle& objectInstanceHandle)
-    { IntrusiveUnorderedMap<ObjectInstanceHandle, _MessageListElement>::Hook::setKey(objectInstanceHandle); }
+    { _objectInstanceHandle = objectInstanceHandle; }
+    ObjectInstanceHandle _objectInstanceHandle;
     SharedPtr<const AbstractMessage> _message;
   };
-  typedef IntrusiveList<_MessageListElement> _MessageList;
+  typedef Intrusive::List<Intrusive::ListLink<_MessageListElement, Intrusive::NumericTag<0> > > _MessageList;
 
   // The timestamped queued messages
   typedef std::map<LogicalTimePair, _MessageList> LogicalTimeMessageListMap;
@@ -1193,8 +1194,13 @@ public:
   // List elements for reuse
   _MessageList _messageListPool;
 
+  struct _MessageListElementKeyAccess {
+    static ObjectInstanceHandle const& get(_MessageListElement const& item)
+    { return item._objectInstanceHandle; }
+  };
   // List elements that reference a specific object instance
-  typedef IntrusiveUnorderedMap<ObjectInstanceHandle, _MessageListElement> _ObjectInstanceHandleMessageListElementMap;
+  typedef Intrusive::UnorderedSet<ObjectInstanceHandle, Intrusive::UnorderedSetLink<_MessageListElement, Intrusive::NumericTag<0> >,
+                                  Intrusive::DeleteNoop, _MessageListElementKeyAccess> _ObjectInstanceHandleMessageListElementMap;
   _ObjectInstanceHandleMessageListElementMap _objectInstanceHandleMessageListElementMap;
 
   // The logical time factory required to do our job
