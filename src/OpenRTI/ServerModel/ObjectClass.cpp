@@ -196,12 +196,6 @@ ObjectClass::insertClassAttributeFor(AttributeDefinition& attributeDefinition)
 }
 
 void
-ObjectClass::insert(ObjectInstance& objectInstance)
-{
-  _objectInstanceList.push_back(objectInstance);
-}
-
-void
 ObjectClass::removeConnect(ConnectHandle const& connectHandle)
 {
   for (AttributeHandleClassAttributeMap::iterator i = _attributeHandleClassAttributeMap.begin();
@@ -279,6 +273,18 @@ void
 ObjectClass::_unlinkAttributeHandleClassAttributeMap(ClassAttribute& classAttribute)
 {
   _attributeHandleClassAttributeMap.unlink(classAttribute);
+}
+
+void
+ObjectClass::_insertObjectInstanceList(ObjectInstance& objectInstance)
+{
+  _objectInstanceList.push_back(objectInstance);
+}
+
+void
+ObjectClass::_unlinkObjectInstanceList(ObjectInstance& objectInstance)
+{
+  _objectInstanceList.unlink(objectInstance);
 }
 
 } // namespace ServerModel

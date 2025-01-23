@@ -1077,7 +1077,7 @@ public:
       unsigned count = message->getCount();
       response->getObjectInstanceHandleNamePairVector().reserve(count);
       while (count--) {
-        ServerModel::ObjectInstance* objectInstance = insertObjectInstance(ObjectInstanceHandle(), std::string());
+        ServerModel::ObjectInstance* objectInstance = createObjectInstance(ObjectInstanceHandle(), std::string());
         objectInstance->reference(*federationConnect);
         response->getObjectInstanceHandleNamePairVector().push_back(ObjectInstanceHandleNamePair(objectInstance->getObjectInstanceHandle(), objectInstance->getName()));
       }
@@ -1101,7 +1101,7 @@ public:
     } else {
       for (ObjectInstanceHandleNamePairVector::const_iterator k = message->getObjectInstanceHandleNamePairVector().begin();
            k != message->getObjectInstanceHandleNamePairVector().end(); ++k) {
-        ServerModel::ObjectInstance* objectInstance = insertObjectInstance(k->first, k->second);
+        ServerModel::ObjectInstance* objectInstance = createObjectInstance(k->first, k->second);
         objectInstance->reference(*federationConnect);
       }
 
@@ -1164,7 +1164,7 @@ public:
       response->setFederationHandle(getFederationHandle());
       response->setFederateHandle(federateHandle);
       if (!isObjectInstanceNameInUse(message->getName())) {
-        ServerModel::ObjectInstance* objectInstance = insertObjectInstance(ObjectInstanceHandle(), message->getName());
+        ServerModel::ObjectInstance* objectInstance = createObjectInstance(ObjectInstanceHandle(), message->getName());
         objectInstance->reference(*federationConnect);
         response->setObjectInstanceHandleNamePair(ObjectInstanceHandleNamePair(objectInstance->getObjectInstanceHandle(), objectInstance->getName()));
         response->setSuccess(true);
@@ -1192,7 +1192,7 @@ public:
       // If so, then release the reservations.
     } else {
       if (message->getSuccess()) {
-        ServerModel::ObjectInstance* objectInstance = insertObjectInstance(message->getObjectInstanceHandleNamePair().first,
+        ServerModel::ObjectInstance* objectInstance = createObjectInstance(message->getObjectInstanceHandleNamePair().first,
                                                                            message->getObjectInstanceHandleNamePair().second);
         objectInstance->reference(*federateConnect);
       }
@@ -1233,7 +1233,7 @@ public:
       if (response->getSuccess()) {
         for (ObjectInstanceHandleNamePairVector::iterator j = response->getObjectInstanceHandleNamePairVector().begin();
              j != response->getObjectInstanceHandleNamePairVector().end(); ++j) {
-          ServerModel::ObjectInstance* objectInstance = insertObjectInstance(ObjectInstanceHandle(), j->second);
+          ServerModel::ObjectInstance* objectInstance = createObjectInstance(ObjectInstanceHandle(), j->second);
           objectInstance->reference(*federationConnect);
           j->first = objectInstance->getObjectInstanceHandle();
         }
@@ -1259,7 +1259,7 @@ public:
       if (message->getSuccess()) {
         for (ObjectInstanceHandleNamePairVector::const_iterator k = message->getObjectInstanceHandleNamePairVector().begin();
              k != message->getObjectInstanceHandleNamePairVector().end(); ++k) {
-          ServerModel::ObjectInstance* objectInstance = insertObjectInstance(k->first, k->second);
+          ServerModel::ObjectInstance* objectInstance = createObjectInstance(k->first, k->second);
           objectInstance->reference(*federateConnect);
         }
       }
@@ -1290,7 +1290,7 @@ public:
         if (*j == connectHandle)
           continue;
         if (!objectInstance)
-          objectInstance = insertObjectInstance(objectInstanceHandle, message->getName());
+          objectInstance = createObjectInstance(objectInstanceHandle, message->getName());
         ServerModel::FederationConnect* federationConnect = getFederationConnect(*j);
         if (!federationConnect)
           continue;

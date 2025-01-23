@@ -288,11 +288,8 @@ public:
   /// Get one ObjectInstance instance matching name
   ObjectInstance const* getObjectInstance(std::string const& name) const;
   ObjectInstance* getObjectInstance(std::string const& name);
-  void insert(ObjectInstance& objectInstance);
   void erase(ObjectInstance& objectInstance);
   bool isObjectInstanceNameInUse(std::string const& name) const;
-  /// FIXME
-  ObjectInstance* insertObjectInstance(ObjectInstanceHandle const& objectInstanceHandle, std::string const& objectInstanceName);
 
   ///
   /// Create a new Federate instance
@@ -472,12 +469,21 @@ private:
   FederateNameFederateMap _federateNameFederateMap;
 
   /// UnorderedSet of ObjectInstance instances indexed by objectInstanceHandle
+  friend class ObjectInstance;
+  /// Insert objectInstance into objectInstanceHandleObjectInstanceMap
+  void _insertObjectInstanceHandleObjectInstanceMap(ObjectInstance& objectInstance);
+  /// Unlink objectInstance from objectInstanceHandleObjectInstanceMap
+  void _unlinkObjectInstanceHandleObjectInstanceMap(ObjectInstance& objectInstance);
   ObjectInstanceHandleObjectInstanceMap _objectInstanceHandleObjectInstanceMap;
 
   /// The appropriate HandleAllocator
   HandleAllocator<ObjectInstanceHandle> _objectInstanceHandleAllocator;
 
   /// UnorderedSet of ObjectInstance instances indexed by name
+  /// Insert objectInstance into objectInstanceNameObjectInstanceMap
+  void _insertObjectInstanceNameObjectInstanceMap(ObjectInstance& objectInstance);
+  /// Unlink objectInstance from objectInstanceNameObjectInstanceMap
+  void _unlinkObjectInstanceNameObjectInstanceMap(ObjectInstance& objectInstance);
   ObjectInstanceNameObjectInstanceMap _objectInstanceNameObjectInstanceMap;
 };
 

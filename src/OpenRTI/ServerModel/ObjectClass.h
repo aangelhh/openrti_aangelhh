@@ -140,8 +140,6 @@ public:
   { return _objectInstanceList; }
   ObjectInstanceList& getObjectInstanceList()
   { return _objectInstanceList; }
-  void insert(ObjectInstance& objectInstance);
-
 
   void removeConnect(ConnectHandle const& connectHandle);
 
@@ -287,6 +285,11 @@ private:
   AttributeHandleClassAttributeMap _attributeHandleClassAttributeMap;
 
   /// List of ObjectInstance instances belonging to this ObjectClass
+  friend class ObjectInstance;
+  /// Insert objectInstance into objectInstanceList
+  void _insertObjectInstanceList(ObjectInstance& objectInstance);
+  /// Unlink objectInstance from objectInstanceList
+  void _unlinkObjectInstanceList(ObjectInstance& objectInstance);
   ObjectInstanceList _objectInstanceList;
 };
 

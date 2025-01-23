@@ -98,6 +98,12 @@ public:
   template<typename Link>
   struct IntrusiveKey;
 
+protected:
+  /// The pointer to the object class this object is an instance of, can be zero
+  /// Insert and Unlink ObjectInstance from referencing containers.
+  void _insertContainerForObjectClassChange();
+  void _unlinkContainerForObjectClassChange();
+
 private:
 #if 201103L <= __cplusplus
   ObjectInstance(ObjectInstance const&) = delete;

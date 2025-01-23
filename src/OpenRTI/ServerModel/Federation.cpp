@@ -1324,15 +1324,6 @@ Federation::getObjectInstance(std::string const& name)
 }
 
 void
-Federation::insert(ObjectInstance& objectInstance)
-{
-  OpenRTIAssert(_objectInstanceHandleObjectInstanceMap.find(objectInstance.getObjectInstanceHandle()) == _objectInstanceHandleObjectInstanceMap.end());
-  OpenRTIAssert(!isObjectInstanceNameInUse(objectInstance.getName()));
-  _objectInstanceHandleObjectInstanceMap.insert(objectInstance);
-  _objectInstanceNameObjectInstanceMap.insert(objectInstance);
-}
-
-void
 Federation::erase(ObjectInstance& objectInstance)
 {
   _objectInstanceHandleAllocator.put(objectInstance.getObjectInstanceHandle());
@@ -1343,14 +1334,6 @@ bool
 Federation::isObjectInstanceNameInUse(std::string const& name) const
 {
   return _objectInstanceNameObjectInstanceMap.find(name) != _objectInstanceNameObjectInstanceMap.end();
-}
-
-ObjectInstance*
-Federation::insertObjectInstance(ObjectInstanceHandle const& objectInstanceHandle, std::string const& objectInstanceName)
-{
-  ObjectInstance* objectInstance = createObjectInstance(objectInstanceHandle, objectInstanceName);
-  insert(*objectInstance);
-  return objectInstance;
 }
 
 Federate*
@@ -1540,6 +1523,30 @@ void
 Federation::_unlinkFederateNameFederateMap(Federate& federate)
 {
   _federateNameFederateMap.unlink(federate);
+}
+
+void
+Federation::_insertObjectInstanceHandleObjectInstanceMap(ObjectInstance& objectInstance)
+{
+  _objectInstanceHandleObjectInstanceMap.insert(objectInstance);
+}
+
+void
+Federation::_unlinkObjectInstanceHandleObjectInstanceMap(ObjectInstance& objectInstance)
+{
+  _objectInstanceHandleObjectInstanceMap.unlink(objectInstance);
+}
+
+void
+Federation::_insertObjectInstanceNameObjectInstanceMap(ObjectInstance& objectInstance)
+{
+  _objectInstanceNameObjectInstanceMap.insert(objectInstance);
+}
+
+void
+Federation::_unlinkObjectInstanceNameObjectInstanceMap(ObjectInstance& objectInstance)
+{
+  _objectInstanceNameObjectInstanceMap.unlink(objectInstance);
 }
 
 } // namespace ServerModel

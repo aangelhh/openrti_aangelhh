@@ -34,12 +34,18 @@ ObjectInstance::ObjectInstance(Federation& federation, ObjectInstanceHandle cons
   _name(name),
   _objectClass(0)
 {
+  _federation._insertObjectInstanceHandleObjectInstanceMap(*this);
+  _federation._insertObjectInstanceNameObjectInstanceMap(*this);
 }
 
 ObjectInstance::~ObjectInstance()
 {
   _attributeHandleInstanceAttributeMap.clear();
   _connectHandleObjectInstanceConnectMap.clear();
+
+  setObjectClass(0);
+  _federation._unlinkObjectInstanceNameObjectInstanceMap(*this);
+  _federation._unlinkObjectInstanceHandleObjectInstanceMap(*this);
 
   OpenRTIAssert(_attributeHandleInstanceAttributeMap.empty());
   OpenRTIAssert(_connectHandleObjectInstanceConnectMap.empty());
@@ -50,9 +56,13 @@ ObjectInstance::setObjectClass(ObjectClass* objectClass)
 {
   if (objectClass == getObjectClass())
     return;
-  OpenRTIAssert(!_objectClass);
+  OpenRTIAssert(!_objectClass || !objectClass);
+  _unlinkContainerForObjectClassChange();
   _objectClass = objectClass;
-  _objectClass->insert(*this);
+  _insertContainerForObjectClassChange();
+
+  if (!objectClass)
+    return;
 
   ObjectClass::AttributeHandleClassAttributeMap& attributeHandleClassAttributeMap = objectClass->getAttributeHandleClassAttributeMap();
   for (ObjectClass::AttributeHandleClassAttributeMap::iterator i = attributeHandleClassAttributeMap.begin();
@@ -153,6 +163,20 @@ void
 ObjectInstance::insert(InstanceAttribute& instanceAttribute)
 {
   _attributeHandleInstanceAttributeMap.insert(instanceAttribute);
+}
+
+void
+ObjectInstance::_insertContainerForObjectClassChange()
+{
+  if (ObjectClass* objectClass = _objectClass)
+    objectClass->_insertObjectInstanceList(*this);
+}
+
+void
+ObjectInstance::_unlinkContainerForObjectClassChange()
+{
+  if (ObjectClass* objectClass = _objectClass)
+    objectClass->_unlinkObjectInstanceList(*this);
 }
 
 } // namespace ServerModel
