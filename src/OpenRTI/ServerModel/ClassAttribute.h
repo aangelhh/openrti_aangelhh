@@ -33,8 +33,8 @@ class AttributeDefinition;
 class ObjectClass;
 
 class OPENRTI_LOCAL ClassAttribute :
-    public IntrusiveUnorderedMap<AttributeHandle const, ClassAttribute>::Hook,
-    public IntrusiveList<ClassAttribute, 0>::Hook,
+    public Intrusive::UnorderedSetLink<ClassAttribute, Intrusive::ParentTag<ObjectClass> >,
+    public Intrusive::ListLink<ClassAttribute, Intrusive::ParentTag<AttributeDefinition> >,
     public PublishSubscribe
 {
 public:
@@ -52,7 +52,10 @@ public:
   { return _attributeDefinition; }
 
   AttributeHandle const& getAttributeHandle() const
-  { return IntrusiveUnorderedMap<AttributeHandle const, ClassAttribute>::Hook::getKey(); }
+  { return _attributeHandle; }
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -72,6 +75,14 @@ private:
   ObjectClass& _objectClass;
 
   AttributeDefinition& _attributeDefinition;
+
+  AttributeHandle const _attributeHandle;
+};
+
+template<>
+struct ClassAttribute::IntrusiveKey<Intrusive::UnorderedSetLink<ClassAttribute, Intrusive::ParentTag<ObjectClass> > > {
+  static AttributeHandle const& get(ClassAttribute const& classAttribute)
+  { return classAttribute.getAttributeHandle(); }
 };
 
 } // namespace ServerModel

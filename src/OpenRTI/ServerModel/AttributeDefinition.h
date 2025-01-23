@@ -60,7 +60,7 @@ public:
   void setTransportationType(TransportationType transportationType);
 
   /// List of ClassAttribute instances belonging to this AttributeDefinition
-  typedef IntrusiveList<ClassAttribute, 0> ClassAttributeList;
+  typedef Intrusive::List<Intrusive::ListLink<ClassAttribute, Intrusive::ParentTag<AttributeDefinition> > > ClassAttributeList;
   /// Get the list of ClassAttribute instances
   ClassAttributeList const& getClassAttributeList() const
   { return _classAttributeList; }

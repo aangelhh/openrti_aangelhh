@@ -117,7 +117,7 @@ public:
   bool getAreAttributesReferencedByAnyModule() const;
 
   /// UnorderedSet of ClassAttribute instances indexed by attributeHandle
-  typedef IntrusiveUnorderedMap<AttributeHandle const, ClassAttribute> AttributeHandleClassAttributeMap;
+  typedef Intrusive::UnorderedSet<AttributeHandle, Intrusive::UnorderedSetLink<ClassAttribute, Intrusive::ParentTag<ObjectClass> > > AttributeHandleClassAttributeMap;
   /// Get the set of ClassAttribute instances
   AttributeHandleClassAttributeMap const& getAttributeHandleClassAttributeMap() const
   { return _attributeHandleClassAttributeMap; }
