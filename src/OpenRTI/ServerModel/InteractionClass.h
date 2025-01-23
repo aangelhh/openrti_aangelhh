@@ -162,6 +162,10 @@ public:
     }
   }
 
+  ///
+  /// Create a new ParameterDefinition instance
+  ParameterDefinition* createParameterDefinition(ParameterHandle const& parameterHandle, std::string const& name);
+
   template<typename Link>
   struct IntrusiveKey;
 

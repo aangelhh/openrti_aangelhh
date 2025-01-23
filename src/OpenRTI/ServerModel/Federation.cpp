@@ -661,8 +661,7 @@ Federation::insertOrCheck(Module& module, FOMStringInteractionClass const& strin
         throw InconsistentFDD(ss.str());
       }
 
-      ParameterDefinition* parameterDefinition;
-      parameterDefinition = new ParameterDefinition(*interactionClass, nextParameterHandle, i->getName());
+      ParameterDefinition* parameterDefinition = interactionClass->createParameterDefinition(nextParameterHandle, i->getName());
       interactionClass->insertClassParameterFor(*parameterDefinition);
 
       nextParameterHandle = ParameterHandle(nextParameterHandle.getHandle() + 1);
@@ -924,8 +923,7 @@ Federation::insert(Module& module, FOMInteractionClass const& fomInteractionClas
             throw MessageError("Duplicate InteractionClass parameter names.");
           if (i->getParameterDefinition(j->getParameterHandle()))
             throw MessageError("Duplicate InteractionClass parameter handles.");
-          ParameterDefinition* parameterDefinition;
-          parameterDefinition = new ParameterDefinition(*i, j->getParameterHandle(), j->getName());
+          ParameterDefinition* parameterDefinition = i->createParameterDefinition(j->getParameterHandle(), j->getName());
           i->insertClassParameterFor(*parameterDefinition);
         }
       } else {
@@ -970,8 +968,7 @@ Federation::insert(Module& module, FOMInteractionClass const& fomInteractionClas
         throw MessageError("Duplicate InteractionClass parameter names.");
       if (interactionClass->getParameterDefinition(j->getParameterHandle()))
         throw MessageError("Duplicate InteractionClass parameter handles.");
-      ParameterDefinition* parameterDefinition;
-      parameterDefinition = new ParameterDefinition(*interactionClass, j->getParameterHandle(), j->getName());
+      ParameterDefinition* parameterDefinition = interactionClass->createParameterDefinition(j->getParameterHandle(), j->getName());
       interactionClass->insertClassParameterFor(*parameterDefinition);
     }
   }

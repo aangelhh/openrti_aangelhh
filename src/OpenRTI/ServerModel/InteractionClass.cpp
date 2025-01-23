@@ -198,6 +198,12 @@ InteractionClass::insertClassParameterFor(ParameterDefinition& parameterDefiniti
     i->insertClassParameterFor(parameterDefinition);
 }
 
+ParameterDefinition*
+InteractionClass::createParameterDefinition(ParameterHandle const& parameterHandle, std::string const& name)
+{
+  return new ParameterDefinition(*this, parameterHandle, name);
+}
+
 void
 InteractionClass::_insertChildInteractionClassList(InteractionClass& interactionClass)
 {
