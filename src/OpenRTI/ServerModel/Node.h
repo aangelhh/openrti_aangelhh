@@ -20,6 +20,8 @@
 #ifndef OpenRTI_ServerModel_Node_h
 #define OpenRTI_ServerModel_Node_h
 
+#include "OpenRTIConfig.h"
+
 #include "Intrusive.h"
 
 #include "AbstractMessageSender.h"

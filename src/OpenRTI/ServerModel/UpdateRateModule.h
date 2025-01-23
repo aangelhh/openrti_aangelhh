@@ -20,6 +20,8 @@
 #ifndef OpenRTI_ServerModel_UpdateRateModule_h
 #define OpenRTI_ServerModel_UpdateRateModule_h
 
+#include "OpenRTIConfig.h"
+
 #include "Intrusive.h"
 
 namespace OpenRTI {

@@ -20,6 +20,8 @@
 #ifndef OpenRTI_ServerModel_Federate_h
 #define OpenRTI_ServerModel_Federate_h
 
+#include "OpenRTIConfig.h"
+
 #include "Intrusive.h"
 
 #include "Handle.h"

@@ -20,6 +20,8 @@
 #ifndef OpenRTI_ServerModel_ObjectInstance_h
 #define OpenRTI_ServerModel_ObjectInstance_h
 
+#include "OpenRTIConfig.h"
+
 #include "Intrusive.h"
 
 #include "Handle.h"

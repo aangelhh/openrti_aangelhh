@@ -20,6 +20,8 @@
 #ifndef OpenRTI_ServerModel_ParameterDefinition_h
 #define OpenRTI_ServerModel_ParameterDefinition_h
 
+#include "OpenRTIConfig.h"
+
 #include "Intrusive.h"
 
 #include "Handle.h"

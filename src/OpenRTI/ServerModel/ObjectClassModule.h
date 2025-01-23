@@ -20,6 +20,8 @@
 #ifndef OpenRTI_ServerModel_ObjectClassModule_h
 #define OpenRTI_ServerModel_ObjectClassModule_h
 
+#include "OpenRTIConfig.h"
+
 #include "Intrusive.h"
 
 namespace OpenRTI {
