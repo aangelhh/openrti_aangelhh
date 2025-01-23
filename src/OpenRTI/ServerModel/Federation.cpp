@@ -552,7 +552,7 @@ Federation::insertOrCheck(Module& module, FOMStringUpdateRate const& stringUpdat
     module.insert(*i);
     return false;
   } else {
-    UpdateRate* updateRate = new UpdateRate(*this, _updateRateHandleAllocator.get(), stringUpdateRate.getName());
+    UpdateRate* updateRate = createUpdateRate(_updateRateHandleAllocator.get(), stringUpdateRate.getName());
     updateRate->setRate(stringUpdateRate.getRate());
     module.insert(*updateRate);
     return true;
@@ -891,7 +891,7 @@ Federation::insert(Module& module, FOMUpdateRate const& fomUpdateRate)
     module.insert(*i);
   } else {
     _updateRateHandleAllocator.take(fomUpdateRate.getUpdateRateHandle());
-    UpdateRate* updateRate = new UpdateRate(*this, fomUpdateRate.getUpdateRateHandle(), fomUpdateRate.getName());
+    UpdateRate* updateRate = createUpdateRate(fomUpdateRate.getUpdateRateHandle(), fomUpdateRate.getName());
     updateRate->setRate(fomUpdateRate.getRate());
     module.insert(*updateRate);
   }
@@ -1346,6 +1346,12 @@ Dimension*
 Federation::createDimension(DimensionHandle const& dimensionHandle, std::string const& name)
 {
   return new Dimension(*this, dimensionHandle, name);
+}
+
+UpdateRate*
+Federation::createUpdateRate(UpdateRateHandle const& updateRateHandle, std::string const& name)
+{
+  return new UpdateRate(*this, updateRateHandle, name);
 }
 
 Federate*

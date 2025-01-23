@@ -300,6 +300,10 @@ public:
   Dimension* createDimension(DimensionHandle const& dimensionHandle, std::string const& name);
 
   ///
+  /// Create a new UpdateRate instance
+  UpdateRate* createUpdateRate(UpdateRateHandle const& updateRateHandle, std::string const& name);
+
+  ///
   /// Create a new Federate instance
   Federate* createFederate(FederateHandle const& federateHandle, std::string const& name);
 
