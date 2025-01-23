@@ -331,13 +331,6 @@ Federation::getModule(ModuleHandle const& moduleHandle)
   return i.get();
 }
 
-void
-Federation::insert(Module& module)
-{
-  OpenRTIAssert(_moduleHandleModuleMap.find(module.getModuleHandle()) == _moduleHandleModuleMap.end());
-  _moduleHandleModuleMap.insert(module);
-}
-
 OrderType
 Federation::resolveOrderType(std::string const& orderType)
 {
@@ -853,7 +846,6 @@ Federation::insert(FOMStringModule const& stringModule)
   module->setContent(stringModule.getContent());
   module->setArtificialInteractionRoot(stringModule.getArtificialInteractionRoot());
   module->setArtificialObjectRoot(stringModule.getArtificialObjectRoot());
-  insert(*module);
 
   bool created = false;
   try {
@@ -1134,7 +1126,6 @@ Federation::insert(FOMModule const& fomModule)
     module->setContent(fomModule.getContent());
     module->setArtificialInteractionRoot(fomModule.getArtificialInteractionRoot());
     module->setArtificialObjectRoot(fomModule.getArtificialObjectRoot());
-    insert(*module);
 
     for (FOMDimensionList::const_iterator j = fomModule.getDimensionList().begin();
          j != fomModule.getDimensionList().end(); ++j) {
@@ -1458,6 +1449,19 @@ void
 Federation::_unlinkTimeRegulatingFederationConnectList(FederationConnect& federationConnect)
 {
   _timeRegulatingFederationConnectList.unlink(federationConnect);
+}
+
+void
+Federation::_insertModuleHandleModuleMap(Module& module)
+{
+  OpenRTIAssert(_moduleHandleModuleMap.find(module.getModuleHandle()) == _moduleHandleModuleMap.end());
+  _moduleHandleModuleMap.insert(module);
+}
+
+void
+Federation::_unlinkModuleHandleModuleMap(Module& module)
+{
+  _moduleHandleModuleMap.unlink(module);
 }
 
 } // namespace ServerModel

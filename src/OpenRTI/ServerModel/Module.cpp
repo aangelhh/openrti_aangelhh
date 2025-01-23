@@ -42,10 +42,13 @@ Module::Module(Federation& federation, ModuleHandle const& moduleHandle) :
   _artificialInteractionRoot(false),
   _artificialObjectRoot(false)
 {
+  _federation._insertModuleHandleModuleMap(*this);
 }
 
 Module::~Module()
 {
+  _federation._unlinkModuleHandleModuleMap(*this);
+
   OpenRTIAssert(_attributeDefinitionModuleList.empty());
   OpenRTIAssert(_objectClassModuleList.empty());
   OpenRTIAssert(_parameterDefinitionModuleList.empty());

@@ -132,7 +132,6 @@ public:
   /// Get one Module instance matching moduleHandle
   Module const* getModule(ModuleHandle const& moduleHandle) const;
   Module* getModule(ModuleHandle const& moduleHandle);
-  void insert(Module& module);
 
   OrderType resolveOrderType(std::string const& orderType);
   TransportationType resolveTransportationType(std::string const& transportationType);
@@ -356,6 +355,11 @@ private:
   TimeRegulatingFederationConnectList _timeRegulatingFederationConnectList;
 
   /// UnorderedSet of Module instances indexed by moduleHandle
+  friend class Module;
+  /// Insert module into moduleHandleModuleMap
+  void _insertModuleHandleModuleMap(Module& module);
+  /// Unlink module from moduleHandleModuleMap
+  void _unlinkModuleHandleModuleMap(Module& module);
   ModuleHandleModuleMap _moduleHandleModuleMap;
 
   /// The appropriate HandleAllocator
