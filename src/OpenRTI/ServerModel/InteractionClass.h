@@ -114,7 +114,7 @@ public:
   void insert(ParameterDefinition& parameterDefinition);
 
   /// The list of Modules referencing this InteractionClass set of ParameterDefinitions
-  typedef IntrusiveList<ParameterDefinitionModule, 1> ParameterDefinitionModuleList;
+  typedef Intrusive::List<Intrusive::ListLink<ParameterDefinitionModule, Intrusive::ParentTag<InteractionClass> > > ParameterDefinitionModuleList;
   /// Get the list of ParameterDefinitionModule instances
   ParameterDefinitionModuleList const& getParameterDefinitionModuleList() const
   { return _parameterDefinitionModuleList; }

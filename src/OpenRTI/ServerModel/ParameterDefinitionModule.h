@@ -30,8 +30,8 @@ class InteractionClass;
 class Module;
 
 class OPENRTI_LOCAL ParameterDefinitionModule :
-    public IntrusiveList<ParameterDefinitionModule, 0>::Hook,
-    public IntrusiveList<ParameterDefinitionModule, 1>::Hook
+    public Intrusive::ListLink<ParameterDefinitionModule, Intrusive::ParentTag<Module> >,
+    public Intrusive::ListLink<ParameterDefinitionModule, Intrusive::ParentTag<InteractionClass> >
 {
 public:
   ParameterDefinitionModule(InteractionClass& interactionClass, Module& module);

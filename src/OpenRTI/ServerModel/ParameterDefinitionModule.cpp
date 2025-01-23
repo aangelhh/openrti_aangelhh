@@ -19,6 +19,9 @@
 
 #include "ParameterDefinitionModule.h"
 
+#include "InteractionClass.h"
+#include "Module.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 
