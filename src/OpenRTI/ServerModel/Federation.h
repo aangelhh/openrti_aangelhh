@@ -296,6 +296,10 @@ public:
   Module* createModule(ModuleHandle const& moduleHandle);
 
   ///
+  /// Create a new Dimension instance
+  Dimension* createDimension(DimensionHandle const& dimensionHandle, std::string const& name);
+
+  ///
   /// Create a new Federate instance
   Federate* createFederate(FederateHandle const& federateHandle, std::string const& name);
 

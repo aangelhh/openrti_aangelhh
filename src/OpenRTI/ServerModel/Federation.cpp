@@ -529,7 +529,7 @@ Federation::insertOrCheck(Module& module, FOMStringDimension const& stringDimens
     module.insert(*i);
     return false;
   } else {
-    Dimension* dimension = new Dimension(*this, _dimensionHandleAllocator.get(), stringDimension.getName());
+    Dimension* dimension = createDimension(_dimensionHandleAllocator.get(), stringDimension.getName());
     dimension->setUpperBound(stringDimension.getUpperBound());
     module.insert(*dimension);
     return true;
@@ -873,7 +873,7 @@ Federation::insert(Module& module, FOMDimension const& fomDimension)
     module.insert(*i);
   } else {
     _dimensionHandleAllocator.take(fomDimension.getDimensionHandle());
-    Dimension* dimension = new Dimension(*this, fomDimension.getDimensionHandle(), fomDimension.getName());
+    Dimension* dimension = createDimension(fomDimension.getDimensionHandle(), fomDimension.getName());
     dimension->setUpperBound(fomDimension.getUpperBound());
     module.insert(*dimension);
   }
@@ -1340,6 +1340,12 @@ Module*
 Federation::createModule(ModuleHandle const& moduleHandle)
 {
   return new Module(*this, moduleHandle);
+}
+
+Dimension*
+Federation::createDimension(DimensionHandle const& dimensionHandle, std::string const& name)
+{
+  return new Dimension(*this, dimensionHandle, name);
 }
 
 Federate*
