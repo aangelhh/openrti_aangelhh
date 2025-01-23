@@ -19,6 +19,7 @@
 
 #include "NodeConnect.h"
 
+#include "Federation.h"
 #include "FederationConnect.h"
 #include "Node.h"
 
@@ -86,6 +87,12 @@ NodeConnect::send(const SharedPtr<const AbstractMessage>& message)
   if (!_messageSender.valid())
     return;
   _messageSender->send(message);
+}
+
+FederationConnect*
+NodeConnect::createFederationConnect(Federation& federation)
+{
+  return new FederationConnect(federation, *this);
 }
 
 void

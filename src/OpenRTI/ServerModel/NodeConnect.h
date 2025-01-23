@@ -31,6 +31,7 @@
 namespace OpenRTI {
 namespace ServerModel {
 
+class Federation;
 class FederationConnect;
 class Node;
 
@@ -80,6 +81,10 @@ public:
 
   /// We can actually send messages through a connect
   void send(const SharedPtr<const AbstractMessage>& message);
+
+  ///
+  /// Create a new FederationConnect instance
+  FederationConnect* createFederationConnect(Federation& federation);
 
   template<typename Link>
   struct IntrusiveKey;

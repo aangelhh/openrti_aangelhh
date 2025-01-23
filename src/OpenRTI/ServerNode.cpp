@@ -1568,7 +1568,7 @@ public:
     if (federationConnect)
       return federationConnect;
 
-    federationConnect = new ServerModel::FederationConnect(*this, nodeConnect);
+    federationConnect = nodeConnect.createFederationConnect(*this);
     if (nodeConnect.getIsParentConnect())
       federationConnect->setActive(true);
     return federationConnect;
