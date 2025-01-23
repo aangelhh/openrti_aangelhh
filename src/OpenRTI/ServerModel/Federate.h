@@ -114,7 +114,6 @@ public:
   /// Get one Region instance matching regionHandle
   Region const* getRegion(LocalRegionHandle const& regionHandle) const;
   Region* getRegion(LocalRegionHandle const& regionHandle);
-  void insert(Region& region);
 
   template<typename Link>
   struct IntrusiveKey;
@@ -171,6 +170,11 @@ private:
   Unsigned _commitId;
 
   /// UnorderedSet of Region instances indexed by regionHandle
+  friend class Region;
+  /// Insert region into regionHandleRegionMap
+  void _insertRegionHandleRegionMap(Region& region);
+  /// Unlink region from regionHandleRegionMap
+  void _unlinkRegionHandleRegionMap(Region& region);
   RegionHandleRegionMap _regionHandleRegionMap;
 };
 

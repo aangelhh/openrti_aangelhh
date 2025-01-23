@@ -28,10 +28,12 @@ Region::Region(Federate& federate, LocalRegionHandle const& regionHandle) :
   _federate(federate),
   _regionHandle(regionHandle)
 {
+  _federate._insertRegionHandleRegionMap(*this);
 }
 
 Region::~Region()
 {
+  _federate._unlinkRegionHandleRegionMap(*this);
 }
 
 } // namespace ServerModel

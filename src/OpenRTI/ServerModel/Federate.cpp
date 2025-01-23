@@ -156,12 +156,6 @@ Federate::getRegion(LocalRegionHandle const& regionHandle)
 }
 
 void
-Federate::insert(Region& region)
-{
-  _regionHandleRegionMap.insert(region);
-}
-
-void
 Federate::_insertContainerForFederationConnectChange()
 {
   if (FederationConnect* federationConnect = _federationConnect)
@@ -185,6 +179,18 @@ void
 Federate::_unlinkSynchronizationFederateList(SynchronizationFederate& synchronizationFederate)
 {
   _synchronizationFederateList.unlink(synchronizationFederate);
+}
+
+void
+Federate::_insertRegionHandleRegionMap(Region& region)
+{
+  _regionHandleRegionMap.insert(region);
+}
+
+void
+Federate::_unlinkRegionHandleRegionMap(Region& region)
+{
+  _regionHandleRegionMap.unlink(region);
 }
 
 } // namespace ServerModel
