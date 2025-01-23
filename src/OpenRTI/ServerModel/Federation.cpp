@@ -397,13 +397,6 @@ Federation::getDimension(std::string const& name)
   return i.get();
 }
 
-void
-Federation::insert(Dimension& dimension)
-{
-  _dimensionNameDimensionMap.insert(dimension);
-  _dimensionHandleDimensionMap.insert(dimension);
-}
-
 UpdateRate const*
 Federation::getUpdateRate(UpdateRateHandle const& updateRateHandle) const
 {
@@ -579,7 +572,6 @@ Federation::insertOrCheck(Module& module, FOMStringDimension const& stringDimens
   } else {
     Dimension* dimension = new Dimension(*this, _dimensionHandleAllocator.get(), stringDimension.getName());
     dimension->setUpperBound(stringDimension.getUpperBound());
-    insert(*dimension);
     module.insert(*dimension);
     return true;
   }
@@ -927,7 +919,6 @@ Federation::insert(Module& module, FOMDimension const& fomDimension)
     _dimensionHandleAllocator.take(fomDimension.getDimensionHandle());
     Dimension* dimension = new Dimension(*this, fomDimension.getDimensionHandle(), fomDimension.getName());
     dimension->setUpperBound(fomDimension.getUpperBound());
-    insert(*dimension);
     module.insert(*dimension);
   }
 }
@@ -1462,6 +1453,30 @@ void
 Federation::_unlinkModuleHandleModuleMap(Module& module)
 {
   _moduleHandleModuleMap.unlink(module);
+}
+
+void
+Federation::_insertDimensionHandleDimensionMap(Dimension& dimension)
+{
+  _dimensionHandleDimensionMap.insert(dimension);
+}
+
+void
+Federation::_unlinkDimensionHandleDimensionMap(Dimension& dimension)
+{
+  _dimensionHandleDimensionMap.unlink(dimension);
+}
+
+void
+Federation::_insertDimensionNameDimensionMap(Dimension& dimension)
+{
+  _dimensionNameDimensionMap.insert(dimension);
+}
+
+void
+Federation::_unlinkDimensionNameDimensionMap(Dimension& dimension)
+{
+  _dimensionNameDimensionMap.unlink(dimension);
 }
 
 } // namespace ServerModel

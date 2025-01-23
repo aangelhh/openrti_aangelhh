@@ -154,7 +154,6 @@ public:
   Dimension* getDimension(std::string const& name);
   Dimension* resolveDimension(std::string const& dimensionName)
   { return getDimension(dimensionName); }
-  void insert(Dimension& dimension);
 
   /// UnorderedSet of UpdateRate instances indexed by updateRateHandle
   typedef Intrusive::UnorderedSet<UpdateRateHandle, Intrusive::UnorderedSetLink<UpdateRate, Intrusive::ParentTag<Federation> > > UpdateRateHandleUpdateRateMap;
@@ -376,12 +375,21 @@ private:
   /// HandleAllocator<TransportationTypeHandle> _transportationTypeHandleAllocator;
 
   /// UnorderedSet of Dimension instances indexed by dimensionHandle
+  friend class Dimension;
+  /// Insert dimension into dimensionHandleDimensionMap
+  void _insertDimensionHandleDimensionMap(Dimension& dimension);
+  /// Unlink dimension from dimensionHandleDimensionMap
+  void _unlinkDimensionHandleDimensionMap(Dimension& dimension);
   DimensionHandleDimensionMap _dimensionHandleDimensionMap;
 
   /// The appropriate HandleAllocator
   HandleAllocator<DimensionHandle> _dimensionHandleAllocator;
 
   /// UnorderedSet of Dimension instances indexed by name
+  /// Insert dimension into dimensionNameDimensionMap
+  void _insertDimensionNameDimensionMap(Dimension& dimension);
+  /// Unlink dimension from dimensionNameDimensionMap
+  void _unlinkDimensionNameDimensionMap(Dimension& dimension);
   DimensionNameDimensionMap _dimensionNameDimensionMap;
 
   /// UnorderedSet of UpdateRate instances indexed by updateRateHandle

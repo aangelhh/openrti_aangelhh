@@ -31,10 +31,15 @@ Dimension::Dimension(Federation& federation, DimensionHandle const& dimensionHan
   _name(name),
   _upperBound(~Unsigned(0))
 {
+  _federation._insertDimensionHandleDimensionMap(*this);
+  _federation._insertDimensionNameDimensionMap(*this);
 }
 
 Dimension::~Dimension()
 {
+  _federation._unlinkDimensionNameDimensionMap(*this);
+  _federation._unlinkDimensionHandleDimensionMap(*this);
+
   OpenRTIAssert(_dimensionModuleList.empty());
 }
 
