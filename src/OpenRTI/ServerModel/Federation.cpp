@@ -739,7 +739,7 @@ Federation::insertOrCheck(Module& module, FOMStringObjectClass const& stringObje
 
     module.createObjectClassModule(*i);
     if (!stringObjectClass.getAttributeList().empty())
-      module.insertAttributes(*i);
+      module.createAttributeDefinitionModule(*i);
 
     return false;
   } else {
@@ -752,7 +752,7 @@ Federation::insertOrCheck(Module& module, FOMStringObjectClass const& stringObje
     module.createObjectClassModule(*objectClass);
 
     if (!stringObjectClass.getAttributeList().empty())
-      module.insertAttributes(*objectClass);
+      module.createAttributeDefinitionModule(*objectClass);
 
     AttributeHandle nextAttributeHandle = objectClass->getFirstUnusedAttributeHandle();
     for (FOMStringAttributeList::const_iterator i = stringObjectClass.getAttributeList().begin();
@@ -986,7 +986,7 @@ Federation::insert(Module& module, FOMObjectClass const& fomObjectClass)
       throw MessageError("Parent ObjectClass does not match.");
     // In this case we want to check for the attribute list being the same on both ends.
     if (!fomObjectClass.getAttributeList().empty()) {
-      module.insertAttributes(*i);
+      module.createAttributeDefinitionModule(*i);
       if (i->getAttributeHandleAttributeDefinitionMap().empty()) {
         for (FOMAttributeList::const_iterator j = fomObjectClass.getAttributeList().begin();
              j != fomObjectClass.getAttributeList().end(); ++j) {
@@ -1038,7 +1038,7 @@ Federation::insert(Module& module, FOMObjectClass const& fomObjectClass)
     ObjectClass* objectClass = createObjectClass(fomObjectClass.getObjectClassHandle(), name, parentObjectClass);
     module.createObjectClassModule(*objectClass);
     if (!fomObjectClass.getAttributeList().empty())
-      module.insertAttributes(*objectClass);
+      module.createAttributeDefinitionModule(*objectClass);
     for (FOMAttributeList::const_iterator j = fomObjectClass.getAttributeList().begin();
          j != fomObjectClass.getAttributeList().end(); ++j) {
       if (objectClass->getAttributeDefinition(j->getName()))
