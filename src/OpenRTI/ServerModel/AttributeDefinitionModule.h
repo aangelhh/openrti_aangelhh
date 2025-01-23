@@ -30,8 +30,8 @@ class Module;
 class ObjectClass;
 
 class OPENRTI_LOCAL AttributeDefinitionModule :
-    public IntrusiveList<AttributeDefinitionModule, 0>::Hook,
-    public IntrusiveList<AttributeDefinitionModule, 1>::Hook
+    public Intrusive::ListLink<AttributeDefinitionModule, Intrusive::ParentTag<Module> >,
+    public Intrusive::ListLink<AttributeDefinitionModule, Intrusive::ParentTag<ObjectClass> >
 {
 public:
   AttributeDefinitionModule(ObjectClass& objectClass, Module& module);

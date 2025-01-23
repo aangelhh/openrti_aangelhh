@@ -19,6 +19,9 @@
 
 #include "AttributeDefinitionModule.h"
 
+#include "Module.h"
+#include "ObjectClass.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 

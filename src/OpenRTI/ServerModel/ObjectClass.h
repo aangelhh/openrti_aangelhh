@@ -107,7 +107,7 @@ public:
   void insert(AttributeDefinition& attributeDefinition);
 
   /// The list of Modules referencing this ObjectClass set of AttributeDefinitions
-  typedef IntrusiveList<AttributeDefinitionModule, 1> AttributeDefinitionModuleList;
+  typedef Intrusive::List<Intrusive::ListLink<AttributeDefinitionModule, Intrusive::ParentTag<ObjectClass> > > AttributeDefinitionModuleList;
   /// Get the list of AttributeDefinitionModule instances
   AttributeDefinitionModuleList const& getAttributeDefinitionModuleList() const
   { return _attributeDefinitionModuleList; }
