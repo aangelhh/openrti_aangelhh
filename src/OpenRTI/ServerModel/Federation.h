@@ -23,18 +23,11 @@
 #include "IntrusiveList.h"
 #include "IntrusiveUnorderedMap.h"
 
-#include "Dimension.h"
-#include "Federate.h"
-#include "FederationConnect.h"
 #include "Handle.h"
 #include "HandleAllocator.h"
-#include "InteractionClass.h"
-#include "Module.h"
-#include "ObjectClass.h"
-#include "ObjectInstance.h"
+#include "Message.h"
+#include "Region.h"
 #include "StringUtils.h"
-#include "Synchronization.h"
-#include "UpdateRate.h"
 
 namespace OpenRTI {
 namespace ServerModel {
@@ -47,11 +40,12 @@ class Module;
 class Node;
 class ObjectClass;
 class ObjectInstance;
+class Synchronization;
 class UpdateRate;
 
 class OPENRTI_LOCAL Federation :
-    public IntrusiveUnorderedMap<FederationHandle const, Federation>::Hook,
-    public IntrusiveUnorderedMap<std::string const, Federation>::Hook
+    public Intrusive::UnorderedSetLink<Federation, Intrusive::ParentTag<Node> >,
+    public Intrusive::UnorderedSetLink<Federation, Intrusive::ParentTag<Node, 1> >
 {
 public:
   Federation(Node& serverNode, FederationHandle const& federationHandle, std::string const& name);
@@ -81,11 +75,11 @@ public:
 
   /// The federation handle
   FederationHandle const& getFederationHandle() const
-  { return IntrusiveUnorderedMap<FederationHandle const, Federation>::Hook::getKey(); }
+  { return _federationHandle; }
 
   /// The federation name
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string const, Federation>::Hook::getKey(); }
+  { return _name; }
 
   /// The name of the logical time factory
   std::string const& getLogicalTimeFactoryName() const
@@ -102,8 +96,7 @@ public:
   /// Get one FederationConnect instance matching connectHandle
   FederationConnect const* getFederationConnect(ConnectHandle const& connectHandle) const;
   FederationConnect* getFederationConnect(ConnectHandle const& connectHandle);
-  void insert(FederationConnect& federationConnect)
-  { _connectHandleFederationConnectMap.insert(federationConnect); }
+  void insert(FederationConnect& federationConnect);
   void removeConnect(ConnectHandle const& connectHandle);
 
   void send(ConnectHandle const& connectHandle, const SharedPtr<const AbstractMessage>& message);
@@ -307,6 +300,9 @@ public:
   /// Create a new ObjectInstance instance
   ObjectInstance* createObjectInstance(ObjectInstanceHandle const& objectInstanceHandle, std::string const& name);
 
+  template<typename Link>
+  struct IntrusiveKey;
+
 private:
 #if 201103L <= __cplusplus
   Federation(Federation const&) = delete;
@@ -324,6 +320,12 @@ private:
 
   /// The parent server node this belongs to
   Node& _serverNode;
+
+  /// The federation handle
+  FederationHandle const _federationHandle;
+
+  /// The federation name
+  std::string const _name;
 
   /// The name of the logical time factory
   std::string _logicalTimeFactoryName;
@@ -408,6 +410,18 @@ private:
 
   /// UnorderedSet of ObjectInstance instances indexed by name
   ObjectInstanceNameObjectInstanceMap _objectInstanceNameObjectInstanceMap;
+};
+
+template<>
+struct Federation::IntrusiveKey<Intrusive::UnorderedSetLink<Federation, Intrusive::ParentTag<Node> > > {
+  static FederationHandle const& get(Federation const& federation)
+  { return federation.getFederationHandle(); }
+};
+
+template<>
+struct Federation::IntrusiveKey<Intrusive::UnorderedSetLink<Federation, Intrusive::ParentTag<Node, 1> > > {
+  static std::string const& get(Federation const& federation)
+  { return federation.getName(); }
 };
 
 } // namespace ServerModel

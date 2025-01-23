@@ -19,15 +19,32 @@
 
 #include "Federation.h"
 
+#include "AttributeDefinition.h"
+#include "AttributeDefinitionModule.h"
+#include "Dimension.h"
+#include "DimensionModule.h"
+#include "Federate.h"
+#include "FederationConnect.h"
+#include "InteractionClass.h"
+#include "InteractionClassModule.h"
+#include "Module.h"
 #include "Node.h"
+#include "ObjectClass.h"
+#include "ObjectClassModule.h"
+#include "ObjectInstance.h"
+#include "ParameterDefinition.h"
+#include "ParameterDefinitionModule.h"
+#include "Synchronization.h"
+#include "UpdateRate.h"
+#include "UpdateRateModule.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 Federation::Federation(Node& serverNode, FederationHandle const& federationHandle, std::string const& name) :
-  IntrusiveUnorderedMap<FederationHandle const, Federation>::Hook(federationHandle),
-  IntrusiveUnorderedMap<std::string const, Federation>::Hook(name),
   _serverNode(serverNode),
+  _federationHandle(federationHandle),
+  _name(name),
   _objectInstanceHandleObjectInstanceMap(16384/*hash size*/)
 {
 }
@@ -164,6 +181,12 @@ Federation::getFederationConnect(ConnectHandle const& connectHandle)
   if (i == _connectHandleFederationConnectMap.end())
     return 0;
   return i.get();
+}
+
+void
+Federation::insert(FederationConnect& federationConnect)
+{
+  _connectHandleFederationConnectMap.insert(federationConnect);
 }
 
 void
