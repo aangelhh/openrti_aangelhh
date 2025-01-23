@@ -292,6 +292,10 @@ public:
   bool isObjectInstanceNameInUse(std::string const& name) const;
 
   ///
+  /// Create a new Module instance
+  Module* createModule(ModuleHandle const& moduleHandle);
+
+  ///
   /// Create a new Federate instance
   Federate* createFederate(FederateHandle const& federateHandle, std::string const& name);
 

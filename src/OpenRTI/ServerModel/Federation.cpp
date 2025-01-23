@@ -790,7 +790,7 @@ Federation::insertOrCheck(Module& module, FOMStringObjectClass const& stringObje
 ModuleHandle
 Federation::insert(FOMStringModule const& stringModule)
 {
-  Module* module = new Module(*this, _moduleHandleAllocator.get());
+  Module* module = createModule(_moduleHandleAllocator.get());
   module->setContent(stringModule.getContent());
   module->setArtificialInteractionRoot(stringModule.getArtificialInteractionRoot());
   module->setArtificialObjectRoot(stringModule.getArtificialObjectRoot());
@@ -1066,7 +1066,7 @@ Federation::insert(FOMModule const& fomModule)
   ModuleHandleModuleMap::iterator i = _moduleHandleModuleMap.find(fomModule.getModuleHandle());
   if (i == _moduleHandleModuleMap.end()) {
     _moduleHandleAllocator.take(fomModule.getModuleHandle());
-    Module* module = new Module(*this, fomModule.getModuleHandle());
+    Module* module = createModule(fomModule.getModuleHandle());
     module->setContent(fomModule.getContent());
     module->setArtificialInteractionRoot(fomModule.getArtificialInteractionRoot());
     module->setArtificialObjectRoot(fomModule.getArtificialObjectRoot());
@@ -1334,6 +1334,12 @@ bool
 Federation::isObjectInstanceNameInUse(std::string const& name) const
 {
   return _objectInstanceNameObjectInstanceMap.find(name) != _objectInstanceNameObjectInstanceMap.end();
+}
+
+Module*
+Federation::createModule(ModuleHandle const& moduleHandle)
+{
+  return new Module(*this, moduleHandle);
 }
 
 Federate*
