@@ -155,6 +155,12 @@ Federate::getRegion(LocalRegionHandle const& regionHandle)
   return i.get();
 }
 
+Region*
+Federate::createRegion(LocalRegionHandle const& regionHandle)
+{
+  return new Region(*this, regionHandle);
+}
+
 void
 Federate::_insertContainerForFederationConnectChange()
 {

@@ -115,6 +115,10 @@ public:
   Region const* getRegion(LocalRegionHandle const& regionHandle) const;
   Region* getRegion(LocalRegionHandle const& regionHandle);
 
+  ///
+  /// Create a new Region instance
+  Region* createRegion(LocalRegionHandle const& regionHandle);
+
   template<typename Link>
   struct IntrusiveKey;
 

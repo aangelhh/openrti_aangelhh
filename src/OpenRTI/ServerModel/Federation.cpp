@@ -1264,7 +1264,7 @@ Federation::getOrCreateRegion(RegionHandle const& regionHandle)
   Region* region = i->getRegion(regionHandle.getLocalRegionHandle());
   if (region)
     return region;
-  return new Region(*i, regionHandle.getLocalRegionHandle());
+  return i->createRegion(regionHandle.getLocalRegionHandle());
 }
 
 Region*
