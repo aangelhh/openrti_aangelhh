@@ -21,11 +21,28 @@
 
 #include <algorithm>
 #include <iterator>
-#include "Message.h"
-#include "AbstractMessageSender.h"
+
 #include "LogStream.h"
-#include "ServerModel/Node.h"
+
+#include "AbstractMessageSender.h"
+#include "Message.h"
 #include "ServerOptions.h"
+
+#include "ServerModel/Dimension.h"
+#include "ServerModel/Federate.h"
+#include "ServerModel/Federation.h"
+#include "ServerModel/FederationConnect.h"
+#include "ServerModel/InteractionClass.h"
+#include "ServerModel/Module.h"
+#include "ServerModel/Node.h"
+#include "ServerModel/NodeConnect.h"
+#include "ServerModel/ObjectClass.h"
+#include "ServerModel/ObjectInstance.h"
+#include "ServerModel/ObjectInstanceConnect.h"
+#include "ServerModel/Region.h"
+#include "ServerModel/Synchronization.h"
+#include "ServerModel/SynchronizationFederate.h"
+#include "ServerModel/UpdateRate.h"
 
 namespace OpenRTI {
 

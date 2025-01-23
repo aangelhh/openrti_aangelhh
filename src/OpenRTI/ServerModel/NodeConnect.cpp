@@ -19,14 +19,15 @@
 
 #include "NodeConnect.h"
 
-#include "Federate.h"
+#include "FederationConnect.h"
+#include "Node.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 NodeConnect::NodeConnect(Node& serverNode, ConnectHandle const& connectHandle) :
-  IntrusiveUnorderedMap<ConnectHandle const, NodeConnect>::Hook(connectHandle),
   _serverNode(serverNode),
+  _connectHandle(connectHandle),
   _isParentConnect(false)
 {
 }
@@ -62,6 +63,12 @@ NodeConnect::setOptions(StringStringListMap const& options)
     _name = i->second.front();
   else
     _name.clear();
+}
+
+void
+NodeConnect::insert(FederationConnect& federationConnect)
+{
+  _federationConnectList.push_back(federationConnect);
 }
 
 const SharedPtr<AbstractMessageSender>&

@@ -24,17 +24,17 @@
 #include "IntrusiveUnorderedMap.h"
 
 #include "AbstractMessageSender.h"
-#include "FederationConnect.h"
 #include "Handle.h"
 #include "StringUtils.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
+class FederationConnect;
 class Node;
 
 class OPENRTI_LOCAL NodeConnect :
-    public IntrusiveUnorderedMap<ConnectHandle const, NodeConnect>::Hook
+    public Intrusive::UnorderedSetLink<NodeConnect, Intrusive::ParentTag<Node> >
 {
 public:
   NodeConnect(Node& serverNode, ConnectHandle const& connectHandle);
@@ -48,7 +48,7 @@ public:
 
   /// The connect handle to identify this connect
   ConnectHandle const& getConnectHandle() const
-  { return IntrusiveUnorderedMap<ConnectHandle const, NodeConnect>::Hook::getKey(); }
+  { return _connectHandle; }
 
   /// True if this is the parent connect
   bool getIsParentConnect() const
@@ -72,8 +72,7 @@ public:
   { return _federationConnectList; }
   FederationConnectList& getFederationConnectList()
   { return _federationConnectList; }
-  void insert(FederationConnect& federationConnect)
-  { _federationConnectList.push_back(federationConnect); }
+  void insert(FederationConnect& federationConnect);
 
   /// The message send callback
   const SharedPtr<AbstractMessageSender>& getMessageSender() const;
@@ -81,6 +80,9 @@ public:
 
   /// We can actually send messages through a connect
   void send(const SharedPtr<const AbstractMessage>& message);
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -100,6 +102,9 @@ private:
   /// The parent ServerNode
   Node& _serverNode;
 
+  /// The connect handle to identify this connect
+  ConnectHandle const _connectHandle;
+
   /// True if this is the parent connect
   bool _isParentConnect;
 
@@ -113,6 +118,12 @@ private:
   FederationConnectList _federationConnectList;
 
   SharedPtr<AbstractMessageSender> _messageSender;
+};
+
+template<>
+struct NodeConnect::IntrusiveKey<Intrusive::UnorderedSetLink<NodeConnect, Intrusive::ParentTag<Node> > > {
+  static ConnectHandle const& get(NodeConnect const& nodeConnect)
+  { return nodeConnect.getConnectHandle(); }
 };
 
 } // namespace ServerModel

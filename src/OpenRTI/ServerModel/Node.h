@@ -23,10 +23,9 @@
 #include "IntrusiveList.h"
 #include "IntrusiveUnorderedMap.h"
 
-#include "Federation.h"
+#include "AbstractMessageSender.h"
 #include "Handle.h"
 #include "HandleAllocator.h"
-#include "NodeConnect.h"
 #include "ServerOptions.h"
 
 namespace OpenRTI {
@@ -74,7 +73,7 @@ public:
   { return _serverOptions->getServerPath(); }
 
   /// UnorderedSet of NodeConnect instances indexed by connectHandle
-  typedef IntrusiveUnorderedMap<ConnectHandle const, NodeConnect> ConnectHandleNodeConnectMap;
+  typedef Intrusive::UnorderedSet<ConnectHandle, Intrusive::UnorderedSetLink<NodeConnect, Intrusive::ParentTag<Node> > > ConnectHandleNodeConnectMap;
   /// Get the set of NodeConnect instances
   ConnectHandleNodeConnectMap const& getConnectHandleNodeConnectMap() const
   { return _connectHandleNodeConnectMap; }

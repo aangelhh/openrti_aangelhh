@@ -21,6 +21,9 @@
 
 #include "LogStream.h"
 
+#include "Federation.h"
+#include "NodeConnect.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 
