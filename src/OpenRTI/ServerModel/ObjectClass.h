@@ -216,6 +216,10 @@ public:
   /// Create a new AttributeDefinition instance
   AttributeDefinition* createAttributeDefinition(AttributeHandle const& attributeHandle, std::string const& name);
 
+  ///
+  /// Create a new ClassAttribute instance
+  ClassAttribute* createClassAttribute(AttributeDefinition& attributeDefinition);
+
   template<typename Link>
   struct IntrusiveKey;
 

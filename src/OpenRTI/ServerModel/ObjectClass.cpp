@@ -189,7 +189,7 @@ ObjectClass::getPrivilegeToDeleteClassAttribute()
 void
 ObjectClass::insertClassAttributeFor(AttributeDefinition& attributeDefinition)
 {
-  ClassAttribute* classAttribute = new ClassAttribute(*this, attributeDefinition);
+  ClassAttribute* classAttribute = createClassAttribute(attributeDefinition);
 
   for (ChildObjectClassList::iterator i = _childObjectClassList.begin(); i != _childObjectClassList.end(); ++i)
     i->insertClassAttributeFor(attributeDefinition);
@@ -207,6 +207,12 @@ AttributeDefinition*
 ObjectClass::createAttributeDefinition(AttributeHandle const& attributeHandle, std::string const& name)
 {
   return new AttributeDefinition(*this, attributeHandle, name);
+}
+
+ClassAttribute*
+ObjectClass::createClassAttribute(AttributeDefinition& attributeDefinition)
+{
+  return new ClassAttribute(*this, attributeDefinition);
 }
 
 void
