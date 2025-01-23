@@ -69,8 +69,6 @@ public:
   { return _connectHandleObjectInstanceConnectMap; }
   ConnectHandleObjectInstanceConnectMap& getConnectHandleObjectInstanceConnectMap()
   { return _connectHandleObjectInstanceConnectMap; }
-  /// List of object instance handle/name references at this connect.
-  void insert(ObjectInstanceConnect& objectInstanceConnect);
   /// Mark the name handle pair also represented with this as used in the federationConnect
   void reference(FederationConnect& federationConnect);
   /// Releases the ObjectInstanceConnect entry belonging to the connectHandle
@@ -129,6 +127,11 @@ private:
   ObjectClass* _objectClass;
 
   /// UnorderedSet of ObjectInstanceConnect instances indexed by connectHandle
+  friend class ObjectInstanceConnect;
+  /// Insert objectInstanceConnect into connectHandleObjectInstanceConnectMap
+  void _insertConnectHandleObjectInstanceConnectMap(ObjectInstanceConnect& objectInstanceConnect);
+  /// Unlink objectInstanceConnect from connectHandleObjectInstanceConnectMap
+  void _unlinkConnectHandleObjectInstanceConnectMap(ObjectInstanceConnect& objectInstanceConnect);
   ConnectHandleObjectInstanceConnectMap _connectHandleObjectInstanceConnectMap;
 
   /// UnorderedSet of InstanceAttribute instances indexed by attributeHandle

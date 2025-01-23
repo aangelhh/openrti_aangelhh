@@ -108,7 +108,6 @@ public:
   { return _objectInstanceConnectList; }
   ObjectInstanceConnectList& getObjectInstanceConnectList()
   { return _objectInstanceConnectList; }
-  void insert(ObjectInstanceConnect& objectInstanceConnect);
 
   /// We can actually send something there
   void send(const SharedPtr<const AbstractMessage>& message);
@@ -164,6 +163,11 @@ private:
   TimeRegulatingFederateList _timeRegulatingFederateList;
 
   /// List of ObjectInstanceConnect instances belonging to this FederationConnect
+  friend class ObjectInstanceConnect;
+  /// Insert objectInstanceConnect into objectInstanceConnectList
+  void _insertObjectInstanceConnectList(ObjectInstanceConnect& objectInstanceConnect);
+  /// Unlink objectInstanceConnect from objectInstanceConnectList
+  void _unlinkObjectInstanceConnectList(ObjectInstanceConnect& objectInstanceConnect);
   ObjectInstanceConnectList _objectInstanceConnectList;
 };
 

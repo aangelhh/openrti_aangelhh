@@ -30,10 +30,14 @@ ObjectInstanceConnect::ObjectInstanceConnect(ObjectInstance& objectInstance, Fed
   _federationConnect(federationConnect),
   _connectHandle(federationConnect.getConnectHandle())
 {
+  _objectInstance._insertConnectHandleObjectInstanceConnectMap(*this);
+  _federationConnect._insertObjectInstanceConnectList(*this);
 }
 
 ObjectInstanceConnect::~ObjectInstanceConnect()
 {
+  _federationConnect._unlinkObjectInstanceConnectList(*this);
+  _objectInstance._unlinkConnectHandleObjectInstanceConnectMap(*this);
 }
 
 } // namespace ServerModel

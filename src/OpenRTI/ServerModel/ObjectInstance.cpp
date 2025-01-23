@@ -73,12 +73,6 @@ ObjectInstance::setObjectClass(ObjectClass* objectClass)
 }
 
 void
-ObjectInstance::insert(ObjectInstanceConnect& objectInstanceConnect)
-{
-  _connectHandleObjectInstanceConnectMap.insert(objectInstanceConnect);
-}
-
-void
 ObjectInstance::reference(FederationConnect& federationConnect)
 {
   // OpenRTIAssert(_connectHandleObjectInstanceConnectMap.find(federationConnect.getConnectHandle()) == _connectHandleObjectInstanceConnectMap.end());
@@ -86,8 +80,6 @@ ObjectInstance::reference(FederationConnect& federationConnect)
     return;
   ObjectInstanceConnect* objectInstanceConnect;
   objectInstanceConnect = new ObjectInstanceConnect(*this, federationConnect);
-  insert(*objectInstanceConnect);
-  federationConnect.insert(*objectInstanceConnect);
 }
 
 bool
@@ -177,6 +169,18 @@ ObjectInstance::_unlinkContainerForObjectClassChange()
 {
   if (ObjectClass* objectClass = _objectClass)
     objectClass->_unlinkObjectInstanceList(*this);
+}
+
+void
+ObjectInstance::_insertConnectHandleObjectInstanceConnectMap(ObjectInstanceConnect& objectInstanceConnect)
+{
+  _connectHandleObjectInstanceConnectMap.insert(objectInstanceConnect);
+}
+
+void
+ObjectInstance::_unlinkConnectHandleObjectInstanceConnectMap(ObjectInstanceConnect& objectInstanceConnect)
+{
+  _connectHandleObjectInstanceConnectMap.unlink(objectInstanceConnect);
 }
 
 } // namespace ServerModel

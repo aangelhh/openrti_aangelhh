@@ -111,12 +111,6 @@ FederationConnect::send(const SharedPtr<const AbstractMessage>& message)
 }
 
 void
-FederationConnect::insert(ObjectInstanceConnect& objectInstanceConnect)
-{
-  _objectInstanceConnectList.push_back(objectInstanceConnect);
-}
-
-void
 FederationConnect::_insertFederateList(Federate& federate)
 {
   _federateList.push_back(federate);
@@ -140,6 +134,18 @@ FederationConnect::_unlinkTimeRegulatingFederateList(Federate& federate)
 {
   _timeRegulatingFederateList.unlink(federate);
   setIsTimeRegulating(!_timeRegulatingFederateList.empty());
+}
+
+void
+FederationConnect::_insertObjectInstanceConnectList(ObjectInstanceConnect& objectInstanceConnect)
+{
+  _objectInstanceConnectList.push_back(objectInstanceConnect);
+}
+
+void
+FederationConnect::_unlinkObjectInstanceConnectList(ObjectInstanceConnect& objectInstanceConnect)
+{
+  _objectInstanceConnectList.unlink(objectInstanceConnect);
 }
 
 } // namespace ServerModel
