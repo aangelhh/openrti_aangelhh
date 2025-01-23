@@ -30,8 +30,8 @@ class Module;
 class UpdateRate;
 
 class OPENRTI_LOCAL UpdateRateModule :
-    public IntrusiveList<UpdateRateModule, 0>::Hook,
-    public IntrusiveList<UpdateRateModule, 1>::Hook
+    public Intrusive::ListLink<UpdateRateModule, Intrusive::ParentTag<Module> >,
+    public Intrusive::ListLink<UpdateRateModule, Intrusive::ParentTag<UpdateRate> >
 {
 public:
   UpdateRateModule(UpdateRate& updateRate, Module& module);

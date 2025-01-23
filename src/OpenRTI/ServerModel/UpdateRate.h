@@ -55,7 +55,7 @@ public:
   void setRate(double rate);
 
   /// The list of Modules referencing this UpdateRate
-  typedef IntrusiveList<UpdateRateModule, 1> UpdateRateModuleList;
+  typedef Intrusive::List<Intrusive::ListLink<UpdateRateModule, Intrusive::ParentTag<UpdateRate> > > UpdateRateModuleList;
   bool getIsReferencedByAnyModule() const;
 
   void insert(UpdateRateModule& updateRateModule);

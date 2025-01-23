@@ -78,7 +78,7 @@ public:
   void insert(DimensionModule& dimensionModule);
 
   /// All UpdateRates that are referenced by this Module
-  typedef IntrusiveList<UpdateRateModule, 0> UpdateRateModuleList;
+  typedef Intrusive::List<Intrusive::ListLink<UpdateRateModule, Intrusive::ParentTag<Module> > > UpdateRateModuleList;
   /// Get the list of UpdateRateModule instances
   UpdateRateModuleList const& getUpdateRateModuleList() const
   { return _updateRateModuleList; }

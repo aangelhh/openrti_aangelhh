@@ -19,6 +19,9 @@
 
 #include "UpdateRateModule.h"
 
+#include "Module.h"
+#include "UpdateRate.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 
