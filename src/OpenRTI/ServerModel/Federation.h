@@ -308,6 +308,10 @@ public:
   InteractionClass* createInteractionClass(InteractionClassHandle const& interactionClassHandle, StringVector const& name, InteractionClass* parentInteractionClass);
 
   ///
+  /// Create a new ObjectClass instance
+  ObjectClass* createObjectClass(ObjectClassHandle const& objectClassHandle, StringVector const& name, ObjectClass* parentObjectClass);
+
+  ///
   /// Create a new Federate instance
   Federate* createFederate(FederateHandle const& federateHandle, std::string const& name);
 

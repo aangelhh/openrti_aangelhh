@@ -748,7 +748,7 @@ Federation::insertOrCheck(Module& module, FOMStringObjectClass const& stringObje
     // This signals an error in message preparation
     if (!parentObjectClass && 1 < stringObjectClass.getName().size())
       throw MessageError("Cannot resolve parent object class name!");
-    ObjectClass* objectClass = new ObjectClass(*this, _objectClassHandleAllocator.get(), stringObjectClass.getName(), parentObjectClass);
+    ObjectClass* objectClass = createObjectClass(_objectClassHandleAllocator.get(), stringObjectClass.getName(), parentObjectClass);
     module.insert(*objectClass);
 
     if (!stringObjectClass.getAttributeList().empty())
@@ -1037,7 +1037,7 @@ Federation::insert(Module& module, FOMObjectClass const& fomObjectClass)
       name = parentObjectClass->getName();
     name.push_back(fomObjectClass.getName());
     _objectClassHandleAllocator.take(fomObjectClass.getObjectClassHandle());
-    ObjectClass* objectClass = new ObjectClass(*this, fomObjectClass.getObjectClassHandle(), name, parentObjectClass);
+    ObjectClass* objectClass = createObjectClass(fomObjectClass.getObjectClassHandle(), name, parentObjectClass);
     module.insert(*objectClass);
     if (!fomObjectClass.getAttributeList().empty())
       module.insertAttributes(*objectClass);
@@ -1355,6 +1355,12 @@ InteractionClass*
 Federation::createInteractionClass(InteractionClassHandle const& interactionClassHandle, StringVector const& name, InteractionClass* parentInteractionClass)
 {
   return new InteractionClass(*this, interactionClassHandle, name, parentInteractionClass);
+}
+
+ObjectClass*
+Federation::createObjectClass(ObjectClassHandle const& objectClassHandle, StringVector const& name, ObjectClass* parentObjectClass)
+{
+  return new ObjectClass(*this, objectClassHandle, name, parentObjectClass);
 }
 
 Federate*
