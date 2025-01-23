@@ -23,8 +23,7 @@
 #include "TimeManagement.h"
 
 #include "FederateHandleLowerBoundTimeStampMap.h"
-#include "IntrusiveList.h"
-#include "IntrusiveUnorderedMap.h"
+#include "Intrusive.h"
 
 namespace OpenRTI {
 

@@ -20,8 +20,7 @@
 #ifndef OpenRTI_ServerModel_Node_h
 #define OpenRTI_ServerModel_Node_h
 
-#include "IntrusiveList.h"
-#include "IntrusiveUnorderedMap.h"
+#include "Intrusive.h"
 
 #include "AbstractMessageSender.h"
 #include "Handle.h"

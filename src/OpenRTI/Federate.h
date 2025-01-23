@@ -21,8 +21,7 @@
 #define OpenRTI_Federate_h
 
 #include "Export.h"
-#include "IntrusiveList.h"
-#include "IntrusiveUnorderedMap.h"
+#include "Intrusive.h"
 #include "HandleAllocator.h"
 #include "LogStream.h"
 #include "Message.h"

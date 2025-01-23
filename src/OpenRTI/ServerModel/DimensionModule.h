@@ -20,8 +20,7 @@
 #ifndef OpenRTI_ServerModel_DimensionModule_h
 #define OpenRTI_ServerModel_DimensionModule_h
 
-#include "IntrusiveList.h"
-#include "IntrusiveUnorderedMap.h"
+#include "Intrusive.h"
 
 namespace OpenRTI {
 namespace ServerModel {

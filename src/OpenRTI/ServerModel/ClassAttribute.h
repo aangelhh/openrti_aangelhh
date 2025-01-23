@@ -20,8 +20,7 @@
 #ifndef OpenRTI_ServerModel_ClassAttribute_h
 #define OpenRTI_ServerModel_ClassAttribute_h
 
-#include "IntrusiveList.h"
-#include "IntrusiveUnorderedMap.h"
+#include "Intrusive.h"
 
 #include "Handle.h"
 #include "PublishSubscribe.h"
