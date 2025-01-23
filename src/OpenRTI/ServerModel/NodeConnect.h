@@ -39,7 +39,7 @@ class OPENRTI_LOCAL NodeConnect :
 {
 public:
   NodeConnect(Node& serverNode, ConnectHandle const& connectHandle);
-  ~NodeConnect();
+  virtual ~NodeConnect();
 
   /// The parent ServerNode
   Node const& getServerNode() const

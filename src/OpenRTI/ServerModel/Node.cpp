@@ -83,7 +83,7 @@ Node::getNodeConnect(ConnectHandle const& connectHandle)
 NodeConnect*
 Node::insertNodeConnect(const SharedPtr<AbstractMessageSender>& messageSender, StringStringListMap const& options)
 {
-  NodeConnect* nodeConnect = new NodeConnect(*this, _connectHandleAllocator.get());
+  NodeConnect* nodeConnect = createNodeConnect(_connectHandleAllocator.get());
   nodeConnect->setMessageSender(messageSender);
   nodeConnect->setOptions(options);
   return nodeConnect;
@@ -211,6 +211,18 @@ void
 Node::broadcastToChildren(const SharedPtr<const AbstractMessage>& message)
 {
   broadcast(_parentConnectHandle, message);
+}
+
+NodeConnect*
+Node::createNodeConnect(ConnectHandle const& connectHandle)
+{
+  return _createNodeConnect(connectHandle);
+}
+
+NodeConnect*
+Node::_createNodeConnect(ConnectHandle const& connectHandle)
+{
+  return new NodeConnect(*this, connectHandle);
 }
 
 void

@@ -83,6 +83,7 @@ public:
   /// Get one NodeConnect instance matching connectHandle
   NodeConnect const* getNodeConnect(ConnectHandle const& connectHandle) const;
   NodeConnect* getNodeConnect(ConnectHandle const& connectHandle);
+
   NodeConnect* insertNodeConnect(const SharedPtr<AbstractMessageSender>& messageSender, StringStringListMap const& options);
   NodeConnect* insertParentNodeConnect(const SharedPtr<AbstractMessageSender>& messageSender, StringStringListMap const& options);
   void erase(ConnectHandle const& connectHandle);
@@ -112,6 +113,15 @@ public:
   void broadcast(const SharedPtr<const AbstractMessage>& message);
   void broadcast(ConnectHandle const& connectHandle, const SharedPtr<const AbstractMessage>& message);
   void broadcastToChildren(const SharedPtr<const AbstractMessage>& message);
+
+  ///
+  /// Create a new NodeConnect instance
+  NodeConnect* createNodeConnect(ConnectHandle const& connectHandle);
+
+protected:
+  ///
+  /// Create a new NodeConnect instance
+  virtual NodeConnect* _createNodeConnect(ConnectHandle const& connectHandle);
 
 protected:
 #if 201103L <= __cplusplus
