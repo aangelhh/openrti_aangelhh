@@ -62,7 +62,7 @@ public:
   void setObjectClass(ObjectClass* objectClass);
 
   /// UnorderedSet of ObjectInstanceConnect instances indexed by connectHandle
-  typedef IntrusiveUnorderedMap<ConnectHandle, ObjectInstanceConnect> ConnectHandleObjectInstanceConnectMap;
+  typedef Intrusive::UnorderedSet<ConnectHandle, Intrusive::UnorderedSetLink<ObjectInstanceConnect, Intrusive::ParentTag<ObjectInstance> > > ConnectHandleObjectInstanceConnectMap;
   /// Get the set of ObjectInstanceConnect instances
   ConnectHandleObjectInstanceConnectMap const& getConnectHandleObjectInstanceConnectMap() const
   { return _connectHandleObjectInstanceConnectMap; }

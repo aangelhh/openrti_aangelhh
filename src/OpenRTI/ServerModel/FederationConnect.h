@@ -101,7 +101,7 @@ public:
   void eraseTimeRegulating(Federate& federate);
 
   /// List of ObjectInstanceConnect instances belonging to this FederationConnect
-  typedef IntrusiveList<ObjectInstanceConnect, 0> ObjectInstanceConnectList;
+  typedef Intrusive::List<Intrusive::ListLink<ObjectInstanceConnect, Intrusive::ParentTag<FederationConnect> > > ObjectInstanceConnectList;
   /// Get the list of ObjectInstanceConnect instances
   ObjectInstanceConnectList const& getObjectInstanceConnectList() const
   { return _objectInstanceConnectList; }

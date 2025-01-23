@@ -32,8 +32,8 @@ class FederationConnect;
 class ObjectInstance;
 
 class OPENRTI_LOCAL ObjectInstanceConnect :
-    public IntrusiveUnorderedMap<ConnectHandle, ObjectInstanceConnect>::Hook,
-    public IntrusiveList<ObjectInstanceConnect, 0>::Hook
+    public Intrusive::UnorderedSetLink<ObjectInstanceConnect, Intrusive::ParentTag<ObjectInstance> >,
+    public Intrusive::ListLink<ObjectInstanceConnect, Intrusive::ParentTag<FederationConnect> >
 {
 public:
   ObjectInstanceConnect(ObjectInstance& objectInstance, FederationConnect& federationConnect);
@@ -50,7 +50,11 @@ public:
   { return _federationConnect; }
 
   /// The connect handle to identify this connect
-  ConnectHandle const& getConnectHandle() const;
+  ConnectHandle const& getConnectHandle() const
+  { return _connectHandle; }
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -70,6 +74,15 @@ private:
   ObjectInstance& _objectInstance;
 
   FederationConnect& _federationConnect;
+
+  /// The connect handle to identify this connect
+  ConnectHandle const _connectHandle;
+};
+
+template<>
+struct ObjectInstanceConnect::IntrusiveKey<Intrusive::UnorderedSetLink<ObjectInstanceConnect, Intrusive::ParentTag<ObjectInstance> > > {
+  static ConnectHandle const& get(ObjectInstanceConnect const& objectInstanceConnect)
+  { return objectInstanceConnect.getConnectHandle(); }
 };
 
 } // namespace ServerModel

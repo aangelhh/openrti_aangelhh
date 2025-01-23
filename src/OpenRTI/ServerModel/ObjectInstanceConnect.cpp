@@ -20,26 +20,20 @@
 #include "ObjectInstanceConnect.h"
 
 #include "FederationConnect.h"
+#include "ObjectInstance.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 ObjectInstanceConnect::ObjectInstanceConnect(ObjectInstance& objectInstance, FederationConnect& federationConnect) :
-  IntrusiveUnorderedMap<ConnectHandle, ObjectInstanceConnect>::Hook(federationConnect.getConnectHandle()),
   _objectInstance(objectInstance),
-  _federationConnect(federationConnect)
+  _federationConnect(federationConnect),
+  _connectHandle(federationConnect.getConnectHandle())
 {
 }
 
 ObjectInstanceConnect::~ObjectInstanceConnect()
 {
-}
-
-ConnectHandle const&
-ObjectInstanceConnect::getConnectHandle() const
-{
-  // return getFederationConnect().getConnectHandle();
-  return IntrusiveUnorderedMap<ConnectHandle, ObjectInstanceConnect>::Hook::getKey();
 }
 
 } // namespace ServerModel
