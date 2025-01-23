@@ -64,12 +64,15 @@ public:
   // private:
 
   /// The FederateHandle to SynchronizationFederate map of federates
+  /// UnorderedSet of SynchronizationFederate instances indexed by federateHandle
   /// waiting for this synchronization point
-  typedef IntrusiveUnorderedMap<FederateHandle const, SynchronizationFederate> WaitingFederateSynchronizationMap;
+  typedef Intrusive::UnorderedSet<FederateHandle, Intrusive::UnorderedSetLink<SynchronizationFederate, Intrusive::ParentTag<Synchronization> > > WaitingFederateSynchronizationMap;
   WaitingFederateSynchronizationMap _waitingFederateSynchronizationMap;
+
+  /// UnorderedSet of SynchronizationFederate instances indexed by federateHandle
+  typedef Intrusive::UnorderedSet<FederateHandle, Intrusive::UnorderedSetLink<SynchronizationFederate, Intrusive::ParentTag<Synchronization> > > AchievedFederateSynchronizationMap;
   /// The FederateHandle to SynchronizationFederate map of federates
   /// that have achieved the synchronization point
-  typedef IntrusiveUnorderedMap<FederateHandle const, SynchronizationFederate> AchievedFederateSynchronizationMap;
   AchievedFederateSynchronizationMap _achievedFederateSynchronizationMap;
 
   template<typename Link>

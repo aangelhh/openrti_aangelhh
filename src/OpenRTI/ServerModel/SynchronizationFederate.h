@@ -32,8 +32,8 @@ class Federate;
 class Synchronization;
 
 class OPENRTI_LOCAL SynchronizationFederate :
-    public IntrusiveUnorderedMap<FederateHandle const, SynchronizationFederate>::Hook,
-    public IntrusiveList<SynchronizationFederate, 0>::Hook
+    public Intrusive::UnorderedSetLink<SynchronizationFederate, Intrusive::ParentTag<Synchronization> >,
+    public Intrusive::ListLink<SynchronizationFederate, Intrusive::ParentTag<Federate> >
 {
 public:
   SynchronizationFederate(Synchronization& synchronization, Federate& federate);
@@ -50,11 +50,14 @@ public:
   { return _federate; }
 
   FederateHandle const& getFederateHandle() const
-  { return IntrusiveUnorderedMap<FederateHandle const, SynchronizationFederate>::Hook::getKey(); }
+  { return _federateHandle; }
 
   bool getSuccessful() const
   { return _successful; }
   void setSuccessful(bool successful);
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -75,7 +78,15 @@ private:
 
   Federate& _federate;
 
+  FederateHandle const _federateHandle;
+
   bool _successful;
+};
+
+template<>
+struct SynchronizationFederate::IntrusiveKey<Intrusive::UnorderedSetLink<SynchronizationFederate, Intrusive::ParentTag<Synchronization> > > {
+  static FederateHandle const& get(SynchronizationFederate const& synchronizationFederate)
+  { return synchronizationFederate.getFederateHandle(); }
 };
 
 } // namespace ServerModel

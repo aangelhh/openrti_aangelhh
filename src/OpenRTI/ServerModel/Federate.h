@@ -79,7 +79,7 @@ public:
   void send(const SharedPtr<const AbstractMessage>& message);
 
   /// List of SynchronizationFederate instances belonging to this Federate
-  typedef IntrusiveList<SynchronizationFederate, 0> SynchronizationFederateList;
+  typedef Intrusive::List<Intrusive::ListLink<SynchronizationFederate, Intrusive::ParentTag<Federate> > > SynchronizationFederateList;
   /// Get the list of SynchronizationFederate instances
   SynchronizationFederateList const& getSynchronizationFederateList() const
   { return _synchronizationFederateList; }

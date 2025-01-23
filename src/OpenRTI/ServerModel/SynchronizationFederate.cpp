@@ -20,14 +20,15 @@
 #include "SynchronizationFederate.h"
 
 #include "Federate.h"
+#include "Synchronization.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 SynchronizationFederate::SynchronizationFederate(Synchronization& synchronization, Federate& federate) :
-  IntrusiveUnorderedMap<FederateHandle const, SynchronizationFederate>::Hook(federate.getFederateHandle()),
   _synchronization(synchronization),
   _federate(federate),
+  _federateHandle(federate.getFederateHandle()),
   _successful(false)
 {
 }
