@@ -219,6 +219,12 @@ Node::createNodeConnect(ConnectHandle const& connectHandle)
   return _createNodeConnect(connectHandle);
 }
 
+Federation*
+Node::createFederation(FederationHandle const& federationHandle, std::string const& name)
+{
+  return _createFederation(_federationHandleAllocator.getOrTake(federationHandle), name);
+}
+
 NodeConnect*
 Node::_createNodeConnect(ConnectHandle const& connectHandle)
 {

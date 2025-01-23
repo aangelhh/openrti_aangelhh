@@ -118,12 +118,20 @@ public:
   /// Create a new NodeConnect instance
   NodeConnect* createNodeConnect(ConnectHandle const& connectHandle);
 
+  ///
+  /// Create a new Federation instance
+  Federation* createFederation(FederationHandle const& federationHandle, std::string const& name);
+
 protected:
   ///
   /// Create a new NodeConnect instance
   virtual NodeConnect* _createNodeConnect(ConnectHandle const& connectHandle);
 
-protected:
+  ///
+  /// Create a new Federation instance
+  virtual Federation* _createFederation(FederationHandle const& federationHandle, std::string const& name) = 0;
+
+private:
 #if 201103L <= __cplusplus
   Node(Node const&) = delete;
   Node(Node&&) = delete;

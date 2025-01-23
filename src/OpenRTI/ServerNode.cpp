@@ -1905,11 +1905,6 @@ public:
 class OPENRTI_LOCAL ServerMessageDispatcher : public ServerModel::Node {
 public:
 
-  FederationServer* createFederation(FederationHandle const& federationHandle, std::string const& name)
-  {
-    return new FederationServer(*this, _federationHandleAllocator.getOrTake(federationHandle), name);
-  }
-
   /// We have some stateless upstream messages that get handled in the root server,
   /// We remember these and know where to send them back.
   template<typename M>
@@ -1974,7 +1969,7 @@ public:
       // Successful create
       FederationServer* federationServer = NULL;
       try {
-        federationServer = createFederation(FederationHandle(), message->getFederationExecution());
+        federationServer = static_cast<FederationServer*>(createFederation(FederationHandle(), message->getFederationExecution()));
         federationServer->setLogicalTimeFactoryName(message->getLogicalTimeFactoryName());
         federationServer->insert(message->getFOMStringModuleList());
 
@@ -2529,34 +2524,31 @@ public:
 private:
   FederationServer* getFederation(const std::string& federationName)
   {
-    ServerModel::Federation* federation = ServerModel::Node::getFederation(federationName);
-    if (!federation)
-      return 0;
-    return static_cast<FederationServer*>(federation);
+    return static_cast<FederationServer*>(ServerModel::Node::getFederation(federationName));
   }
   FederationServer* getFederation(const FederationHandle& federationHandle)
   {
-    ServerModel::Federation* federation = ServerModel::Node::getFederation(federationHandle);
-    if (!federation)
-      return 0;
-    return static_cast<FederationServer*>(federation);
+    return static_cast<FederationServer*>(ServerModel::Node::getFederation(federationHandle));
   }
-
 
   FederationServer* insertFederation(const std::string& name, const FederationHandle& federationHandle)
   {
     OpenRTIAssert(!isRootServer());
     OpenRTIAssert(federationHandle.valid());
-    OpenRTIAssert(_federationNameFederationMap.find(name) == _federationNameFederationMap.end());
-    OpenRTIAssert(_federationHandleFederationMap.find(federationHandle) == _federationHandleFederationMap.end());
+    OpenRTIAssert(!getFederation(name));
+    OpenRTIAssert(!getFederation(federationHandle));
 
     ServerModel::NodeConnect* connect = getNodeConnect(getParentConnectHandle());
     OpenRTIAssert(connect);
 
-    FederationServer* federationServer = createFederation(federationHandle, name);
+    FederationServer* federationServer = static_cast<FederationServer*>(createFederation(federationHandle, name));
     federationServer->getOrInsertConnect(*connect);
 
     return federationServer;
+  }
+  virtual FederationServer* _createFederation(FederationHandle const& federationHandle, std::string const& name)
+  {
+    return new FederationServer(*this, federationHandle, name);
   }
 
   /// Messages that require a response from the root server.
