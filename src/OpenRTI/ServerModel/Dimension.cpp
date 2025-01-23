@@ -56,9 +56,15 @@ Dimension::getIsReferencedByAnyModule() const
 }
 
 void
-Dimension::insert(DimensionModule& dimensionModule)
+Dimension::_insertDimensionModuleList(DimensionModule& dimensionModule)
 {
   _dimensionModuleList.push_back(dimensionModule);
+}
+
+void
+Dimension::_unlinkDimensionModuleList(DimensionModule& dimensionModule)
+{
+  _dimensionModuleList.unlink(dimensionModule);
 }
 
 } // namespace ServerModel

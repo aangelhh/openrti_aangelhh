@@ -59,8 +59,8 @@ public:
 
   /// The list of Modules referencing this Dimension
   typedef Intrusive::List<Intrusive::ListLink<DimensionModule, Intrusive::ParentTag<Dimension> > > DimensionModuleList;
+  /// Returns if the Dimension is referenced by a module.
   bool getIsReferencedByAnyModule() const;
-  void insert(DimensionModule& dimensionModule);
 
   template<typename Link>
   struct IntrusiveKey;
@@ -90,6 +90,11 @@ private:
   Unsigned _upperBound;
 
   /// The list of Modules referencing this Dimension
+  friend class DimensionModule;
+  /// Insert dimensionModule into dimensionModuleList
+  void _insertDimensionModuleList(DimensionModule& dimensionModule);
+  /// Unlink dimensionModule from dimensionModuleList
+  void _unlinkDimensionModuleList(DimensionModule& dimensionModule);
   DimensionModuleList _dimensionModuleList;
 };
 

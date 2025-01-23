@@ -76,12 +76,6 @@ Module::setArtificialObjectRoot(bool artificialObjectRoot)
 }
 
 void
-Module::insert(DimensionModule& dimensionModule)
-{
-  _dimensionModuleList.push_back(dimensionModule);
-}
-
-void
 Module::insert(UpdateRateModule& updateRateModule)
 {
   _updateRateModuleList.push_back(updateRateModule);
@@ -213,11 +207,7 @@ Module::getModule(FOMModule& module) const
 DimensionModule*
 Module::insert(Dimension& dimension)
 {
-  DimensionModule* dimensionModule;
-  dimensionModule = new DimensionModule(dimension, *this);
-  dimension.insert(*dimensionModule);
-  insert(*dimensionModule);
-  return dimensionModule;
+  return new DimensionModule(dimension, *this);
 }
 
 UpdateRateModule*
@@ -268,6 +258,18 @@ Module::insertAttributes(ObjectClass& objectClass)
   objectClass.insert(*attributeDefinitionModule);
   insert(*attributeDefinitionModule);
   return attributeDefinitionModule;
+}
+
+void
+Module::_insertDimensionModuleList(DimensionModule& dimensionModule)
+{
+  _dimensionModuleList.push_back(dimensionModule);
+}
+
+void
+Module::_unlinkDimensionModuleList(DimensionModule& dimensionModule)
+{
+  _dimensionModuleList.unlink(dimensionModule);
 }
 
 } // namespace ServerModel

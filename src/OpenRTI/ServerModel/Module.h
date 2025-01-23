@@ -76,7 +76,6 @@ public:
   { return _dimensionModuleList; }
   DimensionModuleList& getDimensionModuleList()
   { return _dimensionModuleList; }
-  void insert(DimensionModule& dimensionModule);
 
   /// All UpdateRates that are referenced by this Module
   typedef Intrusive::List<Intrusive::ListLink<UpdateRateModule, Intrusive::ParentTag<Module> > > UpdateRateModuleList;
@@ -163,6 +162,11 @@ private:
   bool _artificialObjectRoot;
 
   /// All Dimensions that are referenced by this Module
+  friend class DimensionModule;
+  /// Insert dimensionModule into dimensionModuleList
+  void _insertDimensionModuleList(DimensionModule& dimensionModule);
+  /// Unlink dimensionModule from dimensionModuleList
+  void _unlinkDimensionModuleList(DimensionModule& dimensionModule);
   DimensionModuleList _dimensionModuleList;
 
   /// All UpdateRates that are referenced by this Module

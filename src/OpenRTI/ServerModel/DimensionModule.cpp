@@ -29,10 +29,14 @@ DimensionModule::DimensionModule(Dimension& dimension, Module& module) :
   _dimension(dimension),
   _module(module)
 {
+  _module._insertDimensionModuleList(*this);
+  _dimension._insertDimensionModuleList(*this);
 }
 
 DimensionModule::~DimensionModule()
 {
+  _dimension._unlinkDimensionModuleList(*this);
+  _module._unlinkDimensionModuleList(*this);
 }
 
 } // namespace ServerModel
