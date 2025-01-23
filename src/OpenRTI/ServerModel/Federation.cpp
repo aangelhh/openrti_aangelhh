@@ -526,12 +526,12 @@ Federation::insertOrCheck(Module& module, FOMStringDimension const& stringDimens
          << i->getUpperBound() << "!";
       throw InconsistentFDD(ss.str());
     }
-    module.insert(*i);
+    module.createDimensionModule(*i);
     return false;
   } else {
     Dimension* dimension = createDimension(_dimensionHandleAllocator.get(), stringDimension.getName());
     dimension->setUpperBound(stringDimension.getUpperBound());
-    module.insert(*dimension);
+    module.createDimensionModule(*dimension);
     return true;
   }
 }
@@ -870,12 +870,12 @@ Federation::insert(Module& module, FOMDimension const& fomDimension)
       throw MessageError("Dimension name does not match.");
     if (fomDimension.getUpperBound() != i->getUpperBound())
       throw MessageError("Dimension upper bound does not match.");
-    module.insert(*i);
+    module.createDimensionModule(*i);
   } else {
     _dimensionHandleAllocator.take(fomDimension.getDimensionHandle());
     Dimension* dimension = createDimension(fomDimension.getDimensionHandle(), fomDimension.getName());
     dimension->setUpperBound(fomDimension.getUpperBound());
-    module.insert(*dimension);
+    module.createDimensionModule(*dimension);
   }
 }
 

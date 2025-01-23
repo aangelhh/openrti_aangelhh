@@ -174,12 +174,6 @@ Module::getModule(FOMModule& module) const
   }
 }
 
-DimensionModule*
-Module::insert(Dimension& dimension)
-{
-  return new DimensionModule(dimension, *this);
-}
-
 UpdateRateModule*
 Module::insert(UpdateRate& updateRate)
 {
@@ -208,6 +202,12 @@ AttributeDefinitionModule*
 Module::insertAttributes(ObjectClass& objectClass)
 {
   return new AttributeDefinitionModule(objectClass, *this);
+}
+
+DimensionModule*
+Module::createDimensionModule(Dimension& dimension)
+{
+  return new DimensionModule(dimension, *this);
 }
 
 void
