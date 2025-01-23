@@ -29,10 +29,14 @@ ObjectClassModule::ObjectClassModule(ObjectClass& objectClass, Module& module) :
   _objectClass(objectClass),
   _module(module)
 {
+  _module._insertObjectClassModuleList(*this);
+  _objectClass._insertObjectClassModuleList(*this);
 }
 
 ObjectClassModule::~ObjectClassModule()
 {
+  _objectClass._unlinkObjectClassModuleList(*this);
+  _module._unlinkObjectClassModuleList(*this);
 }
 
 } // namespace ServerModel

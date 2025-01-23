@@ -81,7 +81,9 @@ public:
   { return _objectClassModuleList; }
   ObjectClassModuleList& getObjectClassModuleList()
   { return _objectClassModuleList; }
-  void insert(ObjectClassModule& objectClassModule);
+  /// Returns if the ObjectClass is referenced by a module.
+  bool getObjectClassIsReferencedByAnyModule() const;
+  /// Returns if the ObjectClass or AttributeDefinitions are referenced by a module.
   bool getIsReferencedByAnyModule() const;
 
   /// UnorderedSet of AttributeDefinition instances indexed by attributeHandle
@@ -245,6 +247,11 @@ private:
   ChildObjectClassList _childObjectClassList;
 
   /// The list of Modules referencing this ObjectClass
+  friend class ObjectClassModule;
+  /// Insert objectClassModule into objectClassModuleList
+  void _insertObjectClassModuleList(ObjectClassModule& objectClassModule);
+  /// Unlink objectClassModule from objectClassModuleList
+  void _unlinkObjectClassModuleList(ObjectClassModule& objectClassModule);
   ObjectClassModuleList _objectClassModuleList;
 
   /// UnorderedSet of AttributeDefinition instances indexed by attributeHandle

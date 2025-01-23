@@ -72,16 +72,16 @@ ObjectClass::getParentObjectClassHandle() const
   return _parentObjectClass->getObjectClassHandle();
 }
 
-void
-ObjectClass::insert(ObjectClassModule& objectClassModule)
+bool
+ObjectClass::getObjectClassIsReferencedByAnyModule() const
 {
-  _objectClassModuleList.push_back(objectClassModule);
+  return !_objectClassModuleList.empty();
 }
 
 bool
 ObjectClass::getIsReferencedByAnyModule() const
 {
-  return !_objectClassModuleList.empty() || !_attributeDefinitionModuleList.empty();
+  return getObjectClassIsReferencedByAnyModule() || getAreAttributesReferencedByAnyModule();
 }
 
 AttributeDefinition const*
@@ -235,6 +235,18 @@ void
 ObjectClass::_unlinkChildObjectClassList(ObjectClass& objectClass)
 {
   _childObjectClassList.unlink(objectClass);
+}
+
+void
+ObjectClass::_insertObjectClassModuleList(ObjectClassModule& objectClassModule)
+{
+  _objectClassModuleList.push_back(objectClassModule);
+}
+
+void
+ObjectClass::_unlinkObjectClassModuleList(ObjectClassModule& objectClassModule)
+{
+  _objectClassModuleList.unlink(objectClassModule);
 }
 
 } // namespace ServerModel

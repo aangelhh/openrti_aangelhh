@@ -108,7 +108,6 @@ public:
   { return _objectClassModuleList; }
   ObjectClassModuleList& getObjectClassModuleList()
   { return _objectClassModuleList; }
-  void insert(ObjectClassModule& objectClassModule);
 
   /// All ObjectClasses whos AttributeDefinitions are referenced by this Module
   typedef Intrusive::List<Intrusive::ListLink<AttributeDefinitionModule, Intrusive::ParentTag<Module> > > AttributeDefinitionModuleList;
@@ -191,6 +190,11 @@ private:
   ParameterDefinitionModuleList _parameterDefinitionModuleList;
 
   /// All ObjectClasses that are referenced by this Module
+  friend class ObjectClassModule;
+  /// Insert objectClassModule into objectClassModuleList
+  void _insertObjectClassModuleList(ObjectClassModule& objectClassModule);
+  /// Unlink objectClassModule from objectClassModuleList
+  void _unlinkObjectClassModuleList(ObjectClassModule& objectClassModule);
   ObjectClassModuleList _objectClassModuleList;
 
   /// All ObjectClasses whos AttributeDefinitions are referenced by this Module
