@@ -166,6 +166,10 @@ public:
   /// Create a new ParameterDefinition instance
   ParameterDefinition* createParameterDefinition(ParameterHandle const& parameterHandle, std::string const& name);
 
+  ///
+  /// Create a new ClassParameter instance
+  ClassParameter* createClassParameter(ParameterDefinition& parameterDefinition);
+
   template<typename Link>
   struct IntrusiveKey;
 

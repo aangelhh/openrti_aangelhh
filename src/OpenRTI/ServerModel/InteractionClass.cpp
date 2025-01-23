@@ -192,7 +192,7 @@ InteractionClass::getClassParameter(ParameterHandle const& parameterHandle)
 void
 InteractionClass::insertClassParameterFor(ParameterDefinition& parameterDefinition)
 {
-  ClassParameter* classParameter = new ClassParameter(*this, parameterDefinition);
+  ClassParameter* classParameter = createClassParameter(parameterDefinition);
 
   for (ChildInteractionClassList::iterator i = _childInteractionClassList.begin(); i != _childInteractionClassList.end(); ++i)
     i->insertClassParameterFor(parameterDefinition);
@@ -202,6 +202,12 @@ ParameterDefinition*
 InteractionClass::createParameterDefinition(ParameterHandle const& parameterHandle, std::string const& name)
 {
   return new ParameterDefinition(*this, parameterHandle, name);
+}
+
+ClassParameter*
+InteractionClass::createClassParameter(ParameterDefinition& parameterDefinition)
+{
+  return new ClassParameter(*this, parameterDefinition);
 }
 
 void
