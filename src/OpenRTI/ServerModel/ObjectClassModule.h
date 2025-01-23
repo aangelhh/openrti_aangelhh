@@ -30,8 +30,8 @@ class Module;
 class ObjectClass;
 
 class OPENRTI_LOCAL ObjectClassModule :
-    public IntrusiveList<ObjectClassModule, 0>::Hook,
-    public IntrusiveList<ObjectClassModule, 1>::Hook
+    public Intrusive::ListLink<ObjectClassModule, Intrusive::ParentTag<Module> >,
+    public Intrusive::ListLink<ObjectClassModule, Intrusive::ParentTag<ObjectClass> >
 {
 public:
   ObjectClassModule(ObjectClass& objectClass, Module& module);

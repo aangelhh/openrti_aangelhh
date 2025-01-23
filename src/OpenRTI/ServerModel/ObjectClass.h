@@ -74,7 +74,7 @@ public:
   { return _childObjectClassList; }
 
   /// The list of Modules referencing this ObjectClass
-  typedef IntrusiveList<ObjectClassModule, 1> ObjectClassModuleList;
+  typedef Intrusive::List<Intrusive::ListLink<ObjectClassModule, Intrusive::ParentTag<ObjectClass> > > ObjectClassModuleList;
   /// Get the list of ObjectClassModule instances
   ObjectClassModuleList const& getObjectClassModuleList() const
   { return _objectClassModuleList; }

@@ -105,7 +105,7 @@ public:
   void insert(ParameterDefinitionModule& parameterDefinitionModule);
 
   /// All ObjectClasses that are referenced by this Module
-  typedef IntrusiveList<ObjectClassModule, 0> ObjectClassModuleList;
+  typedef Intrusive::List<Intrusive::ListLink<ObjectClassModule, Intrusive::ParentTag<Module> > > ObjectClassModuleList;
   /// Get the list of ObjectClassModule instances
   ObjectClassModuleList const& getObjectClassModuleList() const
   { return _objectClassModuleList; }
