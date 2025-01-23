@@ -87,7 +87,7 @@ public:
   void insert(UpdateRateModule& updateRateModule);
 
   /// All InteractionClasses that are referenced by this Module
-  typedef IntrusiveList<InteractionClassModule, 0> InteractionClassModuleList;
+  typedef Intrusive::List<Intrusive::ListLink<InteractionClassModule, Intrusive::ParentTag<Module> > > InteractionClassModuleList;
   /// Get the list of InteractionClassModule instances
   InteractionClassModuleList const& getInteractionClassModuleList() const
   { return _interactionClassModuleList; }

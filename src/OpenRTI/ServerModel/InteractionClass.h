@@ -81,7 +81,7 @@ public:
   { return _childInteractionClassList; }
 
   /// The list of Modules referencing this InteractionClass
-  typedef IntrusiveList<InteractionClassModule, 1> InteractionClassModuleList;
+  typedef Intrusive::List<Intrusive::ListLink<InteractionClassModule, Intrusive::ParentTag<InteractionClass> > > InteractionClassModuleList;
   /// Get the list of InteractionClassModule instances
   InteractionClassModuleList const& getInteractionClassModuleList() const
   { return _interactionClassModuleList; }
