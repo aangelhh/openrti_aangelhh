@@ -22,6 +22,8 @@
 
 #include "OpenRTIConfig.h"
 
+#include <cstddef>
+
 #include "Intrusive.h"
 
 #include "ClassAttribute.h"
@@ -96,6 +98,8 @@ public:
   /// Get one AttributeDefinition instance matching attributeHandle
   AttributeDefinition const* getAttributeDefinition(AttributeHandle const& attributeHandle) const;
   AttributeDefinition* getAttributeDefinition(AttributeHandle const& attributeHandle);
+  /// Return the count of attributeDefinition instances
+  std::size_t getNumAttributeDefinitions() const;
 
   /// UnorderedSet of AttributeDefinition instances indexed by name
   typedef Intrusive::UnorderedSet<std::string, Intrusive::UnorderedSetLink<AttributeDefinition, Intrusive::ParentTag<ObjectClass, 1> > > AttributeNameAttributeDefinitionMap;
@@ -104,10 +108,7 @@ public:
   AttributeDefinition* getAttributeDefinition(std::string const& name);
 
   void eraseAttributeDefinitions();
-  std::size_t getNumAttributeDefinitions() const;
   AttributeHandle getFirstUnusedAttributeHandle();
-
-  void insert(AttributeDefinition& attributeDefinition);
 
   /// The list of Modules referencing this ObjectClass set of AttributeDefinitions
   typedef Intrusive::List<Intrusive::ListLink<AttributeDefinitionModule, Intrusive::ParentTag<ObjectClass> > > AttributeDefinitionModuleList;
@@ -255,9 +256,18 @@ private:
   ObjectClassModuleList _objectClassModuleList;
 
   /// UnorderedSet of AttributeDefinition instances indexed by attributeHandle
+  friend class AttributeDefinition;
+  /// Insert attributeDefinition into attributeHandleAttributeDefinitionMap
+  void _insertAttributeHandleAttributeDefinitionMap(AttributeDefinition& attributeDefinition);
+  /// Unlink attributeDefinition from attributeHandleAttributeDefinitionMap
+  void _unlinkAttributeHandleAttributeDefinitionMap(AttributeDefinition& attributeDefinition);
   AttributeHandleAttributeDefinitionMap _attributeHandleAttributeDefinitionMap;
 
   /// UnorderedSet of AttributeDefinition instances indexed by name
+  /// Insert attributeDefinition into attributeNameAttributeDefinitionMap
+  void _insertAttributeNameAttributeDefinitionMap(AttributeDefinition& attributeDefinition);
+  /// Unlink attributeDefinition from attributeNameAttributeDefinitionMap
+  void _unlinkAttributeNameAttributeDefinitionMap(AttributeDefinition& attributeDefinition);
   AttributeNameAttributeDefinitionMap _attributeNameAttributeDefinitionMap;
 
   /// The list of Modules referencing this ObjectClass set of AttributeDefinitions

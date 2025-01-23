@@ -787,7 +787,7 @@ Federation::insertOrCheck(Module& module, FOMStringObjectClass const& stringObje
 
       AttributeDefinition* attributeDefinition;
       attributeDefinition = new AttributeDefinition(*objectClass, nextAttributeHandle, i->getName());
-      objectClass->insert(*attributeDefinition);
+      objectClass->insertClassAttributeFor(*attributeDefinition);
 
       attributeDefinition->setOrderType(resolveOrderType(i->getOrderType()));
       attributeDefinition->setTransportationType(resolveTransportationType(i->getTransportationType()));
@@ -1020,7 +1020,7 @@ Federation::insert(Module& module, FOMObjectClass const& fomObjectClass)
             throw MessageError("Duplicate ObjectClass attribute handles.");
           AttributeDefinition* attributeDefinition;
           attributeDefinition = new AttributeDefinition(*i, j->getAttributeHandle(), j->getName());
-          i->insert(*attributeDefinition);
+          i->insertClassAttributeFor(*attributeDefinition);
           attributeDefinition->setOrderType(j->getOrderType());
           attributeDefinition->setTransportationType(j->getTransportationType());
           attributeDefinition->_dimensionHandleSet = j->getDimensionHandleSet();
@@ -1072,7 +1072,7 @@ Federation::insert(Module& module, FOMObjectClass const& fomObjectClass)
         throw MessageError("Duplicate ObjectClass attribute handles.");
       AttributeDefinition* attributeDefinition;
       attributeDefinition = new AttributeDefinition(*objectClass, j->getAttributeHandle(), j->getName());
-      objectClass->insert(*attributeDefinition);
+      objectClass->insertClassAttributeFor(*attributeDefinition);
       attributeDefinition->setOrderType(j->getOrderType());
       attributeDefinition->setTransportationType(j->getTransportationType());
       attributeDefinition->_dimensionHandleSet = j->getDimensionHandleSet();

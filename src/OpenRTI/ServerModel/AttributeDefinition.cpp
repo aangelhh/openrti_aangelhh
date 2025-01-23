@@ -32,11 +32,16 @@ AttributeDefinition::AttributeDefinition(ObjectClass& objectClass, AttributeHand
   _orderType(RECEIVE),
   _transportationType(RELIABLE)
 {
+  _objectClass._insertAttributeHandleAttributeDefinitionMap(*this);
+  _objectClass._insertAttributeNameAttributeDefinitionMap(*this);
 }
 
 AttributeDefinition::~AttributeDefinition()
 {
   _classAttributeList.clear();
+
+  _objectClass._unlinkAttributeNameAttributeDefinitionMap(*this);
+  _objectClass._unlinkAttributeHandleAttributeDefinitionMap(*this);
 
   OpenRTIAssert(_classAttributeList.empty());
 }

@@ -104,6 +104,13 @@ ObjectClass::getAttributeDefinition(AttributeHandle const& attributeHandle)
   return i.get();
 }
 
+std::size_t
+ObjectClass::getNumAttributeDefinitions() const
+{
+  // FIXME O(N)
+  return _attributeHandleAttributeDefinitionMap.size();
+}
+
 AttributeDefinition const*
 ObjectClass::getAttributeDefinition(std::string const& name) const
 {
@@ -131,13 +138,6 @@ ObjectClass::eraseAttributeDefinitions()
   OpenRTIAssert(_attributeNameAttributeDefinitionMap.empty());
 }
 
-std::size_t
-ObjectClass::getNumAttributeDefinitions() const
-{
-  // FIXME O(N)
-  return _attributeHandleAttributeDefinitionMap.size();
-}
-
 AttributeHandle
 ObjectClass::getFirstUnusedAttributeHandle()
 {
@@ -147,14 +147,6 @@ ObjectClass::getFirstUnusedAttributeHandle()
     numAttributes += _parentObjectClass->getFirstUnusedAttributeHandle().getHandle();
   numAttributes += getNumAttributeDefinitions();
   return AttributeHandle(numAttributes);
-}
-
-void
-ObjectClass::insert(AttributeDefinition& attributeDefinition)
-{
-  _attributeHandleAttributeDefinitionMap.insert(attributeDefinition);
-  _attributeNameAttributeDefinitionMap.insert(attributeDefinition);
-  insertClassAttributeFor(attributeDefinition);
 }
 
 void
@@ -247,6 +239,30 @@ void
 ObjectClass::_unlinkObjectClassModuleList(ObjectClassModule& objectClassModule)
 {
   _objectClassModuleList.unlink(objectClassModule);
+}
+
+void
+ObjectClass::_insertAttributeHandleAttributeDefinitionMap(AttributeDefinition& attributeDefinition)
+{
+  _attributeHandleAttributeDefinitionMap.insert(attributeDefinition);
+}
+
+void
+ObjectClass::_unlinkAttributeHandleAttributeDefinitionMap(AttributeDefinition& attributeDefinition)
+{
+  _attributeHandleAttributeDefinitionMap.unlink(attributeDefinition);
+}
+
+void
+ObjectClass::_insertAttributeNameAttributeDefinitionMap(AttributeDefinition& attributeDefinition)
+{
+  _attributeNameAttributeDefinitionMap.insert(attributeDefinition);
+}
+
+void
+ObjectClass::_unlinkAttributeNameAttributeDefinitionMap(AttributeDefinition& attributeDefinition)
+{
+  _attributeNameAttributeDefinitionMap.unlink(attributeDefinition);
 }
 
 } // namespace ServerModel
