@@ -174,12 +174,6 @@ Module::getModule(FOMModule& module) const
   }
 }
 
-ParameterDefinitionModule*
-Module::insertParameters(InteractionClass& interactionClass)
-{
-  return new ParameterDefinitionModule(interactionClass, *this);
-}
-
 ObjectClassModule*
 Module::insert(ObjectClass& objectClass)
 {
@@ -208,6 +202,12 @@ InteractionClassModule*
 Module::createInteractionClassModule(InteractionClass& interactionClass)
 {
   return new InteractionClassModule(interactionClass, *this);
+}
+
+ParameterDefinitionModule*
+Module::createParameterDefinitionModule(InteractionClass& interactionClass)
+{
+  return new ParameterDefinitionModule(interactionClass, *this);
 }
 
 void

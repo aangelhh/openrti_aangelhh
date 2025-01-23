@@ -625,7 +625,7 @@ Federation::insertOrCheck(Module& module, FOMStringInteractionClass const& strin
 
     module.createInteractionClassModule(*i);
     if (!stringInteractionClass.getParameterList().empty())
-      module.insertParameters(*i);
+      module.createParameterDefinitionModule(*i);
 
     return false;
   } else {
@@ -649,7 +649,7 @@ Federation::insertOrCheck(Module& module, FOMStringInteractionClass const& strin
     }
 
     if (!stringInteractionClass.getParameterList().empty())
-      module.insertParameters(*interactionClass);
+      module.createParameterDefinitionModule(*interactionClass);
 
     ParameterHandle nextParameterHandle = interactionClass->getFirstUnusedParameterHandle();
     for (FOMStringParameterList::const_iterator i = stringInteractionClass.getParameterList().begin();
@@ -915,7 +915,7 @@ Federation::insert(Module& module, FOMInteractionClass const& fomInteractionClas
       throw MessageError("InteractionClass dimension handle set does not match.");
     // In this case we want to check for the parameter list being the same on both ends.
     if (!fomInteractionClass.getParameterList().empty()) {
-      module.insertParameters(*i);
+      module.createParameterDefinitionModule(*i);
       if (i->getParameterHandleParameterDefinitionMap().empty()) {
         for (FOMParameterList::const_iterator j = fomInteractionClass.getParameterList().begin();
              j != fomInteractionClass.getParameterList().end(); ++j) {
@@ -961,7 +961,7 @@ Federation::insert(Module& module, FOMInteractionClass const& fomInteractionClas
     interactionClass->setTransportationType(fomInteractionClass.getTransportationType());
     interactionClass->_dimensionHandleSet = fomInteractionClass.getDimensionHandleSet();
     if (!fomInteractionClass.getParameterList().empty())
-      module.insertParameters(*interactionClass);
+      module.createParameterDefinitionModule(*interactionClass);
     for (FOMParameterList::const_iterator j = fomInteractionClass.getParameterList().begin();
          j != fomInteractionClass.getParameterList().end(); ++j) {
       if (interactionClass->getParameterDefinition(j->getName()))
