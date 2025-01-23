@@ -117,7 +117,7 @@ public:
   { return _attributeDefinitionModuleList; }
   AttributeDefinitionModuleList& getAttributeDefinitionModuleList()
   { return _attributeDefinitionModuleList; }
-  void insert(AttributeDefinitionModule& attributeDefinitionModule);
+  /// Returns if the AttributeDefitions are referenced by a module.
   bool getAreAttributesReferencedByAnyModule() const;
 
   /// UnorderedSet of ClassAttribute instances indexed by attributeHandle
@@ -271,6 +271,11 @@ private:
   AttributeNameAttributeDefinitionMap _attributeNameAttributeDefinitionMap;
 
   /// The list of Modules referencing this ObjectClass set of AttributeDefinitions
+  friend class AttributeDefinitionModule;
+  /// Insert attributeDefinitionModule into attributeDefinitionModuleList
+  void _insertAttributeDefinitionModuleList(AttributeDefinitionModule& attributeDefinitionModule);
+  /// Unlink attributeDefinitionModule from attributeDefinitionModuleList
+  void _unlinkAttributeDefinitionModuleList(AttributeDefinitionModule& attributeDefinitionModule);
   AttributeDefinitionModuleList _attributeDefinitionModuleList;
 
   /// UnorderedSet of ClassAttribute instances indexed by attributeHandle

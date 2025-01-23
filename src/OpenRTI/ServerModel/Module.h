@@ -116,7 +116,6 @@ public:
   { return _attributeDefinitionModuleList; }
   AttributeDefinitionModuleList& getAttributeDefinitionModuleList()
   { return _attributeDefinitionModuleList; }
-  void insert(AttributeDefinitionModule& attributeDefinitionModule);
 
   /// Read back the FOMModule context to send this with a message
   void getModule(FOMModule& module) const;
@@ -198,6 +197,11 @@ private:
   ObjectClassModuleList _objectClassModuleList;
 
   /// All ObjectClasses whos AttributeDefinitions are referenced by this Module
+  friend class AttributeDefinitionModule;
+  /// Insert attributeDefinitionModule into attributeDefinitionModuleList
+  void _insertAttributeDefinitionModuleList(AttributeDefinitionModule& attributeDefinitionModule);
+  /// Unlink attributeDefinitionModule from attributeDefinitionModuleList
+  void _unlinkAttributeDefinitionModuleList(AttributeDefinitionModule& attributeDefinitionModule);
   AttributeDefinitionModuleList _attributeDefinitionModuleList;
 };
 

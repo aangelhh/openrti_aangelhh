@@ -76,12 +76,6 @@ Module::setArtificialObjectRoot(bool artificialObjectRoot)
 }
 
 void
-Module::insert(AttributeDefinitionModule& attributeDefinitionModule)
-{
-  _attributeDefinitionModuleList.push_back(attributeDefinitionModule);
-}
-
-void
 Module::getModule(FOMModule& module) const
 {
   module.setModuleHandle(getModuleHandle());
@@ -213,11 +207,7 @@ Module::insert(ObjectClass& objectClass)
 AttributeDefinitionModule*
 Module::insertAttributes(ObjectClass& objectClass)
 {
-  AttributeDefinitionModule* attributeDefinitionModule;
-  attributeDefinitionModule = new AttributeDefinitionModule(objectClass, *this);
-  objectClass.insert(*attributeDefinitionModule);
-  insert(*attributeDefinitionModule);
-  return attributeDefinitionModule;
+  return new AttributeDefinitionModule(objectClass, *this);
 }
 
 void
@@ -278,6 +268,18 @@ void
 Module::_unlinkObjectClassModuleList(ObjectClassModule& objectClassModule)
 {
   _objectClassModuleList.unlink(objectClassModule);
+}
+
+void
+Module::_insertAttributeDefinitionModuleList(AttributeDefinitionModule& attributeDefinitionModule)
+{
+  _attributeDefinitionModuleList.push_back(attributeDefinitionModule);
+}
+
+void
+Module::_unlinkAttributeDefinitionModuleList(AttributeDefinitionModule& attributeDefinitionModule)
+{
+  _attributeDefinitionModuleList.unlink(attributeDefinitionModule);
 }
 
 } // namespace ServerModel

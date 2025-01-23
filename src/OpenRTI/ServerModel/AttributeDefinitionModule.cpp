@@ -29,10 +29,14 @@ AttributeDefinitionModule::AttributeDefinitionModule(ObjectClass& objectClass, M
   _objectClass(objectClass),
   _module(module)
 {
+  _module._insertAttributeDefinitionModuleList(*this);
+  _objectClass._insertAttributeDefinitionModuleList(*this);
 }
 
 AttributeDefinitionModule::~AttributeDefinitionModule()
 {
+  _objectClass._unlinkAttributeDefinitionModuleList(*this);
+  _module._unlinkAttributeDefinitionModuleList(*this);
 }
 
 } // namespace ServerModel

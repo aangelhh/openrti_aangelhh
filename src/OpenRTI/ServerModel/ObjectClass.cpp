@@ -149,12 +149,6 @@ ObjectClass::getFirstUnusedAttributeHandle()
   return AttributeHandle(numAttributes);
 }
 
-void
-ObjectClass::insert(AttributeDefinitionModule& attributeDefinitionModule)
-{
-  _attributeDefinitionModuleList.push_back(attributeDefinitionModule);
-}
-
 bool
 ObjectClass::getAreAttributesReferencedByAnyModule() const
 {
@@ -263,6 +257,18 @@ void
 ObjectClass::_unlinkAttributeNameAttributeDefinitionMap(AttributeDefinition& attributeDefinition)
 {
   _attributeNameAttributeDefinitionMap.unlink(attributeDefinition);
+}
+
+void
+ObjectClass::_insertAttributeDefinitionModuleList(AttributeDefinitionModule& attributeDefinitionModule)
+{
+  _attributeDefinitionModuleList.push_back(attributeDefinitionModule);
+}
+
+void
+ObjectClass::_unlinkAttributeDefinitionModuleList(AttributeDefinitionModule& attributeDefinitionModule)
+{
+  _attributeDefinitionModuleList.unlink(attributeDefinitionModule);
 }
 
 } // namespace ServerModel
