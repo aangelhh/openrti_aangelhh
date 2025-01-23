@@ -331,6 +331,10 @@ protected:
   /// Create a new Federate instance
   Federate* _createFederate(FederateHandle const& federateHandle, std::string const& name);
 
+  ///
+  /// Create a new ObjectInstance instance
+  ObjectInstance* _createObjectInstance(ObjectInstanceHandle const& objectInstanceHandle, std::string const& name);
+
 private:
 #if 201103L <= __cplusplus
   Federation(Federation const&) = delete;
