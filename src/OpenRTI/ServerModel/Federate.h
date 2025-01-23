@@ -25,8 +25,6 @@
 
 #include "Handle.h"
 #include "Message.h"
-#include "Region.h"
-#include "SynchronizationFederate.h"
 #include "VariableLengthData.h"
 
 namespace OpenRTI {
@@ -35,12 +33,13 @@ namespace ServerModel {
 class Federation;
 class FederationConnect;
 class Region;
+class SynchronizationFederate;
 
 class OPENRTI_LOCAL Federate :
-    public IntrusiveUnorderedMap<FederateHandle const, Federate>::Hook,
-    public IntrusiveUnorderedMap<std::string const, Federate>::Hook,
-    public IntrusiveList<Federate, 0>::Hook,
-    public IntrusiveList<Federate, 1>::Hook
+    public Intrusive::UnorderedSetLink<Federate, Intrusive::ParentTag<Federation> >,
+    public Intrusive::UnorderedSetLink<Federate, Intrusive::ParentTag<Federation, 1> >,
+    public Intrusive::ListLink<Federate, Intrusive::ParentTag<FederationConnect> >,
+    public Intrusive::ListLink<Federate, Intrusive::ParentTag<FederationConnect, 1> >
 {
 public:
   Federate(Federation& federation, FederateHandle const& federateHandle, std::string const& name);
@@ -52,10 +51,10 @@ public:
   { return _federation; }
 
   FederateHandle const& getFederateHandle() const
-  { return IntrusiveUnorderedMap<FederateHandle const, Federate>::Hook::getKey(); }
+  { return _federateHandle; }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string const, Federate>::Hook::getKey(); }
+  { return _name; }
 
   std::string const& getFederateType() const
   { return _federateType; }
@@ -86,8 +85,7 @@ public:
   { return _synchronizationFederateList; }
   SynchronizationFederateList& getSynchronizationFederateList()
   { return _synchronizationFederateList; }
-  void insert(SynchronizationFederate& synchronizationFederate)
-  { _synchronizationFederateList.push_back(synchronizationFederate); }
+  void insert(SynchronizationFederate& synchronizationFederate);
 
   bool getIsTimeRegulating() const;
 
@@ -114,8 +112,10 @@ public:
   /// Get one Region instance matching regionHandle
   Region const* getRegion(LocalRegionHandle const& regionHandle) const;
   Region* getRegion(LocalRegionHandle const& regionHandle);
-  void insert(Region& region)
-  { _regionHandleRegionMap.insert(region); }
+  void insert(Region& region);
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -133,6 +133,10 @@ private:
 #endif
 
   Federation& _federation;
+
+  FederateHandle const _federateHandle;
+
+  std::string const _name;
 
   std::string _federateType;
 
@@ -155,6 +159,18 @@ private:
 
   /// UnorderedSet of Region instances indexed by regionHandle
   RegionHandleRegionMap _regionHandleRegionMap;
+};
+
+template<>
+struct Federate::IntrusiveKey<Intrusive::UnorderedSetLink<Federate, Intrusive::ParentTag<Federation> > > {
+  static FederateHandle const& get(Federate const& federate)
+  { return federate.getFederateHandle(); }
+};
+
+template<>
+struct Federate::IntrusiveKey<Intrusive::UnorderedSetLink<Federate, Intrusive::ParentTag<Federation, 1> > > {
+  static std::string const& get(Federate const& federate)
+  { return federate.getName(); }
 };
 
 } // namespace ServerModel

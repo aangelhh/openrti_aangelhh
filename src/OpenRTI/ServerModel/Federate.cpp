@@ -19,15 +19,18 @@
 
 #include "Federate.h"
 
+#include "Federation.h"
 #include "FederationConnect.h"
+#include "Region.h"
+#include "SynchronizationFederate.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
 Federate::Federate(Federation& federation, FederateHandle const& federateHandle, std::string const& name) :
-  IntrusiveUnorderedMap<FederateHandle const, Federate>::Hook(federateHandle),
-  IntrusiveUnorderedMap<std::string const, Federate>::Hook(name),
   _federation(federation),
+  _federateHandle(federateHandle),
+  _name(name),
   _resignAction(CANCEL_THEN_DELETE_THEN_DIVEST),
   _resignPending(false),
   _federationConnect(0),
@@ -86,11 +89,17 @@ Federate::send(const SharedPtr<const AbstractMessage>& message)
   _federationConnect->send(message);
 }
 
+void
+Federate::insert(SynchronizationFederate& synchronizationFederate)
+{
+  _synchronizationFederateList.push_back(synchronizationFederate);
+}
+
 bool
 Federate::getIsTimeRegulating() const
 {
-  // OpenRTIAssert(!FederationConnect::TimeRegulatingFederateList::Hook::is_linked() || _federationConnect->_permitTimeRegulation);
-  return FederationConnect::TimeRegulatingFederateList::Hook::is_linked();
+  // OpenRTIAssert(!FederationConnect::TimeRegulatingFederateList::link_type::is_linked() || _federationConnect->_permitTimeRegulation);
+  return FederationConnect::TimeRegulatingFederateList::link_type::is_linked();
 }
 
 void
@@ -129,6 +138,12 @@ Federate::getRegion(LocalRegionHandle const& regionHandle)
   if (i == _regionHandleRegionMap.end())
     return 0;
   return i.get();
+}
+
+void
+Federate::insert(Region& region)
+{
+  _regionHandleRegionMap.insert(region);
 }
 
 } // namespace ServerModel

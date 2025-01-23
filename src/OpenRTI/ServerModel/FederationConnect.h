@@ -80,7 +80,7 @@ public:
   void setPermitTimeRegulation(bool permitTimeRegulation);
 
   /// List of Federate instances belonging to this FederationConnect
-  typedef IntrusiveList<Federate, 0> FederateList;
+  typedef Intrusive::List<Intrusive::ListLink<Federate, Intrusive::ParentTag<FederationConnect> > > FederateList;
   /// Get the list of Federate instances
   FederateList const& getFederateList() const
   { return _federateList; }
@@ -90,7 +90,7 @@ public:
   void erase(Federate& federate);
 
   /// List of Time Regulating Federate instances belonging to this FederationConnect
-  typedef IntrusiveList<Federate, 1> TimeRegulatingFederateList;
+  typedef Intrusive::List<Intrusive::ListLink<Federate, Intrusive::ParentTag<FederationConnect, 1> > > TimeRegulatingFederateList;
   /// Get the list of Federate instances
   TimeRegulatingFederateList const& getTimeRegulatingFederateList() const
   { return _timeRegulatingFederateList; }

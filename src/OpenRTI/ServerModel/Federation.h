@@ -244,7 +244,7 @@ public:
   SynchronizationNameSynchronizationMap _synchronizationNameSynchronizationMap;
 
   /// UnorderedSet of Federate instances indexed by federateHandle
-  typedef IntrusiveUnorderedMap<FederateHandle const, Federate> FederateHandleFederateMap;
+  typedef Intrusive::UnorderedSet<FederateHandle, Intrusive::UnorderedSetLink<Federate, Intrusive::ParentTag<Federation> > > FederateHandleFederateMap;
   /// Get the set of Federate instances
   FederateHandleFederateMap const& getFederateHandleFederateMap() const
   { return _federateHandleFederateMap; }
@@ -255,7 +255,7 @@ public:
   Federate* getFederate(FederateHandle const& federateHandle);
 
   /// UnorderedSet of Federate instances indexed by name
-  typedef IntrusiveUnorderedMap<std::string const, Federate> FederateNameFederateMap;
+  typedef Intrusive::UnorderedSet<std::string, Intrusive::UnorderedSetLink<Federate, Intrusive::ParentTag<Federation, 1> > > FederateNameFederateMap;
   /// Get one Federate instance matching name
   Federate const* getFederate(std::string const& name) const;
   Federate* getFederate(std::string const& name);
