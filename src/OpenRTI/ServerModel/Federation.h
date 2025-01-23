@@ -304,6 +304,10 @@ public:
   UpdateRate* createUpdateRate(UpdateRateHandle const& updateRateHandle, std::string const& name);
 
   ///
+  /// Create a new InteractionClass instance
+  InteractionClass* createInteractionClass(InteractionClassHandle const& interactionClassHandle, StringVector const& name, InteractionClass* parentInteractionClass);
+
+  ///
   /// Create a new Federate instance
   Federate* createFederate(FederateHandle const& federateHandle, std::string const& name);
 

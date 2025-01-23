@@ -634,7 +634,7 @@ Federation::insertOrCheck(Module& module, FOMStringInteractionClass const& strin
     // This signals an error in message preparation
     if (!parentInteractionClass && 1 < stringInteractionClass.getName().size())
       throw MessageError("Cannot resolve parent interaction class name!");
-    InteractionClass* interactionClass = new InteractionClass(*this, _interactionClassHandleAllocator.get(), stringInteractionClass.getName(), parentInteractionClass);
+    InteractionClass* interactionClass = createInteractionClass(_interactionClassHandleAllocator.get(), stringInteractionClass.getName(), parentInteractionClass);
     module.insert(*interactionClass);
 
     interactionClass->setOrderType(resolveOrderType(stringInteractionClass.getOrderType()));
@@ -957,7 +957,7 @@ Federation::insert(Module& module, FOMInteractionClass const& fomInteractionClas
       name = parentInteractionClass->getName();
     name.push_back(fomInteractionClass.getName());
     _interactionClassHandleAllocator.take(fomInteractionClass.getInteractionClassHandle());
-    InteractionClass* interactionClass = new InteractionClass(*this, fomInteractionClass.getInteractionClassHandle(), name, parentInteractionClass);
+    InteractionClass* interactionClass = createInteractionClass(fomInteractionClass.getInteractionClassHandle(), name, parentInteractionClass);
     module.insert(*interactionClass);
     interactionClass->setOrderType(fomInteractionClass.getOrderType());
     interactionClass->setTransportationType(fomInteractionClass.getTransportationType());
@@ -1352,6 +1352,12 @@ UpdateRate*
 Federation::createUpdateRate(UpdateRateHandle const& updateRateHandle, std::string const& name)
 {
   return new UpdateRate(*this, updateRateHandle, name);
+}
+
+InteractionClass*
+Federation::createInteractionClass(InteractionClassHandle const& interactionClassHandle, StringVector const& name, InteractionClass* parentInteractionClass)
+{
+  return new InteractionClass(*this, interactionClassHandle, name, parentInteractionClass);
 }
 
 Federate*
