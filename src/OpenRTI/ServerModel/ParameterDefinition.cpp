@@ -19,13 +19,16 @@
 
 #include "ParameterDefinition.h"
 
+#include "ClassParameter.h"
+#include "InteractionClass.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 
 ParameterDefinition::ParameterDefinition(InteractionClass& interactionClass, ParameterHandle const& parameterHandle, std::string const& name) :
-  IntrusiveUnorderedMap<ParameterHandle const, ParameterDefinition>::Hook(parameterHandle),
-  IntrusiveUnorderedMap<std::string const, ParameterDefinition>::Hook(name),
-  _interactionClass(interactionClass)
+  _interactionClass(interactionClass),
+  _parameterHandle(parameterHandle),
+  _name(name)
 {
 }
 
@@ -34,6 +37,12 @@ ParameterDefinition::~ParameterDefinition()
   _classParameterList.clear();
 
   OpenRTIAssert(_classParameterList.empty());
+}
+
+void
+ParameterDefinition::insert(ClassParameter& classParameter)
+{
+  _classParameterList.push_back(classParameter);
 }
 
 } // namespace ServerModel

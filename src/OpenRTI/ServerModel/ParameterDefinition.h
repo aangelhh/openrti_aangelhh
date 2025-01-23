@@ -23,17 +23,17 @@
 #include "IntrusiveList.h"
 #include "IntrusiveUnorderedMap.h"
 
-#include "ClassParameter.h"
 #include "Handle.h"
 
 namespace OpenRTI {
 namespace ServerModel {
 
+class ClassParameter;
 class InteractionClass;
 
 class OPENRTI_LOCAL ParameterDefinition :
-    public IntrusiveUnorderedMap<ParameterHandle const, ParameterDefinition>::Hook,
-    public IntrusiveUnorderedMap<std::string const, ParameterDefinition>::Hook
+    public Intrusive::UnorderedSetLink<ParameterDefinition, Intrusive::ParentTag<InteractionClass> >,
+    public Intrusive::UnorderedSetLink<ParameterDefinition, Intrusive::ParentTag<InteractionClass, 1> >
 {
 public:
   ParameterDefinition(InteractionClass& interactionClass, ParameterHandle const& parameterHandle, std::string const& name);
@@ -45,10 +45,10 @@ public:
   { return _interactionClass; }
 
   ParameterHandle const& getParameterHandle() const
-  { return IntrusiveUnorderedMap<ParameterHandle const, ParameterDefinition>::Hook::getKey(); }
+  { return _parameterHandle; }
 
   std::string const& getName() const
-  { return IntrusiveUnorderedMap<std::string const, ParameterDefinition>::Hook::getKey(); }
+  { return _name; }
 
   /// List of ClassParameter instances belonging to this ParameterDefinition
   typedef IntrusiveList<ClassParameter, 0> ClassParameterList;
@@ -57,8 +57,10 @@ public:
   { return _classParameterList; }
   ClassParameterList& getClassParameterList()
   { return _classParameterList; }
-  void insert(ClassParameter& classParameter)
-  { _classParameterList.push_back(classParameter); }
+  void insert(ClassParameter& classParameter);
+
+  template<typename Link>
+  struct IntrusiveKey;
 
 private:
 #if 201103L <= __cplusplus
@@ -77,8 +79,24 @@ private:
 
   InteractionClass& _interactionClass;
 
+  ParameterHandle const _parameterHandle;
+
+  std::string const _name;
+
   /// List of ClassParameter instances belonging to this ParameterDefinition
   ClassParameterList _classParameterList;
+};
+
+template<>
+struct ParameterDefinition::IntrusiveKey<Intrusive::UnorderedSetLink<ParameterDefinition, Intrusive::ParentTag<InteractionClass> > > {
+  static ParameterHandle const& get(ParameterDefinition const& parameterDefinition)
+  { return parameterDefinition.getParameterHandle(); }
+};
+
+template<>
+struct ParameterDefinition::IntrusiveKey<Intrusive::UnorderedSetLink<ParameterDefinition, Intrusive::ParentTag<InteractionClass, 1> > > {
+  static std::string const& get(ParameterDefinition const& parameterDefinition)
+  { return parameterDefinition.getName(); }
 };
 
 } // namespace ServerModel

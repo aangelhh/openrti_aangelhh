@@ -91,7 +91,7 @@ public:
   bool getIsReferencedByAnyModule() const;
 
   /// UnorderedSet of ParameterDefinition instances indexed by parameterHandle
-  typedef IntrusiveUnorderedMap<ParameterHandle const, ParameterDefinition> ParameterHandleParameterDefinitionMap;
+  typedef Intrusive::UnorderedSet<ParameterHandle, Intrusive::UnorderedSetLink<ParameterDefinition, Intrusive::ParentTag<InteractionClass> > > ParameterHandleParameterDefinitionMap;
   /// Get the set of ParameterDefinition instances
   ParameterHandleParameterDefinitionMap const& getParameterHandleParameterDefinitionMap() const
   { return _parameterHandleParameterDefinitionMap; }
@@ -102,7 +102,7 @@ public:
   ParameterDefinition* getParameterDefinition(ParameterHandle const& parameterHandle);
 
   /// UnorderedSet of ParameterDefinition instances indexed by name
-  typedef IntrusiveUnorderedMap<std::string const, ParameterDefinition> ParameterNameParameterDefinitionMap;
+  typedef Intrusive::UnorderedSet<std::string, Intrusive::UnorderedSetLink<ParameterDefinition, Intrusive::ParentTag<InteractionClass, 1> > > ParameterNameParameterDefinitionMap;
   /// Get one ParameterDefinition instance matching name
   ParameterDefinition const* getParameterDefinition(std::string const& name) const;
   ParameterDefinition* getParameterDefinition(std::string const& name);
