@@ -19,12 +19,14 @@
 
 #include "Region.h"
 
+#include "Federate.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 
 Region::Region(Federate& federate, LocalRegionHandle const& regionHandle) :
-  IntrusiveUnorderedMap<LocalRegionHandle const, Region>::Hook(regionHandle),
-  _federate(federate)
+  _federate(federate),
+  _regionHandle(regionHandle)
 {
 }
 

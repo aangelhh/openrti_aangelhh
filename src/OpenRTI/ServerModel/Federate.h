@@ -103,7 +103,7 @@ public:
   void setCommitId(Unsigned commitId);
 
   /// UnorderedSet of Region instances indexed by regionHandle
-  typedef IntrusiveUnorderedMap<LocalRegionHandle const, Region> RegionHandleRegionMap;
+  typedef Intrusive::UnorderedSet<LocalRegionHandle, Intrusive::UnorderedSetLink<Region, Intrusive::ParentTag<Federate> > > RegionHandleRegionMap;
   /// Get the set of Region instances
   RegionHandleRegionMap const& getRegionHandleRegionMap() const
   { return _regionHandleRegionMap; }
