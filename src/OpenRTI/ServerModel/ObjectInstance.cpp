@@ -68,7 +68,6 @@ ObjectInstance::setObjectClass(ObjectClass* objectClass)
   for (ObjectClass::AttributeHandleClassAttributeMap::iterator i = attributeHandleClassAttributeMap.begin();
        i != attributeHandleClassAttributeMap.end(); ++i) {
     InstanceAttribute* instanceAttribute = new InstanceAttribute(*this, *i);
-    insert(*instanceAttribute);
   }
 }
 
@@ -152,12 +151,6 @@ ObjectInstance::getPrivilegeToDeleteInstanceAttribute()
 }
 
 void
-ObjectInstance::insert(InstanceAttribute& instanceAttribute)
-{
-  _attributeHandleInstanceAttributeMap.insert(instanceAttribute);
-}
-
-void
 ObjectInstance::_insertContainerForObjectClassChange()
 {
   if (ObjectClass* objectClass = _objectClass)
@@ -181,6 +174,18 @@ void
 ObjectInstance::_unlinkConnectHandleObjectInstanceConnectMap(ObjectInstanceConnect& objectInstanceConnect)
 {
   _connectHandleObjectInstanceConnectMap.unlink(objectInstanceConnect);
+}
+
+void
+ObjectInstance::_insertAttributeHandleInstanceAttributeMap(InstanceAttribute& instanceAttribute)
+{
+  _attributeHandleInstanceAttributeMap.insert(instanceAttribute);
+}
+
+void
+ObjectInstance::_unlinkAttributeHandleInstanceAttributeMap(InstanceAttribute& instanceAttribute)
+{
+  _attributeHandleInstanceAttributeMap.unlink(instanceAttribute);
 }
 
 } // namespace ServerModel

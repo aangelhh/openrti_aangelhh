@@ -30,12 +30,14 @@ InstanceAttribute::InstanceAttribute(ObjectInstance& objectInstance, ClassAttrib
   _classAttribute(classAttribute),
   _attributeHandle(classAttribute.getAttributeHandle())
 {
+  _objectInstance._insertAttributeHandleInstanceAttributeMap(*this);
   /// FIXME
   _receivingConnects = _classAttribute._cumulativeSubscribedConnectHandleSet;
 }
 
 InstanceAttribute::~InstanceAttribute()
 {
+  _objectInstance._unlinkAttributeHandleInstanceAttributeMap(*this);
 }
 
 } // namespace ServerModel

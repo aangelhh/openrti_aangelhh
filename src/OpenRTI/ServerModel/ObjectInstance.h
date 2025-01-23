@@ -91,7 +91,6 @@ public:
   InstanceAttribute const* getInstanceAttribute(AttributeHandle const& attributeHandle) const;
   InstanceAttribute* getInstanceAttribute(AttributeHandle const& attributeHandle);
   InstanceAttribute* getPrivilegeToDeleteInstanceAttribute();
-  void insert(InstanceAttribute& instanceAttribute);
 
   template<typename Link>
   struct IntrusiveKey;
@@ -135,6 +134,11 @@ private:
   ConnectHandleObjectInstanceConnectMap _connectHandleObjectInstanceConnectMap;
 
   /// UnorderedSet of InstanceAttribute instances indexed by attributeHandle
+  friend class InstanceAttribute;
+  /// Insert instanceAttribute into attributeHandleInstanceAttributeMap
+  void _insertAttributeHandleInstanceAttributeMap(InstanceAttribute& instanceAttribute);
+  /// Unlink instanceAttribute from attributeHandleInstanceAttributeMap
+  void _unlinkAttributeHandleInstanceAttributeMap(InstanceAttribute& instanceAttribute);
   AttributeHandleInstanceAttributeMap _attributeHandleInstanceAttributeMap;
 };
 
