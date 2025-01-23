@@ -192,7 +192,7 @@ public:
   InteractionClass* resolveParentInteractionClass(StringVector const& interactionClassName);
 
   /// UnorderedSet of ObjectClass instances indexed by objectClassHandle
-  typedef IntrusiveUnorderedMap<ObjectClassHandle const, ObjectClass> ObjectClassHandleObjectClassMap;
+  typedef Intrusive::UnorderedSet<ObjectClassHandle, Intrusive::UnorderedSetLink<ObjectClass, Intrusive::ParentTag<Federation> > > ObjectClassHandleObjectClassMap;
   /// Get the set of ObjectClass instances
   ObjectClassHandleObjectClassMap const& getObjectClassHandleObjectClassMap() const
   { return _objectClassHandleObjectClassMap; }
@@ -203,7 +203,7 @@ public:
   ObjectClass* getObjectClass(ObjectClassHandle const& objectClassHandle);
 
   /// UnorderedSet of ObjectClass instances indexed by name
-  typedef IntrusiveUnorderedMap<StringVector const, ObjectClass> ObjectClassNameObjectClassMap;
+  typedef Intrusive::UnorderedSet<StringVector, Intrusive::UnorderedSetLink<ObjectClass, Intrusive::ParentTag<Federation, 1> > > ObjectClassNameObjectClassMap;
   /// Get one ObjectClass instance matching name
   ObjectClass const* getObjectClass(StringVector const& name) const;
   ObjectClass* getObjectClass(StringVector const& name);

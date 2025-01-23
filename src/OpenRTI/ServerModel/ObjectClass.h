@@ -23,11 +23,9 @@
 #include "IntrusiveList.h"
 #include "IntrusiveUnorderedMap.h"
 
-#include "AttributeDefinition.h"
-#include "AttributeDefinitionModule.h"
 #include "ClassAttribute.h"
 #include "Handle.h"
-#include "ObjectClassModule.h"
+#include "InstanceAttribute.h"
 #include "ObjectInstance.h"
 #include "StringUtils.h"
 
@@ -35,13 +33,16 @@ namespace OpenRTI {
 namespace ServerModel {
 
 class AttributeDefinition;
+class AttributeDefinitionModule;
 class ClassAttribute;
 class Federation;
+class ObjectClassModule;
+class ObjectInstance;
 
 class OPENRTI_LOCAL ObjectClass :
-    public IntrusiveUnorderedMap<ObjectClassHandle const, ObjectClass>::Hook,
-    public IntrusiveUnorderedMap<StringVector const, ObjectClass>::Hook,
-    public IntrusiveList<ObjectClass, 0>::Hook
+    public Intrusive::UnorderedSetLink<ObjectClass, Intrusive::ParentTag<Federation> >,
+    public Intrusive::UnorderedSetLink<ObjectClass, Intrusive::ParentTag<Federation, 1> >,
+    public Intrusive::ListLink<ObjectClass, Intrusive::ParentTag<ObjectClass> >
 {
 public:
   ObjectClass(Federation& federation, ObjectClassHandle const& objectClassHandle, StringVector const& name, ObjectClass* parentObjectClass = 0);
@@ -53,10 +54,10 @@ public:
   { return _federation; }
 
   ObjectClassHandle const& getObjectClassHandle() const
-  { return IntrusiveUnorderedMap<ObjectClassHandle const, ObjectClass>::Hook::getKey(); }
+  { return _objectClassHandle; }
 
   StringVector const& getName() const
-  { return IntrusiveUnorderedMap<StringVector const, ObjectClass>::Hook::getKey(); }
+  { return _name; }
 
   ObjectClass const* getParentObjectClass() const
   { return _parentObjectClass; }
@@ -65,7 +66,7 @@ public:
   ObjectClassHandle getParentObjectClassHandle() const;
 
   /// List of ObjectClass instances belonging to this ObjectClass
-  typedef IntrusiveList<ObjectClass, 0> ChildObjectClassList;
+  typedef Intrusive::List<Intrusive::ListLink<ObjectClass, Intrusive::ParentTag<ObjectClass> > > ChildObjectClassList;
   /// Get the list of ObjectClass instances
   ChildObjectClassList const& getChildObjectClassList() const
   { return _childObjectClassList; }
@@ -79,8 +80,7 @@ public:
   { return _objectClassModuleList; }
   ObjectClassModuleList& getObjectClassModuleList()
   { return _objectClassModuleList; }
-  void insert(ObjectClassModule& objectClassModule)
-  { _objectClassModuleList.push_back(objectClassModule); }
+  void insert(ObjectClassModule& objectClassModule);
   bool getIsReferencedByAnyModule() const;
 
   /// UnorderedSet of AttributeDefinition instances indexed by attributeHandle
@@ -113,8 +113,7 @@ public:
   { return _attributeDefinitionModuleList; }
   AttributeDefinitionModuleList& getAttributeDefinitionModuleList()
   { return _attributeDefinitionModuleList; }
-  void insert(AttributeDefinitionModule& attributeDefinitionModule)
-  { _attributeDefinitionModuleList.push_back(attributeDefinitionModule); }
+  void insert(AttributeDefinitionModule& attributeDefinitionModule);
   bool getAreAttributesReferencedByAnyModule() const;
 
   /// UnorderedSet of ClassAttribute instances indexed by attributeHandle
@@ -211,6 +210,9 @@ public:
     }
   }
 
+  template<typename Link>
+  struct IntrusiveKey;
+
 private:
 #if 201103L <= __cplusplus
   ObjectClass(ObjectClass const&) = delete;
@@ -227,6 +229,10 @@ private:
 #endif
 
   Federation& _federation;
+
+  ObjectClassHandle const _objectClassHandle;
+
+  StringVector const _name;
 
   ObjectClass* const _parentObjectClass;
 
@@ -250,6 +256,18 @@ private:
 
   /// List of ObjectInstance instances belonging to this ObjectClass
   ObjectInstanceList _objectInstanceList;
+};
+
+template<>
+struct ObjectClass::IntrusiveKey<Intrusive::UnorderedSetLink<ObjectClass, Intrusive::ParentTag<Federation> > > {
+  static ObjectClassHandle const& get(ObjectClass const& objectClass)
+  { return objectClass.getObjectClassHandle(); }
+};
+
+template<>
+struct ObjectClass::IntrusiveKey<Intrusive::UnorderedSetLink<ObjectClass, Intrusive::ParentTag<Federation, 1> > > {
+  static StringVector const& get(ObjectClass const& objectClass)
+  { return objectClass.getName(); }
 };
 
 } // namespace ServerModel

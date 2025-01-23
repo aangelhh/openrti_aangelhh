@@ -19,13 +19,18 @@
 
 #include "ObjectClass.h"
 
+#include "AttributeDefinition.h"
+#include "AttributeDefinitionModule.h"
+#include "Federation.h"
+#include "ObjectClassModule.h"
+
 namespace OpenRTI {
 namespace ServerModel {
 
 ObjectClass::ObjectClass(Federation& federation, ObjectClassHandle const& objectClassHandle, StringVector const& name, ObjectClass* parentObjectClass) :
-  IntrusiveUnorderedMap<ObjectClassHandle const, ObjectClass>::Hook(objectClassHandle),
-  IntrusiveUnorderedMap<StringVector const, ObjectClass>::Hook(name),
   _federation(federation),
+  _objectClassHandle(objectClassHandle),
+  _name(name),
   _parentObjectClass(parentObjectClass)
 {
   if (_parentObjectClass) {
@@ -58,6 +63,12 @@ ObjectClass::getParentObjectClassHandle() const
   if (!_parentObjectClass)
     return ObjectClassHandle();
   return _parentObjectClass->getObjectClassHandle();
+}
+
+void
+ObjectClass::insert(ObjectClassModule& objectClassModule)
+{
+  _objectClassModuleList.push_back(objectClassModule);
 }
 
 bool
@@ -137,6 +148,12 @@ ObjectClass::insert(AttributeDefinition& attributeDefinition)
   _attributeHandleAttributeDefinitionMap.insert(attributeDefinition);
   _attributeNameAttributeDefinitionMap.insert(attributeDefinition);
   insertClassAttributeFor(attributeDefinition);
+}
+
+void
+ObjectClass::insert(AttributeDefinitionModule& attributeDefinitionModule)
+{
+  _attributeDefinitionModuleList.push_back(attributeDefinitionModule);
 }
 
 bool
