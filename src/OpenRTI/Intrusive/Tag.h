@@ -17,19 +17,36 @@
  *
  */
 
-#ifndef OpenRTI_IntrusiveList_h
-#define OpenRTI_IntrusiveList_h
+#ifndef OpenRTI_Intrusive_Tag_h
+#define OpenRTI_Intrusive_Tag_h
 
-#include "Intrusive.h"
+#include "OpenRTIConfig.h"
+#include "Export.h"
 
 namespace OpenRTI {
+namespace Intrusive {
 
-template<typename T, unsigned tag = 0>
-class OPENRTI_LOCAL IntrusiveList : public Intrusive::List<Intrusive::ListLink<T, Intrusive::NumericTag<tag> > > {
-public:
-  typedef Intrusive::ListLink<T, Intrusive::NumericTag<tag> > Hook;
-};
+/// Tags for use with containers.
+/// Note that all these tags never get instantiated.
 
+template<typename>
+struct Tag;
+
+template<typename, std::size_t = ~std::size_t(0)>
+struct ParentTag;
+template<typename, std::size_t = ~std::size_t(0)>
+struct ReferenceTag;
+
+template<std::size_t>
+struct NumericTag;
+
+/// For unordered sets.
+template<typename Tag, std::size_t = ~std::size_t(0)>
+struct ChainTag;
+template<typename Tag, std::size_t = ~std::size_t(0)>
+struct LocalTag;
+
+} // namespace Intrusive
 } // namespace OpenRTI
 
 #endif

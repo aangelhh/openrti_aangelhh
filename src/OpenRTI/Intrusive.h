@@ -17,19 +17,16 @@
  *
  */
 
-#ifndef OpenRTI_IntrusiveList_h
-#define OpenRTI_IntrusiveList_h
+#ifndef OpenRTI_Intrusive_h
+#define OpenRTI_Intrusive_h
 
-#include "Intrusive.h"
-
-namespace OpenRTI {
-
-template<typename T, unsigned tag = 0>
-class OPENRTI_LOCAL IntrusiveList : public Intrusive::List<Intrusive::ListLink<T, Intrusive::NumericTag<tag> > > {
-public:
-  typedef Intrusive::ListLink<T, Intrusive::NumericTag<tag> > Hook;
-};
-
-} // namespace OpenRTI
+#include "Intrusive/DeleteMethod.h"
+#include "Intrusive/KeyAccess.h"
+#include "Intrusive/List.h"
+#include "Intrusive/ListLink.h"
+#include "Intrusive/Tag.h"
+#include "Intrusive/UnorderedSet.h"
+#include "Intrusive/UnorderedSetKeyTraits.h"
+#include "Intrusive/UnorderedSetLink.h"
 
 #endif

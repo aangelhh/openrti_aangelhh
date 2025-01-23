@@ -17,19 +17,25 @@
  *
  */
 
-#ifndef OpenRTI_IntrusiveList_h
-#define OpenRTI_IntrusiveList_h
+#ifndef OpenRTI_Intrusive_KeyAccess_h
+#define OpenRTI_Intrusive_KeyAccess_h
 
-#include "Intrusive.h"
+#include "OpenRTIConfig.h"
+#include "Export.h"
 
 namespace OpenRTI {
+namespace Intrusive {
 
-template<typename T, unsigned tag = 0>
-class OPENRTI_LOCAL IntrusiveList : public Intrusive::List<Intrusive::ListLink<T, Intrusive::NumericTag<tag> > > {
-public:
-  typedef Intrusive::ListLink<T, Intrusive::NumericTag<tag> > Hook;
-};
+// Key get struct that queries the key get struct from the actual value type.
+// Special care is taken so that the containers value type is not needed on
+// the declaration of the container. Instead the value type must be present
+// when the key is acually queried.
+// Even if not ealuated in here, keep the Link argument as this prevents a
+// full specialzation for the special casing inside the containers.
+template<typename Link>
+struct DefaultKeyAccess;
 
+} // namespace Intrusive
 } // namespace OpenRTI
 
 #endif

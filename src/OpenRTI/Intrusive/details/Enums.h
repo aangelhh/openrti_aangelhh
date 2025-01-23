@@ -17,19 +17,24 @@
  *
  */
 
-#ifndef OpenRTI_IntrusiveList_h
-#define OpenRTI_IntrusiveList_h
-
-#include "Intrusive.h"
+#ifndef OpenRTI_Intrusive_details_Enums_h
+#define OpenRTI_Intrusive_details_Enums_h
 
 namespace OpenRTI {
+namespace Intrusive {
+namespace details {
 
-template<typename T, unsigned tag = 0>
-class OPENRTI_LOCAL IntrusiveList : public Intrusive::List<Intrusive::ListLink<T, Intrusive::NumericTag<tag> > > {
-public:
-  typedef Intrusive::ListLink<T, Intrusive::NumericTag<tag> > Hook;
+enum Side {
+  SideLeft,
+  SideRight
 };
 
+inline Side
+opposite_side(Side side)
+{ return Side((unsigned)side ^ 1u); }
+
+} // namespace details
+} // namespace Intrusive
 } // namespace OpenRTI
 
 #endif

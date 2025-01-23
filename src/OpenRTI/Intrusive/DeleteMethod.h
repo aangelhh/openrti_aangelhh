@@ -17,19 +17,35 @@
  *
  */
 
-#ifndef OpenRTI_IntrusiveList_h
-#define OpenRTI_IntrusiveList_h
+#ifndef OpenRTI_Intrusive_DeleteMethod_h
+#define OpenRTI_Intrusive_DeleteMethod_h
 
-#include "Intrusive.h"
+#include "OpenRTIConfig.h"
+#include "Export.h"
 
 namespace OpenRTI {
+namespace Intrusive {
 
-template<typename T, unsigned tag = 0>
-class OPENRTI_LOCAL IntrusiveList : public Intrusive::List<Intrusive::ListLink<T, Intrusive::NumericTag<tag> > > {
-public:
-  typedef Intrusive::ListLink<T, Intrusive::NumericTag<tag> > Hook;
+/// Contains a method that does nothing on container destruction
+struct DeleteNoop {
+  template<typename C>
+  static void destroy(C&)
+  { }
+};
+/// Contains a method that unlinks all container elements on container destruction
+struct DeleteUnlink {
+  template<typename C>
+  static void destroy(C& container)
+  { container.unlink(); }
+};
+/// Contains a method that deletes all container elements on container destruction
+struct DeleteClear {
+  template<typename C>
+  static void destroy(C& container)
+  { container.clear(); }
 };
 
+} // namespace Intrusive
 } // namespace OpenRTI
 
 #endif
