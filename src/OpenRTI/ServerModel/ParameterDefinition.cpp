@@ -30,11 +30,16 @@ ParameterDefinition::ParameterDefinition(InteractionClass& interactionClass, Par
   _parameterHandle(parameterHandle),
   _name(name)
 {
+  _interactionClass._insertParameterHandleParameterDefinitionMap(*this);
+  _interactionClass._insertParameterNameParameterDefinitionMap(*this);
 }
 
 ParameterDefinition::~ParameterDefinition()
 {
   _classParameterList.clear();
+
+  _interactionClass._unlinkParameterNameParameterDefinitionMap(*this);
+  _interactionClass._unlinkParameterHandleParameterDefinitionMap(*this);
 
   OpenRTIAssert(_classParameterList.empty());
 }

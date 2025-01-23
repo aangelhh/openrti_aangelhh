@@ -118,6 +118,13 @@ InteractionClass::getParameterDefinition(ParameterHandle const& parameterHandle)
   return i.get();
 }
 
+std::size_t
+InteractionClass::getNumParameterDefinitions() const
+{
+  // FIXME O(N)
+  return _parameterHandleParameterDefinitionMap.size();
+}
+
 ParameterDefinition const*
 InteractionClass::getParameterDefinition(std::string const& name) const
 {
@@ -145,13 +152,6 @@ InteractionClass::eraseParameterDefinitions()
   OpenRTIAssert(_parameterNameParameterDefinitionMap.empty());
 }
 
-std::size_t
-InteractionClass::getNumParameterDefinitions() const
-{
-  // FIXME O(N)
-  return _parameterHandleParameterDefinitionMap.size();
-}
-
 ParameterHandle
 InteractionClass::getFirstUnusedParameterHandle()
 {
@@ -161,14 +161,6 @@ InteractionClass::getFirstUnusedParameterHandle()
     numParameters += _parentInteractionClass->getFirstUnusedParameterHandle().getHandle();
   numParameters += getNumParameterDefinitions();
   return ParameterHandle(numParameters);
-}
-
-void
-InteractionClass::insert(ParameterDefinition& parameterDefinition)
-{
-  _parameterHandleParameterDefinitionMap.insert(parameterDefinition);
-  _parameterNameParameterDefinitionMap.insert(parameterDefinition);
-  insertClassParameterFor(parameterDefinition);
 }
 
 void
@@ -236,6 +228,30 @@ void
 InteractionClass::_unlinkInteractionClassModuleList(InteractionClassModule& interactionClassModule)
 {
   _interactionClassModuleList.unlink(interactionClassModule);
+}
+
+void
+InteractionClass::_insertParameterHandleParameterDefinitionMap(ParameterDefinition& parameterDefinition)
+{
+  _parameterHandleParameterDefinitionMap.insert(parameterDefinition);
+}
+
+void
+InteractionClass::_unlinkParameterHandleParameterDefinitionMap(ParameterDefinition& parameterDefinition)
+{
+  _parameterHandleParameterDefinitionMap.unlink(parameterDefinition);
+}
+
+void
+InteractionClass::_insertParameterNameParameterDefinitionMap(ParameterDefinition& parameterDefinition)
+{
+  _parameterNameParameterDefinitionMap.insert(parameterDefinition);
+}
+
+void
+InteractionClass::_unlinkParameterNameParameterDefinitionMap(ParameterDefinition& parameterDefinition)
+{
+  _parameterNameParameterDefinitionMap.unlink(parameterDefinition);
 }
 
 } // namespace ServerModel

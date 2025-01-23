@@ -690,7 +690,7 @@ Federation::insertOrCheck(Module& module, FOMStringInteractionClass const& strin
 
       ParameterDefinition* parameterDefinition;
       parameterDefinition = new ParameterDefinition(*interactionClass, nextParameterHandle, i->getName());
-      interactionClass->insert(*parameterDefinition);
+      interactionClass->insertClassParameterFor(*parameterDefinition);
 
       nextParameterHandle = ParameterHandle(nextParameterHandle.getHandle() + 1);
     }
@@ -954,7 +954,7 @@ Federation::insert(Module& module, FOMInteractionClass const& fomInteractionClas
             throw MessageError("Duplicate InteractionClass parameter handles.");
           ParameterDefinition* parameterDefinition;
           parameterDefinition = new ParameterDefinition(*i, j->getParameterHandle(), j->getName());
-          i->insert(*parameterDefinition);
+          i->insertClassParameterFor(*parameterDefinition);
         }
       } else {
         std::vector<ParameterHandle> parameterHandles;
@@ -1000,7 +1000,7 @@ Federation::insert(Module& module, FOMInteractionClass const& fomInteractionClas
         throw MessageError("Duplicate InteractionClass parameter handles.");
       ParameterDefinition* parameterDefinition;
       parameterDefinition = new ParameterDefinition(*interactionClass, j->getParameterHandle(), j->getName());
-      interactionClass->insert(*parameterDefinition);
+      interactionClass->insertClassParameterFor(*parameterDefinition);
     }
   }
 }

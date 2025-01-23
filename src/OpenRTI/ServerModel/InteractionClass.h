@@ -22,6 +22,8 @@
 
 #include "OpenRTIConfig.h"
 
+#include <cstddef>
+
 #include "Intrusive.h"
 
 #include "Handle.h"
@@ -103,6 +105,8 @@ public:
   /// Get one ParameterDefinition instance matching parameterHandle
   ParameterDefinition const* getParameterDefinition(ParameterHandle const& parameterHandle) const;
   ParameterDefinition* getParameterDefinition(ParameterHandle const& parameterHandle);
+  /// Return the count of parameterDefinition instances
+  std::size_t getNumParameterDefinitions() const;
 
   /// UnorderedSet of ParameterDefinition instances indexed by name
   typedef Intrusive::UnorderedSet<std::string, Intrusive::UnorderedSetLink<ParameterDefinition, Intrusive::ParentTag<InteractionClass, 1> > > ParameterNameParameterDefinitionMap;
@@ -111,10 +115,7 @@ public:
   ParameterDefinition* getParameterDefinition(std::string const& name);
 
   void eraseParameterDefinitions();
-  std::size_t getNumParameterDefinitions() const;
   ParameterHandle getFirstUnusedParameterHandle();
-
-  void insert(ParameterDefinition& parameterDefinition);
 
   /// The list of Modules referencing this InteractionClass set of ParameterDefinitions
   typedef Intrusive::List<Intrusive::ListLink<ParameterDefinitionModule, Intrusive::ParentTag<InteractionClass> > > ParameterDefinitionModuleList;
@@ -207,9 +208,18 @@ private:
   InteractionClassModuleList _interactionClassModuleList;
 
   /// UnorderedSet of ParameterDefinition instances indexed by parameterHandle
+  friend class ParameterDefinition;
+  /// Insert parameterDefinition into parameterHandleParameterDefinitionMap
+  void _insertParameterHandleParameterDefinitionMap(ParameterDefinition& parameterDefinition);
+  /// Unlink parameterDefinition from parameterHandleParameterDefinitionMap
+  void _unlinkParameterHandleParameterDefinitionMap(ParameterDefinition& parameterDefinition);
   ParameterHandleParameterDefinitionMap _parameterHandleParameterDefinitionMap;
 
   /// UnorderedSet of ParameterDefinition instances indexed by name
+  /// Insert parameterDefinition into parameterNameParameterDefinitionMap
+  void _insertParameterNameParameterDefinitionMap(ParameterDefinition& parameterDefinition);
+  /// Unlink parameterDefinition from parameterNameParameterDefinitionMap
+  void _unlinkParameterNameParameterDefinitionMap(ParameterDefinition& parameterDefinition);
   ParameterNameParameterDefinitionMap _parameterNameParameterDefinitionMap;
 
   /// The list of Modules referencing this InteractionClass set of ParameterDefinitions
