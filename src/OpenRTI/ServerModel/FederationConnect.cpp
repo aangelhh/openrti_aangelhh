@@ -22,6 +22,7 @@
 #include "Federate.h"
 #include "Federation.h"
 #include "NodeConnect.h"
+#include "ObjectInstance.h"
 #include "ObjectInstanceConnect.h"
 
 namespace OpenRTI {
@@ -108,6 +109,12 @@ FederationConnect::send(const SharedPtr<const AbstractMessage>& message)
   if (!_active)
     return;
   _nodeConnect.send(message);
+}
+
+ObjectInstanceConnect*
+FederationConnect::createObjectInstanceConnect(ObjectInstance& objectInstance)
+{
+  return new ObjectInstanceConnect(objectInstance, *this);
 }
 
 void

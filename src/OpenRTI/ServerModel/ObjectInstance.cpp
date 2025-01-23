@@ -77,8 +77,7 @@ ObjectInstance::reference(FederationConnect& federationConnect)
   // OpenRTIAssert(_connectHandleObjectInstanceConnectMap.find(federationConnect.getConnectHandle()) == _connectHandleObjectInstanceConnectMap.end());
   if (_connectHandleObjectInstanceConnectMap.find(federationConnect.getConnectHandle()) != _connectHandleObjectInstanceConnectMap.end())
     return;
-  ObjectInstanceConnect* objectInstanceConnect;
-  objectInstanceConnect = new ObjectInstanceConnect(*this, federationConnect);
+  ObjectInstanceConnect* objectInstanceConnect = federationConnect.createObjectInstanceConnect(*this);
 }
 
 bool

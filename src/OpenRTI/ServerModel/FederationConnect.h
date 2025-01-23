@@ -33,6 +33,7 @@ namespace ServerModel {
 class Federate;
 class Federation;
 class NodeConnect;
+class ObjectInstance;
 class ObjectInstanceConnect;
 
 class OPENRTI_LOCAL FederationConnect :
@@ -111,6 +112,10 @@ public:
 
   /// We can actually send something there
   void send(const SharedPtr<const AbstractMessage>& message);
+
+  ///
+  /// Create a new ObjectInstanceConnect instance
+  ObjectInstanceConnect* createObjectInstanceConnect(ObjectInstance& objectInstance);
 
   template<typename Link>
   struct IntrusiveKey;
