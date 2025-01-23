@@ -56,9 +56,15 @@ UpdateRate::getIsReferencedByAnyModule() const
 }
 
 void
-UpdateRate::insert(UpdateRateModule& updateRateModule)
+UpdateRate::_insertUpdateRateModuleList(UpdateRateModule& updateRateModule)
 {
   _updateRateModuleList.push_back(updateRateModule);
+}
+
+void
+UpdateRate::_unlinkUpdateRateModuleList(UpdateRateModule& updateRateModule)
+{
+  _updateRateModuleList.unlink(updateRateModule);
 }
 
 } // namespace ServerModel

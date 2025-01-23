@@ -76,12 +76,6 @@ Module::setArtificialObjectRoot(bool artificialObjectRoot)
 }
 
 void
-Module::insert(UpdateRateModule& updateRateModule)
-{
-  _updateRateModuleList.push_back(updateRateModule);
-}
-
-void
 Module::insert(InteractionClassModule& interactionClassModule)
 {
   _interactionClassModuleList.push_back(interactionClassModule);
@@ -213,11 +207,7 @@ Module::insert(Dimension& dimension)
 UpdateRateModule*
 Module::insert(UpdateRate& updateRate)
 {
-  UpdateRateModule* updateRateModule;
-  updateRateModule = new UpdateRateModule(updateRate, *this);
-  updateRate.insert(*updateRateModule);
-  insert(*updateRateModule);
-  return updateRateModule;
+  return new UpdateRateModule(updateRate, *this);
 }
 
 InteractionClassModule*
@@ -270,6 +260,18 @@ void
 Module::_unlinkDimensionModuleList(DimensionModule& dimensionModule)
 {
   _dimensionModuleList.unlink(dimensionModule);
+}
+
+void
+Module::_insertUpdateRateModuleList(UpdateRateModule& updateRateModule)
+{
+  _updateRateModuleList.push_back(updateRateModule);
+}
+
+void
+Module::_unlinkUpdateRateModuleList(UpdateRateModule& updateRateModule)
+{
+  _updateRateModuleList.unlink(updateRateModule);
 }
 
 } // namespace ServerModel

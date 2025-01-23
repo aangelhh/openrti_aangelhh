@@ -29,10 +29,14 @@ UpdateRateModule::UpdateRateModule(UpdateRate& updateRate, Module& module) :
   _updateRate(updateRate),
   _module(module)
 {
+  _module._insertUpdateRateModuleList(*this);
+  _updateRate._insertUpdateRateModuleList(*this);
 }
 
 UpdateRateModule::~UpdateRateModule()
 {
+  _updateRate._unlinkUpdateRateModuleList(*this);
+  _module._unlinkUpdateRateModuleList(*this);
 }
 
 } // namespace ServerModel

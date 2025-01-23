@@ -84,7 +84,6 @@ public:
   { return _updateRateModuleList; }
   UpdateRateModuleList& getUpdateRateModuleList()
   { return _updateRateModuleList; }
-  void insert(UpdateRateModule& updateRateModule);
 
   /// All InteractionClasses that are referenced by this Module
   typedef Intrusive::List<Intrusive::ListLink<InteractionClassModule, Intrusive::ParentTag<Module> > > InteractionClassModuleList;
@@ -170,6 +169,11 @@ private:
   DimensionModuleList _dimensionModuleList;
 
   /// All UpdateRates that are referenced by this Module
+  friend class UpdateRateModule;
+  /// Insert updateRateModule into updateRateModuleList
+  void _insertUpdateRateModuleList(UpdateRateModule& updateRateModule);
+  /// Unlink updateRateModule from updateRateModuleList
+  void _unlinkUpdateRateModuleList(UpdateRateModule& updateRateModule);
   UpdateRateModuleList _updateRateModuleList;
 
   /// All InteractionClasses that are referenced by this Module

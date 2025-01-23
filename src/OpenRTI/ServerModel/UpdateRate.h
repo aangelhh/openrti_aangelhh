@@ -57,9 +57,8 @@ public:
 
   /// The list of Modules referencing this UpdateRate
   typedef Intrusive::List<Intrusive::ListLink<UpdateRateModule, Intrusive::ParentTag<UpdateRate> > > UpdateRateModuleList;
+  /// Returns if the UpdateRate is referenced by a module.
   bool getIsReferencedByAnyModule() const;
-
-  void insert(UpdateRateModule& updateRateModule);
 
   template<typename Link>
   struct IntrusiveKey;
@@ -88,6 +87,11 @@ private:
   double _rate;
 
   /// The list of Modules referencing this UpdateRate
+  friend class UpdateRateModule;
+  /// Insert updateRateModule into updateRateModuleList
+  void _insertUpdateRateModuleList(UpdateRateModule& updateRateModule);
+  /// Unlink updateRateModule from updateRateModuleList
+  void _unlinkUpdateRateModuleList(UpdateRateModule& updateRateModule);
   UpdateRateModuleList _updateRateModuleList;
 };
 
