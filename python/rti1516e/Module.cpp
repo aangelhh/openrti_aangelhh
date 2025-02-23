@@ -28,35 +28,372 @@
 #include "RTI/time/HLAinteger64Time.h"
 #include "RTI/time/HLAinteger64Interval.h"
 
-// Immortal objects appeared in 3.12
-#if 0x030C0000 <= PY_VERSION_HEX
-#define USE_IMMORTAL_TYPE_OBJECTS
+#if 0x03020000 <= PY_VERSION_HEX
+// since 3.2 there is an implementation for heap type objects
+#define PyRTIType_Slot PyType_Slot
+#define PyRTIType_Spec PyType_Spec
+
+#define PyRTI_tp_doc Py_tp_doc
+#define PyRTI_tp_new Py_tp_new
+#define PyRTI_tp_dealloc Py_tp_dealloc
+#define PyRTI_tp_traverse Py_tp_traverse
+#define PyRTI_tp_clear Py_tp_clear
+#define PyRTI_tp_repr Py_tp_repr
+#define PyRTI_tp_hash Py_tp_hash
+#define PyRTI_tp_richcompare Py_tp_richcompare
+#define PyRTI_tp_methods Py_tp_methods
+#else
+// Before 3.2 emulate heap type objects
+
+#define PyRTI_tp_doc 0
+#define PyRTI_tp_new 1
+#define PyRTI_tp_dealloc 2
+#define PyRTI_tp_traverse 3
+#define PyRTI_tp_clear 4
+#define PyRTI_tp_repr 5
+#define PyRTI_tp_hash 6
+#define PyRTI_tp_richcompare 7
+#define PyRTI_tp_methods 8
+
+struct PyRTIType_Slot {
+  int slot;
+  void *data;
+};
+
+struct PyRTIType_Spec {
+  const char* name;
+  int basicsize;
+  int itemsize;
+  unsigned int flags;
+  PyRTIType_Slot* slots;
+};
+
 #endif
 
-static int PyTypeObject_Ready(PyTypeObject* type)
+enum TypeObjectIndex {
+  RTIambassadorIndex,
+
+  FederateHandleIndex,
+  ObjectClassHandleIndex,
+  InteractionClassHandleIndex,
+  ObjectInstanceHandleIndex,
+  AttributeHandleIndex,
+  ParameterHandleIndex,
+  DimensionHandleIndex,
+  RegionHandleIndex,
+  MessageRetractionHandleIndex,
+
+  ExceptionIndex,
+
+  AlreadyConnectedIndex,
+  AsynchronousDeliveryAlreadyDisabledIndex,
+  AsynchronousDeliveryAlreadyEnabledIndex,
+  AttributeAcquisitionWasNotCanceledIndex,
+  AttributeAcquisitionWasNotRequestedIndex,
+  AttributeAlreadyBeingAcquiredIndex,
+  AttributeAlreadyBeingChangedIndex,
+  AttributeAlreadyBeingDivestedIndex,
+  AttributeAlreadyOwnedIndex,
+  AttributeDivestitureWasNotRequestedIndex,
+  AttributeNotDefinedIndex,
+  AttributeNotOwnedIndex,
+  AttributeNotPublishedIndex,
+  AttributeNotRecognizedIndex,
+  AttributeNotSubscribedIndex,
+  AttributeRelevanceAdvisorySwitchIsOffIndex,
+  AttributeRelevanceAdvisorySwitchIsOnIndex,
+  AttributeScopeAdvisorySwitchIsOffIndex,
+  AttributeScopeAdvisorySwitchIsOnIndex,
+  BadInitializationParameterIndex,
+  CallNotAllowedFromWithinCallbackIndex,
+  ConnectionFailedIndex,
+  CouldNotCreateLogicalTimeFactoryIndex,
+  CouldNotDecodeIndex,
+  CouldNotDiscoverIndex,
+  CouldNotEncodeIndex,
+  CouldNotOpenFDDIndex,
+  CouldNotOpenMIMIndex,
+  CouldNotInitiateRestoreIndex,
+  DeletePrivilegeNotHeldIndex,
+  DesignatorIsHLAstandardMIMIndex,
+  ErrorReadingMIMIndex,
+  RequestForTimeConstrainedPendingIndex,
+  NoRequestToEnableTimeConstrainedWasPendingIndex,
+  RequestForTimeRegulationPendingIndex,
+  NoRequestToEnableTimeRegulationWasPendingIndex,
+  ErrorReadingFDDIndex,
+  FederateAlreadyExecutionMemberIndex,
+  FederateHasNotBegunSaveIndex,
+  FederateInternalErrorIndex,
+  FederateIsExecutionMemberIndex,
+  FederateNameAlreadyInUseIndex,
+  FederateNotExecutionMemberIndex,
+  FederateHandleNotKnownIndex,
+  FederateOwnsAttributesIndex,
+  FederateServiceInvocationsAreBeingReportedViaMOMIndex,
+  FederateUnableToUseTimeIndex,
+  FederatesCurrentlyJoinedIndex,
+  FederationExecutionAlreadyExistsIndex,
+  FederationExecutionDoesNotExistIndex,
+  IllegalNameIndex,
+  IllegalTimeArithmeticIndex,
+  InconsistentFDDIndex,
+  InteractionClassAlreadyBeingChangedIndex,
+  InteractionClassNotDefinedIndex,
+  InteractionClassNotPublishedIndex,
+  InteractionClassNotRecognizedIndex,
+  InteractionClassNotSubscribedIndex,
+  InteractionParameterNotDefinedIndex,
+  InteractionParameterNotRecognizedIndex,
+  InteractionRelevanceAdvisorySwitchIsOffIndex,
+  InteractionRelevanceAdvisorySwitchIsOnIndex,
+  InTimeAdvancingStateIndex,
+  InvalidAttributeHandleIndex,
+  InvalidDimensionHandleIndex,
+  InvalidFederateHandleIndex,
+  InvalidInteractionClassHandleIndex,
+  InvalidLocalSettingsDesignatorIndex,
+  InvalidLogicalTimeIndex,
+  InvalidLogicalTimeIntervalIndex,
+  InvalidLookaheadIndex,
+  InvalidObjectClassHandleIndex,
+  InvalidOrderNameIndex,
+  InvalidOrderTypeIndex,
+  InvalidParameterHandleIndex,
+  InvalidRangeBoundIndex,
+  InvalidRegionIndex,
+  InvalidRegionContextIndex,
+  InvalidResignActionIndex,
+  InvalidUpdateRateDesignatorIndex,
+  InvalidMessageRetractionHandleIndex,
+  InvalidServiceGroupIndex,
+  InvalidTransportationNameIndex,
+  InvalidTransportationTypeIndex,
+  JoinedFederateIsNotInTimeAdvancingStateIndex,
+  LogicalTimeAlreadyPassedIndex,
+  MessageCanNoLongerBeRetractedIndex,
+  NameNotFoundIndex,
+  NameSetWasEmptyIndex,
+  NoAcquisitionPendingIndex,
+  NotConnectedIndex,
+  ObjectClassNotDefinedIndex,
+  ObjectClassNotKnownIndex,
+  ObjectClassNotPublishedIndex,
+  ObjectClassRelevanceAdvisorySwitchIsOffIndex,
+  ObjectClassRelevanceAdvisorySwitchIsOnIndex,
+  ObjectInstanceNameInUseIndex,
+  ObjectInstanceNameNotReservedIndex,
+  ObjectInstanceNotKnownIndex,
+  OwnershipAcquisitionPendingIndex,
+  RTIinternalErrorIndex,
+  RegionDoesNotContainSpecifiedDimensionIndex,
+  RegionInUseForUpdateOrSubscriptionIndex,
+  RegionNotCreatedByThisFederateIndex,
+  RestoreInProgressIndex,
+  RestoreNotInProgressIndex,
+  RestoreNotRequestedIndex,
+  SaveInProgressIndex,
+  SaveNotInProgressIndex,
+  SaveNotInitiatedIndex,
+  SpecifiedSaveLabelDoesNotExistIndex,
+  SynchronizationPointLabelNotAnnouncedIndex,
+  TimeConstrainedAlreadyEnabledIndex,
+  TimeConstrainedIsNotEnabledIndex,
+  TimeRegulationAlreadyEnabledIndex,
+  TimeRegulationIsNotEnabledIndex,
+  UnableToPerformSaveIndex,
+  UnknownNameIndex,
+  UnsupportedCallbackModelIndex,
+  InternalErrorIndex,
+
+  _TypeObjectIndexCount
+};
+
+struct PyRTI1516EModuleState {
+  PyObject* types[_TypeObjectIndexCount];
+};
+
+static PyRTI1516EModuleState*
+PyRTI1516EModule_GetState(PyObject *m)
 {
-  if (PyType_Ready(type) < 0)
-    return -1;
-#ifdef USE_IMMORTAL_TYPE_OBJECTS
-#if 0x030D0000 <= PY_VERSION_HEX
-  // Starting from 3.13, static type objects shall be immortal
+#if 0x03000000 <= PY_VERSION_HEX
+  // since 3.0
+  return (PyRTI1516EModuleState *)PyModule_GetState(m);
 #else
-  Py_SET_REFCNT((PyObject*)type, _Py_IMMORTAL_REFCNT);
+  static PyRTI1516EModuleState state;
+  return &state;
 #endif
+}
+
+static int
+rti1516e_traverse(PyObject *m, visitproc visit, void *arg)
+{
+#if 0x03000000 <= PY_VERSION_HEX
+  PyRTI1516EModuleState *state = PyRTI1516EModule_GetState(m);
+  for (std::size_t i = 0; i < _TypeObjectIndexCount; ++i) {
+    Py_VISIT(state->types[i]);
+  }
 #endif
   return 0;
 }
 
-static int PyModule_AddTypeObject(PyObject* m, const char* name, PyTypeObject* type)
+static int
+rti1516e_clear(PyObject *m)
 {
-#ifdef USE_IMMORTAL_TYPE_OBJECTS
-#ifdef _Py_IsImmortal
-  assert(_Py_IsImmortal(type));
+  PyRTI1516EModuleState *state = PyRTI1516EModule_GetState(m);
+  for (std::size_t i = 0; i < _TypeObjectIndexCount; ++i) {
+    Py_CLEAR(state->types[i]);
+  }
+  return 0;
+}
+
+static PyMethodDef rti1516e_methods[] = {
+  {NULL, NULL}
+};
+
+#if 3 <= PY_MAJOR_VERSION
+
+#ifdef Py_mod_exec
+// implemented below
+static int rti1516e_mod_exec(PyObject *m);
 #endif
+
+static PyModuleDef_Slot rti1516e_moduledef_slots[] = {
+#ifdef Py_mod_exec
+  { Py_mod_exec, (void*)rti1516e_mod_exec },
+#endif
+#ifdef Py_mod_multiple_interpreters
+  { Py_mod_multiple_interpreters, Py_MOD_PER_INTERPRETER_GIL_SUPPORTED },
+#endif
+#ifdef Py_mod_gil
+  { Py_mod_gil, Py_MOD_GIL_NOT_USED },
+#endif
+  { 0/*id*/, NULL/*value*/ }
+};
+
+static struct PyModuleDef moduledef = {
+  PyModuleDef_HEAD_INIT,
+  "rti1516e",                                             /* m_name */
+  PyDoc_STR("rti1516e RTI/HLA backend implementation."),  /* m_doc */
+  sizeof(PyRTI1516EModuleState),                          /* m_size */
+  rti1516e_methods,                                       /* m_methods */
+#ifdef Py_mod_exec
+  rti1516e_moduledef_slots,                               /* m_slots */
 #else
-  Py_IncRef((PyObject*)type);
+  NULL,                                                   /* m_reload */
 #endif
-  return PyModule_AddObject(m, name, (PyObject*)type);
+  rti1516e_traverse,                                      /* m_traverse */
+  rti1516e_clear,                                         /* m_clear */
+  NULL                                                    /* m_free */
+};
+
+#endif
+
+static PyRTI1516EModuleState*
+PyRTI1516EType_GetModuleState(PyTypeObject *type)
+{
+#if 0x030B0000 <= PY_VERSION_HEX
+  // Only available from 3.11, Stable from 3.13
+  PyObject *m = PyType_GetModuleByDef(type, &moduledef);
+#elif 0x03000000 <= PY_VERSION_HEX
+  PyObject *m = PyState_FindModule(&moduledef);
+#else
+  PyObject *m = NULL;
+#endif
+  return PyRTI1516EModule_GetState(m);
+}
+
+static int
+PyRTI1516EModule_AddObject(PyObject *m, const char* name, TypeObjectIndex index, PyObject* type)
+{
+  PyRTI1516EModuleState* state = PyRTI1516EModule_GetState(m);
+  state->types[index] = type;
+  return PyModule_AddObject(m, name, type);
+}
+
+static PyObject*
+PyRTIType_FromModuleAndSpec(PyObject *m, PyRTIType_Spec* spec)
+{
+#if 0x030A0000 <= PY_VERSION_HEX
+  // 3.10 adds PyType_FromModuleAndSpec(PyObject *module, PyType_Spec *spec, PyObject *bases);
+  return PyType_FromModuleAndSpec(m, spec, NULL);
+#elif 0x03030000 <= PY_VERSION_HEX
+  // 3.3 adds PyType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases);
+  // Note that with this call we are not able to query the module state from the type,
+  // therefore use the above once it appears.
+  return PyType_FromSpecWithBases(spec, NULL);
+#elif 0x03020000 <= PY_VERSION_HEX
+  // 3.2 adds PyType_FromSpec(PyType_Spec *spec);
+  // Note that with this call we are not able to query the module state from the type,
+  // therefore use the above once it appears.
+  return PyType_FromSpec(spec);
+#else
+  // Minimally implemented
+  PyTypeObject* type = (PyTypeObject*)PyType_GenericNew(&PyType_Type, NULL, NULL);
+  type->tp_name = spec->name;
+  type->tp_basicsize = spec->basicsize;
+  type->tp_itemsize = spec->itemsize;
+  type->tp_flags = spec->flags;
+
+  for (PyRTIType_Slot* slot = spec->slots; slot->data; ++slot) {
+    // just the ones we use below
+    switch (slot->slot) {
+    case PyRTI_tp_doc: type->tp_doc = (char*)slot->data; break;
+    case PyRTI_tp_new: type->tp_new = (newfunc)slot->data; break;
+    case PyRTI_tp_dealloc: type->tp_dealloc = (destructor)slot->data; break;
+    case PyRTI_tp_traverse: type->tp_traverse = (traverseproc)slot->data; break;
+    case PyRTI_tp_clear: type->tp_clear = (inquiry)slot->data; break;
+    case PyRTI_tp_repr: type->tp_repr = (reprfunc)slot->data; break;
+    case PyRTI_tp_hash: type->tp_hash = (hashfunc)slot->data; break;
+    case PyRTI_tp_richcompare: type->tp_richcompare = (richcmpfunc)slot->data; break;
+    case PyRTI_tp_methods: type->tp_methods = (PyMethodDef*)slot->data; break;
+    default:
+      /// Error
+      assert(false);
+    }
+  }
+
+  PyType_Ready(type);
+
+  return (PyObject*)type;
+#endif
+}
+
+static int
+PyRTI1516EModule_AddType(PyObject *m, const char* name, TypeObjectIndex index, PyRTIType_Spec* spec)
+{
+  PyObject* type = PyRTIType_FromModuleAndSpec(m, spec);
+  if (!type)
+    return -1;
+  return PyRTI1516EModule_AddObject(m, name, index, type);
+}
+
+static PyObject*
+PyRTI1516EModule_GetType(PyObject *m, TypeObjectIndex index)
+{
+  if (_TypeObjectIndexCount <= index)
+    return NULL;
+  PyRTI1516EModuleState* state = PyRTI1516EModule_GetState(m);
+  if (!state)
+    return NULL;
+  return state->types[index];
+}
+
+static void
+PyRTI1516EObject_Dealloc(PyObject *self)
+{
+  PyTypeObject *type = Py_TYPE(self);
+#if 0x03040000 <= PY_VERSION_HEX
+  freefunc free = (freefunc)PyType_GetSlot(type, Py_tp_free);
+  free(self);
+#else
+  type->tp_free(self);
+#endif
+  // In case the type object is finalised using PyType_Ready, the reference count of the type is not incremented.
+  // But the heap type object family functions do correctly count the type object references
+#if 0x03020000 <= PY_VERSION_HEX
+  Py_DECREF(type);
+#endif
 }
 
 static PyObject*
@@ -625,40 +962,61 @@ PyObject_GetRangeBounds(rti1516e::RangeBounds& rangeBounds, PyObject* o)
   return true;
 }
 
-#define IMPLEMENT_EXCEPTION_CLASS(ExceptionBase, ExceptionKind)               \
-  static PyTypeObject Py ## ExceptionKind ## Type = {                         \
-    PyVarObject_HEAD_INIT(&PyType_Type, 0)                                    \
-    "rti1516e." # ExceptionKind,                                              \
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                        \
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,                                 \
-    PyDoc_STR(#ExceptionKind), 0, 0, 0, 0, 0, 0, 0, 0, 0,                     \
-    ExceptionBase, 0,                                                         \
-  };                                                                          \
-  static int PyErr_SetException(const rti1516e:: ExceptionKind & e)           \
+static std::wstring PyErr_GetExceptionString()
+{
+  PyObject* ptype = 0;
+  PyObject* pvalue = 0;
+  PyObject* ptraceback = 0;
+  PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+  PyErr_NormalizeException(&ptype, &pvalue, &ptraceback);
+  if (ptype)
+    Py_DecRef(ptype);
+  std::wstring s;
+  if (pvalue) {
+    s += PyObject_GetString(pvalue);
+    Py_DecRef(pvalue);
+  }
+  if (ptraceback) {
+    s += PyObject_GetString(ptraceback);
+    Py_DecRef(ptraceback);
+  }
+  PyErr_Clear();
+  return s;
+}
+
+#define IMPLEMENT_EXCEPTION_CLASS(ExceptionKind)                              \
+  static int PyModule_Add ## ExceptionKind ## Type(PyObject* m)               \
   {                                                                           \
-    PyErr_SetObject((PyObject*)&Py ## ExceptionKind ## Type,                  \
+    PyObject* base;                                                           \
+    if (ExceptionIndex == ExceptionKind ## Index)                             \
+      base = PyExc_Exception;                                                 \
+    else                                                                      \
+      base = PyRTI1516EModule_GetType(m, ExceptionIndex);                     \
+    PyObject* type;                                                           \
+    type = PyErr_NewException((char*)"rti1516e." #ExceptionKind, base, NULL); \
+    return PyRTI1516EModule_AddObject(m, #ExceptionKind,                      \
+                                      ExceptionKind ## Index, type);          \
+  }                                                                           \
+                                                                              \
+  static int PyErr_SetException(const PyRTI1516EModuleState& state,           \
+                                const rti1516e:: ExceptionKind & e)           \
+  {                                                                           \
+    PyErr_SetObject(state.types[ExceptionKind ## Index],                      \
                     PyObject_NewString(e.what()));                            \
     return 0;                                                                 \
   }                                                                           \
-  static int PyErr_Set ## ExceptionKind(const char* what)                     \
+                                                                              \
+  static int PyErr_Set ## ExceptionKind(const PyRTI1516EModuleState& state,   \
+                                        const char* what)                     \
   {                                                                           \
-    PyErr_SetString((PyObject*)&Py ## ExceptionKind ## Type, what);           \
+    PyErr_SetString(state.types[ExceptionKind ## Index], what);               \
     return 0;                                                                 \
   }                                                                           \
-  static int Py ## ExceptionKind ## Type_Ready()                              \
-  {                                                                           \
-    return PyTypeObject_Ready(&Py ## ExceptionKind ## Type);                  \
-  }                                                                           \
-  static int PyModule_Add ## ExceptionKind ## Type(PyObject* m)               \
-  {                                                                           \
-    return PyModule_AddTypeObject(m, # ExceptionKind,                         \
-                                      &Py ## ExceptionKind ## Type);          \
-  }                                                                           \
 
-IMPLEMENT_EXCEPTION_CLASS((PyTypeObject*)PyExc_Exception, Exception);
+IMPLEMENT_EXCEPTION_CLASS(Exception)
 
 #define RTI_EXCEPTION(ExceptionKind)                                          \
-  IMPLEMENT_EXCEPTION_CLASS(&PyExceptionType, ExceptionKind);
+  IMPLEMENT_EXCEPTION_CLASS(ExceptionKind)
 
   RTI_EXCEPTION(AlreadyConnected)
   RTI_EXCEPTION(AsynchronousDeliveryAlreadyDisabled)
@@ -785,17 +1143,27 @@ IMPLEMENT_EXCEPTION_CLASS((PyTypeObject*)PyExc_Exception, Exception);
 
 
 #define IMPLEMENT_HANDLE_CLASS(HandleKind)                              \
-                                                                        \
   struct Py ## HandleKind {                                             \
     PyObject_HEAD                                                       \
     rti1516e::HandleKind ob_value;                                      \
   };                                                                    \
                                                                         \
+  static PyObject*                                                      \
+  HandleKind ## _new(PyTypeObject *subtype, PyObject *args, PyObject *) \
+  {                                                                     \
+    Py ## HandleKind *self;                                             \
+    self = (Py ## HandleKind*)PyType_GenericNew(subtype, NULL, NULL);   \
+    if (!self)                                                          \
+      return 0;                                                         \
+    new (&self->ob_value) rti1516e:: HandleKind();                      \
+    return (PyObject*)self;                                             \
+  }                                                                     \
+                                                                        \
   static void                                                           \
   HandleKind ## _dealloc(Py ## HandleKind *o)                           \
   {                                                                     \
     o->ob_value.rti1516e::HandleKind::~HandleKind();                    \
-    Py_TYPE(o)->tp_free(o);                                             \
+    PyRTI1516EObject_Dealloc((PyObject*)o);                             \
   }                                                                     \
                                                                         \
   static PyObject*                                                      \
@@ -872,9 +1240,6 @@ IMPLEMENT_EXCEPTION_CLASS((PyTypeObject*)PyExc_Exception, Exception);
     return PyBool_FromLong(o->ob_value.isValid());                      \
   }                                                                     \
                                                                         \
-  static PyObject*                                                      \
-  HandleKind ## _new(PyTypeObject *type, PyObject *args, PyObject *);   \
-                                                                        \
   static PyMethodDef HandleKind ## _methods[] =                         \
   {                                                                     \
     {"encode", (PyCFunction)HandleKind ## _encode, METH_VARARGS, ""},   \
@@ -882,63 +1247,41 @@ IMPLEMENT_EXCEPTION_CLASS((PyTypeObject*)PyExc_Exception, Exception);
     {0,}                                                                \
   };                                                                    \
                                                                         \
-  static PyTypeObject Py ## HandleKind ## Type = {                      \
-    PyVarObject_HEAD_INIT(&PyType_Type, 0)                              \
-    # HandleKind ,                      /* tp_name */                   \
-    sizeof(Py##HandleKind),             /* tp_basicsize */              \
-    0,                                  /* tp_itemsize */               \
-    (destructor)HandleKind ## _dealloc, /* tp_dealloc */                \
-    0,                                  /* tp_print */                  \
-    0,                                  /* tp_getattr */                \
-    0,                                  /* tp_setattr */                \
-    0,                                  /* tp_compare */                \
-    (reprfunc)HandleKind ## _repr,      /* tp_repr */                   \
-    0,                                  /* tp_as_number */              \
-    0,                                  /* tp_as_sequence */            \
-    0,                                  /* tp_as_mapping */             \
-    (hashfunc)HandleKind ## _hash,      /* tp_hash */                   \
-    0,                                  /* tp_call */                   \
-    0,                                  /* tp_str */                    \
-    0,                                  /* tp_getattro */               \
-    0,                                  /* tp_setattro */               \
-    0,                                  /* tp_as_buffer */              \
-    Py_TPFLAGS_DEFAULT,                 /* tp_flags */                  \
-    PyDoc_STR( # HandleKind ),          /* tp_doc */                    \
-    0,                                  /* tp_traverse */               \
-    0,                                  /* tp_clear */                  \
-    (richcmpfunc)HandleKind ## _richcmp,/* tp_richcompare */            \
-    0,                                  /* tp_weaklistoffset */         \
-    0,                                  /* tp_iter */                   \
-    0,                                  /* tp_iternext */               \
-    HandleKind ## _methods,             /* tp_methods */                \
-    0,                                  /* tp_members */                \
-    0,                                  /* tp_getset */                 \
-    0,                                  /* tp_base */                   \
-    0,                                  /* tp_dict */                   \
-    0,                                  /* tp_descr_get */              \
-    0,                                  /* tp_descr_set */              \
-    0,                                  /* tp_dictoffset */             \
-    0,                                  /* tp_init */                   \
-    0,                                  /* tp_alloc */                  \
-    (newfunc)HandleKind ## _new,        /* tp_new */                    \
+  static PyRTIType_Slot HandleKind ## _Type_slots[] = {                 \
+    {PyRTI_tp_doc, (void*)PyDoc_STR(#HandleKind)},                      \
+    {PyRTI_tp_new, (void*)HandleKind ## _new},                          \
+    {PyRTI_tp_dealloc, (void*)HandleKind ## _dealloc},                  \
+    {PyRTI_tp_repr, (void*)HandleKind ## _repr},                        \
+    {PyRTI_tp_hash, (void*)HandleKind ## _hash},                        \
+    {PyRTI_tp_richcompare, (void*)HandleKind ## _richcmp},              \
+    {PyRTI_tp_methods, (void*)HandleKind ## _methods},                  \
+    {0, NULL}                                                           \
   };                                                                    \
                                                                         \
-  static PyObject*                                                      \
-  HandleKind ## _new(PyTypeObject *type, PyObject *args, PyObject *)    \
+  static PyRTIType_Spec HandleKind ## _Type_spec = {                    \
+    "rti1516e." #HandleKind,                            /* name */      \
+    sizeof(Py##HandleKind),                             /* basicsize */ \
+    0,                                                  /* itemsize */  \
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,           /* flags */     \
+    HandleKind ## _Type_slots,                                          \
+  };                                                                    \
+                                                                        \
+  static int PyModule_Add ## HandleKind ## Type(PyObject* m)            \
   {                                                                     \
-    Py ## HandleKind *self;                                             \
-    self = PyObject_New(Py ## HandleKind, &Py ## HandleKind ## Type);   \
-    if (!self)                                                          \
-      return 0;                                                         \
-    new (&self->ob_value) rti1516e:: HandleKind();                      \
-    return (PyObject*)self;                                             \
+    return PyRTI1516EModule_AddType(m, #HandleKind, HandleKind ## Index,\
+                                    &HandleKind ## _Type_spec);         \
   }                                                                     \
                                                                         \
   static PyObject*                                                      \
-  PyObject_New ## HandleKind(const rti1516e:: HandleKind& handle)       \
+  PyObject_New ## HandleKind(const PyRTI1516EModuleState& state,        \
+                             const rti1516e:: HandleKind& handle)       \
   {                                                                     \
+    PyTypeObject* type;                                                 \
+    type = (PyTypeObject*)state.types[HandleKind ## Index];             \
+    if (!type)                                                          \
+      return 0;                                                         \
     Py ## HandleKind *self;                                             \
-    self = PyObject_New(Py ## HandleKind, &Py ## HandleKind ## Type);   \
+    self = (Py ## HandleKind*)PyType_GenericNew(type, NULL, NULL);      \
     if (!self)                                                          \
       return 0;                                                         \
     new (&self->ob_value) rti1516e::HandleKind(handle);                 \
@@ -946,21 +1289,26 @@ IMPLEMENT_EXCEPTION_CLASS((PyTypeObject*)PyExc_Exception, Exception);
   }                                                                     \
                                                                         \
   static bool                                                           \
-  PyObject_Get ## HandleKind(rti1516e:: HandleKind& handle, PyObject* o)\
+  PyObject_Get ## HandleKind(const PyRTI1516EModuleState& state,        \
+                             rti1516e:: HandleKind& handle, PyObject* o)\
   {                                                                     \
-    if (!PyObject_TypeCheck(o, &Py ## HandleKind ## Type))              \
+    PyObject* type = state.types[HandleKind ## Index];                  \
+    if (!type)                                                          \
+      return false;                                                     \
+    if (!PyObject_TypeCheck(o, (PyTypeObject*)type))                    \
       return false;                                                     \
     handle = ((Py ## HandleKind*)o)->ob_value;                          \
     return true;                                                        \
   }                                                                     \
                                                                         \
   static PyObject*                                                      \
-  PyObject_New ## HandleKind ## Set(const std::set<rti1516e::HandleKind>& handleSet) \
+  PyObject_New ## HandleKind ## Set(const PyRTI1516EModuleState& state, \
+                                    const std::set<rti1516e::HandleKind>& handleSet) \
   {                                                                     \
     PyObject* set = PySet_New(0);                                       \
     std::set<rti1516e::HandleKind>::const_iterator i;                   \
     for (i = handleSet.begin(); i != handleSet.end(); ++i) {            \
-      PyObject *key = PyObject_New ## HandleKind(*i);                   \
+      PyObject *key = PyObject_New ## HandleKind(state, *i);            \
       if (!key) {                                                       \
         Py_DecRef(set);                                                 \
         return 0;                                                       \
@@ -975,14 +1323,15 @@ IMPLEMENT_EXCEPTION_CLASS((PyTypeObject*)PyExc_Exception, Exception);
   }                                                                     \
                                                                         \
   static bool                                                           \
-  PyObject_Get ## HandleKind ## Set(std::set<rti1516e::HandleKind>& handleSet, PyObject* o) \
+  PyObject_Get ## HandleKind ## Set(const PyRTI1516EModuleState& state, \
+                                    std::set<rti1516e::HandleKind>& handleSet, PyObject* o) \
   {                                                                     \
     PyObject* iterator = PyObject_GetIter(o);                           \
     if (!iterator)                                                      \
       return false;                                                     \
     while (PyObject* item = PyIter_Next(iterator)) {                    \
       rti1516e:: HandleKind handle;                                     \
-      if (!PyObject_Get ## HandleKind(handle, item)) {                  \
+      if (!PyObject_Get ## HandleKind(state, handle, item)) {           \
         Py_DecRef(item);                                                \
         Py_DecRef(iterator);                                            \
         return false;                                                   \
@@ -992,17 +1341,6 @@ IMPLEMENT_EXCEPTION_CLASS((PyTypeObject*)PyExc_Exception, Exception);
     }                                                                   \
     Py_DecRef(iterator);                                                \
     return true;                                                        \
-  }                                                                     \
-                                                                        \
-  static int Py ## HandleKind ## Type_Ready()                           \
-  {                                                                     \
-    return PyTypeObject_Ready(&Py ## HandleKind ## Type);               \
-  }                                                                     \
-                                                                        \
-  static int PyModule_Add ## HandleKind ## Type(PyObject* m)            \
-  {                                                                     \
-    return PyModule_AddTypeObject(m, # HandleKind,                      \
-                                  &Py ## HandleKind ## Type);           \
   }                                                                     \
 
 IMPLEMENT_HANDLE_CLASS(FederateHandle)
@@ -1018,7 +1356,7 @@ IMPLEMENT_HANDLE_CLASS(MessageRetractionHandle)
 #undef IMPLEMENT_HANDLE_CLASS
 
 static PyObject*
-PyObject_NewFederateHandleSaveStatusPairVector(const rti1516e::FederationExecutionInformationVector& federationExecutionInformationVector)
+PyObject_NewFederationExecutionInformationVector(const rti1516e::FederationExecutionInformationVector& federationExecutionInformationVector)
 {
   PyObject* list = PyList_New(federationExecutionInformationVector.size());
   for (size_t i = 0; i < federationExecutionInformationVector.size(); ++i) {
@@ -1063,11 +1401,11 @@ PyObject_NewFederateHandleSaveStatusPairVector(const rti1516e::FederationExecuti
 }
 
 static PyObject*
-PyObject_NewFederateHandleSaveStatusPairVector(const rti1516e::FederateHandleSaveStatusPairVector& federateStatusVector)
+PyObject_NewFederateHandleSaveStatusPairVector(const PyRTI1516EModuleState& state, const rti1516e::FederateHandleSaveStatusPairVector& federateStatusVector)
 {
   PyObject* list = PyList_New(federateStatusVector.size());
   for (size_t i = 0; i < federateStatusVector.size(); ++i) {
-    PyObject *first = PyObject_NewFederateHandle(federateStatusVector[i].first);
+    PyObject *first = PyObject_NewFederateHandle(state, federateStatusVector[i].first);
     if (!first) {
       Py_DecRef(list);
       return 0;
@@ -1097,16 +1435,16 @@ PyObject_NewFederateHandleSaveStatusPairVector(const rti1516e::FederateHandleSav
 }
 
 static PyObject*
-PyObject_NewFederateRestoreStatusVector(const rti1516e::FederateRestoreStatusVector& federateStatusVector)
+PyObject_NewFederateRestoreStatusVector(const PyRTI1516EModuleState& state, const rti1516e::FederateRestoreStatusVector& federateStatusVector)
 {
   PyObject* list = PyList_New(federateStatusVector.size());
   for (size_t i = 0; i < federateStatusVector.size(); ++i) {
-    PyObject *preRestoreHandle = PyObject_NewFederateHandle(federateStatusVector[i].preRestoreHandle);
+    PyObject *preRestoreHandle = PyObject_NewFederateHandle(state, federateStatusVector[i].preRestoreHandle);
     if (!preRestoreHandle) {
       Py_DecRef(list);
       return 0;
     }
-    PyObject *postRestoreHandle = PyObject_NewFederateHandle(federateStatusVector[i].preRestoreHandle);
+    PyObject *postRestoreHandle = PyObject_NewFederateHandle(state, federateStatusVector[i].preRestoreHandle);
     if (!postRestoreHandle) {
       Py_DecRef(preRestoreHandle);
       Py_DecRef(list);
@@ -1137,7 +1475,7 @@ PyObject_NewFederateRestoreStatusVector(const rti1516e::FederateRestoreStatusVec
 }
 
 static PyObject*
-PyObject_NewSupplementalReflectInfo(const rti1516e::SupplementalReflectInfo& supplementalReflectInfo)
+PyObject_NewSupplementalReflectInfo(const PyRTI1516EModuleState& state, const rti1516e::SupplementalReflectInfo& supplementalReflectInfo)
 {
   PyObject *hasProducingFederate = PyBool_FromLong(supplementalReflectInfo.hasProducingFederate);
   if (!hasProducingFederate)
@@ -1147,13 +1485,13 @@ PyObject_NewSupplementalReflectInfo(const rti1516e::SupplementalReflectInfo& sup
     Py_DecRef(hasProducingFederate);
     return 0;
   }
-  PyObject *producingFederate = PyObject_NewFederateHandle(supplementalReflectInfo.producingFederate);
+  PyObject *producingFederate = PyObject_NewFederateHandle(state, supplementalReflectInfo.producingFederate);
   if (!producingFederate) {
     Py_DecRef(hasSentRegions);
     Py_DecRef(hasProducingFederate);
     return 0;
   }
-  PyObject *sentRegions = PyObject_NewRegionHandleSet(supplementalReflectInfo.sentRegions);
+  PyObject *sentRegions = PyObject_NewRegionHandleSet(state, supplementalReflectInfo.sentRegions);
   if (!producingFederate) {
     Py_DecRef(hasSentRegions);
     Py_DecRef(hasProducingFederate);
@@ -1198,7 +1536,7 @@ PyObject_NewSupplementalReflectInfo(const rti1516e::SupplementalReflectInfo& sup
 }
 
 static PyObject*
-PyObject_NewSupplementalReceiveInfo(const rti1516e::SupplementalReceiveInfo& supplementalReceiveInfo)
+PyObject_NewSupplementalReceiveInfo(const PyRTI1516EModuleState& state, const rti1516e::SupplementalReceiveInfo& supplementalReceiveInfo)
 {
   PyObject *hasProducingFederate = PyBool_FromLong(supplementalReceiveInfo.hasProducingFederate);
   if (!hasProducingFederate)
@@ -1208,13 +1546,13 @@ PyObject_NewSupplementalReceiveInfo(const rti1516e::SupplementalReceiveInfo& sup
     Py_DecRef(hasProducingFederate);
     return 0;
   }
-  PyObject *producingFederate = PyObject_NewFederateHandle(supplementalReceiveInfo.producingFederate);
+  PyObject *producingFederate = PyObject_NewFederateHandle(state, supplementalReceiveInfo.producingFederate);
   if (!producingFederate) {
     Py_DecRef(hasSentRegions);
     Py_DecRef(hasProducingFederate);
     return 0;
   }
-  PyObject *sentRegions = PyObject_NewRegionHandleSet(supplementalReceiveInfo.sentRegions);
+  PyObject *sentRegions = PyObject_NewRegionHandleSet(state, supplementalReceiveInfo.sentRegions);
   if (!producingFederate) {
     Py_DecRef(hasSentRegions);
     Py_DecRef(hasProducingFederate);
@@ -1259,12 +1597,12 @@ PyObject_NewSupplementalReceiveInfo(const rti1516e::SupplementalReceiveInfo& sup
 }
 
 static PyObject*
-PyObject_NewSupplementalRemoveInfo(const rti1516e::SupplementalRemoveInfo& supplementalRemoveInfo)
+PyObject_NewSupplementalRemoveInfo(const PyRTI1516EModuleState& state, const rti1516e::SupplementalRemoveInfo& supplementalRemoveInfo)
 {
   PyObject *hasProducingFederate = PyBool_FromLong(supplementalRemoveInfo.hasProducingFederate);
   if (!hasProducingFederate)
     return 0;
-  PyObject *producingFederate = PyObject_NewFederateHandle(supplementalRemoveInfo.producingFederate);
+  PyObject *producingFederate = PyObject_NewFederateHandle(state, supplementalRemoveInfo.producingFederate);
   if (!producingFederate) {
     Py_DecRef(hasProducingFederate);
     return 0;
@@ -1290,12 +1628,12 @@ PyObject_NewSupplementalRemoveInfo(const rti1516e::SupplementalRemoveInfo& suppl
 }
 
 static PyObject*
-PyObject_NewAttributeHandleValueMap(const rti1516e::AttributeHandleValueMap& attributeHandleValueMap)
+PyObject_NewAttributeHandleValueMap(const PyRTI1516EModuleState& state, const rti1516e::AttributeHandleValueMap& attributeHandleValueMap)
 {
   PyObject* dict = PyDict_New();
   rti1516e::AttributeHandleValueMap::const_iterator i;
   for (i = attributeHandleValueMap.begin(); i != attributeHandleValueMap.end(); ++i) {
-    PyObject *key = PyObject_NewAttributeHandle(i->first);
+    PyObject *key = PyObject_NewAttributeHandle(state, i->first);
     if (!key) {
       Py_DecRef(dict);
       return 0;
@@ -1317,7 +1655,7 @@ PyObject_NewAttributeHandleValueMap(const rti1516e::AttributeHandleValueMap& att
 }
 
 static bool
-PyObject_GetAttributeHandleValueMap(rti1516e::AttributeHandleValueMap& attributeHandleValueMap, PyObject* o)
+PyObject_GetAttributeHandleValueMap(const PyRTI1516EModuleState& state, rti1516e::AttributeHandleValueMap& attributeHandleValueMap, PyObject* o)
 {
   PyObject* items = PyMapping_Items(o);
   if (!items)
@@ -1336,7 +1674,7 @@ PyObject_GetAttributeHandleValueMap(rti1516e::AttributeHandleValueMap& attribute
       return false;
     }
     rti1516e::AttributeHandle attributeHandle;
-    if (!PyObject_GetAttributeHandle(attributeHandle, key)) {
+    if (!PyObject_GetAttributeHandle(state, attributeHandle, key)) {
       Py_DecRef(key);
       Py_DecRef(item);
       Py_DecRef(iterator);
@@ -1366,12 +1704,12 @@ PyObject_GetAttributeHandleValueMap(rti1516e::AttributeHandleValueMap& attribute
 }
 
 static PyObject*
-PyObject_NewParameterHandleValueMap(const rti1516e::ParameterHandleValueMap& parameterHandleValueMap)
+PyObject_NewParameterHandleValueMap(const PyRTI1516EModuleState& state, const rti1516e::ParameterHandleValueMap& parameterHandleValueMap)
 {
   PyObject* dict = PyDict_New();
   rti1516e::ParameterHandleValueMap::const_iterator i;
   for (i = parameterHandleValueMap.begin(); i != parameterHandleValueMap.end(); ++i) {
-    PyObject *key = PyObject_NewParameterHandle(i->first);
+    PyObject *key = PyObject_NewParameterHandle(state, i->first);
     if (!key) {
       Py_DecRef(dict);
       return 0;
@@ -1393,7 +1731,7 @@ PyObject_NewParameterHandleValueMap(const rti1516e::ParameterHandleValueMap& par
 }
 
 static bool
-PyObject_GetParameterHandleValueMap(rti1516e::ParameterHandleValueMap& parameterHandleValueMap, PyObject* o)
+PyObject_GetParameterHandleValueMap(const PyRTI1516EModuleState& state, rti1516e::ParameterHandleValueMap& parameterHandleValueMap, PyObject* o)
 {
   PyObject* items = PyMapping_Items(o);
   if (!items)
@@ -1412,7 +1750,7 @@ PyObject_GetParameterHandleValueMap(rti1516e::ParameterHandleValueMap& parameter
       return false;
     }
     rti1516e::ParameterHandle parameterHandle;
-    if (!PyObject_GetParameterHandle(parameterHandle, key)) {
+    if (!PyObject_GetParameterHandle(state, parameterHandle, key)) {
       Py_DecRef(key);
       Py_DecRef(item);
       Py_DecRef(iterator);
@@ -1442,7 +1780,8 @@ PyObject_GetParameterHandleValueMap(rti1516e::ParameterHandleValueMap& parameter
 }
 
 static bool
-PyObject_GetAttributeHandleSetRegionHandleSetPairVector(rti1516e::AttributeHandleSetRegionHandleSetPairVector& attributeHandleSetRegionHandleSetPairVector, PyObject* o)
+PyObject_GetAttributeHandleSetRegionHandleSetPairVector(const PyRTI1516EModuleState& state,
+                                                        rti1516e::AttributeHandleSetRegionHandleSetPairVector& attributeHandleSetRegionHandleSetPairVector, PyObject* o)
 {
   PyObject* iterator = PyObject_GetIter(o);
   if (!iterator)
@@ -1455,7 +1794,7 @@ PyObject_GetAttributeHandleSetRegionHandleSetPairVector(rti1516e::AttributeHandl
       return false;
     }
     rti1516e::AttributeHandleSet attributeHandleSet;
-    if (!PyObject_GetAttributeHandleSet(attributeHandleSet, attribute)) {
+    if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, attribute)) {
       Py_DecRef(attribute);
       Py_DecRef(item);
       Py_DecRef(iterator);
@@ -1470,7 +1809,7 @@ PyObject_GetAttributeHandleSetRegionHandleSetPairVector(rti1516e::AttributeHandl
       return false;
     }
     rti1516e::RegionHandleSet regionHandleSet;
-    if (!PyObject_GetRegionHandleSet(regionHandleSet, region)) {
+    if (!PyObject_GetRegionHandleSet(state, regionHandleSet, region)) {
       Py_DecRef(region);
       Py_DecRef(iterator);
       return false;
@@ -1489,50 +1828,29 @@ PyObject_GetAttributeHandleSetRegionHandleSetPairVector(rti1516e::AttributeHandl
 
 #define CATCH_C_EXCEPTION(ExceptionKind)                                      \
   catch(const rti1516e:: ExceptionKind& e) {                                  \
-    PyErr_SetException(e);                                                    \
+    PyErr_SetException(PyRTIambassador_GetModuleState(self), e);              \
     return 0;                                                                 \
   }
 
-static std::wstring PyErr_GetExceptionString()
-{
-  PyObject* ptype = 0;
-  PyObject* pvalue = 0;
-  PyObject* ptraceback = 0;
-  PyErr_Fetch(&ptype, &pvalue, &ptraceback);
-  PyErr_NormalizeException(&ptype, &pvalue, &ptraceback);
-  if (ptype)
-    Py_DecRef(ptype);
-  std::wstring s;
-  if (pvalue) {
-    s += PyObject_GetString(pvalue);
-    Py_DecRef(pvalue);
-  }
-  if (ptraceback) {
-    s += PyObject_GetString(ptraceback);
-    Py_DecRef(ptraceback);
-  }
-  PyErr_Clear();
-  return s;
-}
-
-#define CATCH_PYTHON_EXCEPTION(exception)                                            \
-  do {                                                                               \
-    PyObject *exception = PyErr_Occurred();                                          \
-    if (PyErr_GivenExceptionMatches(exception, PyExc_KeyboardInterrupt)) {           \
-      PyErr_Clear();                                                                 \
-      PyErr_SetInterrupt();                                                          \
-    } else {                                                                         \
-      PyErr_Print();                                                                 \
-      throw rti1516e::FederateInternalError(PyErr_GetExceptionString());             \
-    }                                                                                \
+#define CATCH_PYTHON_EXCEPTION(exception)                                     \
+  do {                                                                        \
+    PyObject *exception = PyErr_Occurred();                                   \
+    if (PyErr_GivenExceptionMatches(exception, PyExc_KeyboardInterrupt)) {    \
+      PyErr_Clear();                                                          \
+      PyErr_SetInterrupt();                                                   \
+    } else {                                                                  \
+      PyErr_Print();                                                          \
+      throw rti1516e::FederateInternalError(PyErr_GetExceptionString());      \
+    }                                                                         \
   } while(0)
 
 ///////////////////////////////////////////////////////////////////////////////
 
 struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
-  PyRTI1516EFederateAmbassador(PyObject* federateAmbassador = 0)
+  PyRTI1516EFederateAmbassador(const PyRTI1516EModuleState& state)
     RTI_THROW ((rti1516e::FederateInternalError)) :
-    ob_federateAmbassador(federateAmbassador),
+    _state(state),
+    ob_federateAmbassador(NULL),
     _threadState(NULL)
   {
     if (ob_federateAmbassador)
@@ -1542,8 +1860,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
   virtual ~PyRTI1516EFederateAmbassador()
     RTI_NOEXCEPT
   {
-    if (ob_federateAmbassador)
-      Py_DecRef(ob_federateAmbassador);
+    Py_CLEAR(ob_federateAmbassador);
     if (_threadState != NULL)
       PyErr_SetString(PyExc_TypeError, "Imbalance on python thread state.");
   }
@@ -1620,7 +1937,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewFederateHandleSaveStatusPairVector(federationExecutionInformationVector);
+    PyObject* arg0 = PyObject_NewFederationExecutionInformationVector(federationExecutionInformationVector);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"reportFederationExecutions", (char*)"N", arg0);
     if (result) {
       Py_DecRef(result);
@@ -1697,7 +2014,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     AquireGILScope aquireGILScope(*this);
 
     PyObject* arg0 = PyObject_NewString(label);
-    PyObject* arg1 = PyObject_NewFederateHandleSet(failedToSyncSet);
+    PyObject* arg1 = PyObject_NewFederateHandleSet(_state, failedToSyncSet);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"federationSynchronized", (char*)"NN", arg0, arg1);
     if (result) {
       Py_DecRef(result);
@@ -1787,7 +2104,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewFederateHandleSaveStatusPairVector(theFederateStatusVector);
+    PyObject* arg0 = PyObject_NewFederateHandleSaveStatusPairVector(_state, theFederateStatusVector);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"federationSaveStatusResponse", (char*)"N", arg0);
     if (result) {
       Py_DecRef(result);
@@ -1860,7 +2177,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     PyObject* arg0 = PyObject_NewString(label);
     PyObject* arg1 = PyObject_NewString(federateName);
-    PyObject* arg2 = PyObject_NewFederateHandle(handle);
+    PyObject* arg2 = PyObject_NewFederateHandle(_state, handle);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"initiateFederateRestore", (char*)"NNN", arg0, arg1, arg2);
     if (result) {
       Py_DecRef(result);
@@ -1913,7 +2230,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewFederateRestoreStatusVector(theFederateStatusVector);
+    PyObject* arg0 = PyObject_NewFederateRestoreStatusVector(_state, theFederateStatusVector);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"federationRestoreStatusResponse", (char*)"N", arg0);
     if (result) {
       Py_DecRef(result);
@@ -1931,7 +2248,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectClassHandle(theClass);
+    PyObject* arg0 = PyObject_NewObjectClassHandle(_state, theClass);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"startRegistrationForObjectClass", (char*)"N", arg0);
     if (result) {
       Py_DecRef(result);
@@ -1949,7 +2266,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectClassHandle(theClass);
+    PyObject* arg0 = PyObject_NewObjectClassHandle(_state, theClass);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"stopRegistrationForObjectClass", (char*)"N", arg0);
     if (result) {
       Py_DecRef(result);
@@ -1967,7 +2284,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewInteractionClassHandle(theHandle);
+    PyObject* arg0 = PyObject_NewInteractionClassHandle(_state, theHandle);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"turnInteractionsOn", (char*)"N", arg0);
     if (result) {
       Py_DecRef(result);
@@ -1985,7 +2302,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewInteractionClassHandle(theHandle);
+    PyObject* arg0 = PyObject_NewInteractionClassHandle(_state, theHandle);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"turnInteractionsOff", (char*)"N", arg0);
     if (result) {
       Py_DecRef(result);
@@ -2076,8 +2393,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewObjectClassHandle(theObjectClass);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewObjectClassHandle(_state, theObjectClass);
     PyObject* arg2 = PyObject_NewString(theObjectInstanceName);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"discoverObjectInstance", (char*)"NNN", arg0, arg1, arg2);
     if (result) {
@@ -2097,10 +2414,10 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewObjectClassHandle(theObjectClass);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewObjectClassHandle(_state, theObjectClass);
     PyObject* arg2 = PyObject_NewString(theObjectInstanceName);
-    PyObject* arg3 = PyObject_NewFederateHandle(producingFederate);
+    PyObject* arg3 = PyObject_NewFederateHandle(_state, producingFederate);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"discoverObjectInstance", (char*)"NNNN", arg0, arg1, arg2, arg3);
     if (result) {
       Py_DecRef(result);
@@ -2120,15 +2437,15 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleValueMap(theAttributeValues);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleValueMap(_state, theAttributeValues);
     PyObject* arg2 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* arg3 = PyObject_NewOrderType(sentOrder);
     PyObject* arg4 = PyObject_NewTransportationType(theType);
     PyObject* arg5 = Py_None;
     PyObject* arg6 = Py_None;
     PyObject* arg7 = Py_None;
-    PyObject* arg8 = PyObject_NewSupplementalReflectInfo(theReflectInfo);
+    PyObject* arg8 = PyObject_NewSupplementalReflectInfo(_state, theReflectInfo);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"reflectAttributeValues",
                                            (char*)"NNNNNOOON", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     if (result) {
@@ -2149,15 +2466,15 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleValueMap(theAttributeValues);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleValueMap(_state, theAttributeValues);
     PyObject* arg2 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* arg3 = PyObject_NewOrderType(sentOrder);
     PyObject* arg4 = PyObject_NewTransportationType(theType);
     PyObject* arg5 = PyObject_NewLogicalTime(theTime);
     PyObject* arg6 = PyObject_NewOrderType(receivedOrder);
     PyObject* arg7 = Py_None;
-    PyObject* arg8 = PyObject_NewSupplementalReflectInfo(theReflectInfo);
+    PyObject* arg8 = PyObject_NewSupplementalReflectInfo(_state, theReflectInfo);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"reflectAttributeValues",
                                            (char*)"NNNNNNNON", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     if (result) {
@@ -2180,15 +2497,15 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleValueMap(theAttributeValues);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleValueMap(_state, theAttributeValues);
     PyObject* arg2 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* arg3 = PyObject_NewOrderType(sentOrder);
     PyObject* arg4 = PyObject_NewTransportationType(theType);
     PyObject* arg5 = PyObject_NewLogicalTime(theTime);
     PyObject* arg6 = PyObject_NewOrderType(receivedOrder);
-    PyObject* arg7 = PyObject_NewMessageRetractionHandle(theHandle);
-    PyObject* arg8 = PyObject_NewSupplementalReflectInfo(theReflectInfo);
+    PyObject* arg7 = PyObject_NewMessageRetractionHandle(_state, theHandle);
+    PyObject* arg8 = PyObject_NewSupplementalReflectInfo(_state, theReflectInfo);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"reflectAttributeValues",
                                            (char*)"NNNNNNNNN", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     if (result) {
@@ -2209,15 +2526,15 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewInteractionClassHandle(theInteraction);
-    PyObject* arg1 = PyObject_NewParameterHandleValueMap(theParameterValues);
+    PyObject* arg0 = PyObject_NewInteractionClassHandle(_state, theInteraction);
+    PyObject* arg1 = PyObject_NewParameterHandleValueMap(_state, theParameterValues);
     PyObject* arg2 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* arg3 = PyObject_NewOrderType(sentOrder);
     PyObject* arg4 = PyObject_NewTransportationType(theType);
     PyObject* arg5 = Py_None;
     PyObject* arg6 = Py_None;
     PyObject* arg7 = Py_None;
-    PyObject* arg8 = PyObject_NewSupplementalReceiveInfo(theReceiveInfo);
+    PyObject* arg8 = PyObject_NewSupplementalReceiveInfo(_state, theReceiveInfo);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"receiveInteraction",
                                            (char*)"NNNNNOOON", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     if (result) {
@@ -2239,15 +2556,15 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewInteractionClassHandle(theInteraction);
-    PyObject* arg1 = PyObject_NewParameterHandleValueMap(theParameterValues);
+    PyObject* arg0 = PyObject_NewInteractionClassHandle(_state, theInteraction);
+    PyObject* arg1 = PyObject_NewParameterHandleValueMap(_state, theParameterValues);
     PyObject* arg2 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* arg3 = PyObject_NewOrderType(sentOrder);
     PyObject* arg4 = PyObject_NewTransportationType(theType);
     PyObject* arg5 = PyObject_NewLogicalTime(theTime);
     PyObject* arg6 = PyObject_NewOrderType(receivedOrder);
     PyObject* arg7 = Py_None;
-    PyObject* arg8 = PyObject_NewSupplementalReceiveInfo(theReceiveInfo);
+    PyObject* arg8 = PyObject_NewSupplementalReceiveInfo(_state, theReceiveInfo);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"receiveInteraction",
                                            (char*)"NNNNNNNON", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     if (result) {
@@ -2272,15 +2589,15 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewInteractionClassHandle(theInteraction);
-    PyObject* arg1 = PyObject_NewParameterHandleValueMap(theParameterValues);
+    PyObject* arg0 = PyObject_NewInteractionClassHandle(_state, theInteraction);
+    PyObject* arg1 = PyObject_NewParameterHandleValueMap(_state, theParameterValues);
     PyObject* arg2 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* arg3 = PyObject_NewOrderType(sentOrder);
     PyObject* arg4 = PyObject_NewTransportationType(theType);
     PyObject* arg5 = PyObject_NewLogicalTime(theTime);
     PyObject* arg6 = PyObject_NewOrderType(receivedOrder);
-    PyObject* arg7 = PyObject_NewMessageRetractionHandle(theHandle);
-    PyObject* arg8 = PyObject_NewSupplementalReceiveInfo(theReceiveInfo);
+    PyObject* arg7 = PyObject_NewMessageRetractionHandle(_state, theHandle);
+    PyObject* arg8 = PyObject_NewSupplementalReceiveInfo(_state, theReceiveInfo);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"receiveInteraction",
                                            (char*)"NNNNNNNNN", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     if (result) {
@@ -2304,13 +2621,13 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
     PyObject* arg1 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* arg2 = PyObject_NewOrderType(sentOrder);
     PyObject* arg3 = Py_None;
     PyObject* arg4 = Py_None;
     PyObject* arg5 = Py_None;
-    PyObject* arg6 = PyObject_NewSupplementalRemoveInfo(theRemoveInfo);
+    PyObject* arg6 = PyObject_NewSupplementalRemoveInfo(_state, theRemoveInfo);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"removeObjectInstance",
                                            (char*)"NNNOOON", arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     if (result) {
@@ -2335,13 +2652,13 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
     PyObject* arg1 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* arg2 = PyObject_NewOrderType(sentOrder);
     PyObject* arg3 = PyObject_NewLogicalTime(theTime);
     PyObject* arg4 = PyObject_NewOrderType(receivedOrder);
     PyObject* arg5 = Py_None;
-    PyObject* arg6 = PyObject_NewSupplementalRemoveInfo(theRemoveInfo);
+    PyObject* arg6 = PyObject_NewSupplementalRemoveInfo(_state, theRemoveInfo);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"removeObjectInstance",
                                            (char*)"NNNNNON", arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     if (result) {
@@ -2367,13 +2684,13 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
     PyObject* arg1 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* arg2 = PyObject_NewOrderType(sentOrder);
     PyObject* arg3 = PyObject_NewLogicalTime(theTime);
     PyObject* arg4 = PyObject_NewOrderType(receivedOrder);
-    PyObject* arg5 = PyObject_NewMessageRetractionHandle(theHandle);
-    PyObject* arg6 = PyObject_NewSupplementalRemoveInfo(theRemoveInfo);
+    PyObject* arg5 = PyObject_NewMessageRetractionHandle(_state, theHandle);
+    PyObject* arg6 = PyObject_NewSupplementalRemoveInfo(_state, theRemoveInfo);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"removeObjectInstance",
                                            (char*)"NNNNNNN", arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     if (result) {
@@ -2395,8 +2712,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, theAttributes);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"attributesInScope", (char*)"NN", arg0, arg1);
     if (result) {
       Py_DecRef(result);
@@ -2417,8 +2734,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, theAttributes);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"attributesOutOfScope", (char*)"NN", arg0, arg1);
     if (result) {
       Py_DecRef(result);
@@ -2438,8 +2755,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, theAttributes);
     PyObject* arg2 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"provideAttributeValueUpdate", (char*)"NNN", arg0, arg1, arg2);
     if (result) {
@@ -2458,8 +2775,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, theAttributes);
     PyObject* arg2 = Py_None;
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"turnUpdatesOnForObjectInstance", (char*)"NNO", arg0, arg1, arg2);
     if (result) {
@@ -2478,8 +2795,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, theAttributes);
     PyObject* arg2 = PyObject_NewString(updateRateDesignator);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"turnUpdatesOnForObjectInstance", (char*)"NNN", arg0, arg1, arg2);
     if (result) {
@@ -2498,8 +2815,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, theAttributes);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"turnUpdatesOffForObjectInstance", (char*)"NN", arg0, arg1);
     if (result) {
       Py_DecRef(result);
@@ -2519,8 +2836,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, theAttributes);
     PyObject* arg2 = PyObject_NewTransportationType(theTransportation);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"confirmAttributeTransportationTypeChange", (char*)"NNN", arg0, arg1, arg2);
     if (result) {
@@ -2541,8 +2858,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandle(theAttribute);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandle(_state, theAttribute);
     PyObject* arg2 = PyObject_NewTransportationType(theTransportation);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"reportAttributeTransportationType", (char*)"NNN", arg0, arg1, arg2);
     if (result) {
@@ -2562,7 +2879,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewInteractionClassHandle(theInteraction);
+    PyObject* arg0 = PyObject_NewInteractionClassHandle(_state, theInteraction);
     PyObject* arg1 = PyObject_NewTransportationType(theTransportation);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"confirmInteractionTransportationTypeChange", (char*)"NN", arg0, arg1);
     if (result) {
@@ -2583,8 +2900,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewFederateHandle(federateHandle);
-    PyObject* arg1 = PyObject_NewInteractionClassHandle(theInteraction);
+    PyObject* arg0 = PyObject_NewFederateHandle(_state, federateHandle);
+    PyObject* arg1 = PyObject_NewInteractionClassHandle(_state, theInteraction);
     PyObject* arg2 = PyObject_NewTransportationType(theTransportation);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"reportInteractionTransportationType", (char*)"NNN", arg0, arg1, arg2);
     if (result) {
@@ -2604,8 +2921,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(offeredAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, offeredAttributes);
     PyObject* arg2 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"requestAttributeOwnershipAssumption", (char*)"NNN", arg0, arg1, arg2);
     if (result) {
@@ -2624,8 +2941,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(releasedAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, releasedAttributes);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"requestDivestitureConfirmation", (char*)"NN", arg0, arg1);
     if (result) {
       Py_DecRef(result);
@@ -2644,8 +2961,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(securedAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, securedAttributes);
     PyObject* arg2 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"attributeOwnershipAcquisitionNotification", (char*)"NNN", arg0, arg1, arg2);
     if (result) {
@@ -2664,8 +2981,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, theAttributes);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"attributeOwnershipUnavailable", (char*)"NN", arg0, arg1);
     if (result) {
       Py_DecRef(result);
@@ -2684,8 +3001,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(candidateAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, candidateAttributes);
     PyObject* arg2 = PyObject_NewVariableLengthData(theUserSuppliedTag);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"requestAttributeOwnershipRelease", (char*)"NNN", arg0, arg1, arg2);
     if (result) {
@@ -2705,8 +3022,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandleSet(theAttributes);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandleSet(_state, theAttributes);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"confirmAttributeOwnershipAcquisitionCancellation", (char*)"NN", arg0, arg1);
     if (result) {
       Py_DecRef(result);
@@ -2725,9 +3042,9 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandle(theAttribute);
-    PyObject* arg2 = PyObject_NewFederateHandle(theOwner);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandle(_state, theAttribute);
+    PyObject* arg2 = PyObject_NewFederateHandle(_state, theOwner);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"informAttributeOwnership", (char*)"NNN", arg0, arg1, arg2);
     if (result) {
       Py_DecRef(result);
@@ -2745,8 +3062,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandle(theAttribute);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandle(_state, theAttribute);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"attributeIsNotOwned", (char*)"NN", arg0, arg1);
     if (result) {
       Py_DecRef(result);
@@ -2764,8 +3081,8 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewObjectInstanceHandle(theObject);
-    PyObject* arg1 = PyObject_NewAttributeHandle(theAttribute);
+    PyObject* arg0 = PyObject_NewObjectInstanceHandle(_state, theObject);
+    PyObject* arg1 = PyObject_NewAttributeHandle(_state, theAttribute);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"attributeIsOwnedByRTI", (char*)"NN", arg0, arg1);
     if (result) {
       Py_DecRef(result);
@@ -2838,7 +3155,7 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
 
     AquireGILScope aquireGILScope(*this);
 
-    PyObject* arg0 = PyObject_NewMessageRetractionHandle(theHandle);
+    PyObject* arg0 = PyObject_NewMessageRetractionHandle(_state, theHandle);
     PyObject* result = PyObject_CallMethod(ob_federateAmbassador, (char*)"requestRetraction", (char*)"N", arg0);
     if (result) {
       Py_DecRef(result);
@@ -2848,20 +3165,28 @@ struct PyRTI1516EFederateAmbassador : public rti1516e::FederateAmbassador {
     }
   }
 
+  const PyRTI1516EModuleState& _state;
+  RTI_UNIQUE_PTR<rti1516e::RTIambassador> ob_value;
+  std::wstring _logicaltimeFactoryName;
   PyObject* ob_federateAmbassador;
   PyThreadState* _threadState;
 };
 
 struct PyRTIambassadorObject {
   PyObject_HEAD
-  RTI_UNIQUE_PTR<rti1516e::RTIambassador> ob_value;
   PyRTI1516EFederateAmbassador _federateAmbassador;
-  std::wstring _logicaltimeFactoryName;
 };
+
+static const PyRTI1516EModuleState& PyRTIambassador_GetModuleState(PyRTIambassadorObject *self)
+{
+  return self->_federateAmbassador._state;
+}
 
 static PyObject *
 PyRTIambassador_connect(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "connect", 2, 3, &arg1, &arg2, &arg3))
     return 0;
@@ -2874,7 +3199,7 @@ PyRTIambassador_connect(PyRTIambassadorObject *self, PyObject *args)
   if (theCallbackModel == rti1516e::HLA_IMMEDIATE) {
     // For now block this here. This only gets sensible once we have the GIL completely removed
     // and OpenRTI below supports this callback model.
-    PyErr_SetUnsupportedCallbackModel("The HLA_IMMEDIATE callback model is not supported!");
+    PyErr_SetUnsupportedCallbackModel(state, "The HLA_IMMEDIATE callback model is not supported!");
     return 0;
   }
 
@@ -2887,7 +3212,7 @@ PyRTIambassador_connect(PyRTIambassadorObject *self, PyObject *args)
   }
 
   try {
-    self->ob_value->connect(self->_federateAmbassador, theCallbackModel, localSettingsDesignator);
+    self->_federateAmbassador.ob_value->connect(self->_federateAmbassador, theCallbackModel, localSettingsDesignator);
     self->_federateAmbassador.setObject(arg1);
 
     Py_IncRef(Py_None);
@@ -2908,7 +3233,7 @@ PyRTIambassador_disconnect(PyRTIambassadorObject *self, PyObject *args)
     return 0;
 
   try {
-    self->ob_value->disconnect();
+    self->_federateAmbassador.ob_value->disconnect();
     self->_federateAmbassador.setObject(0);
 
     Py_IncRef(Py_None);
@@ -2922,6 +3247,8 @@ PyRTIambassador_disconnect(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_createFederationExecution(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "createFederationExecution", 2, 3, &arg1, &arg2, &arg3))
     return 0;
@@ -2950,14 +3277,14 @@ PyRTIambassador_createFederationExecution(PyRTIambassadorObject *self, PyObject 
 
     if (logicalTimeImplementationName != L"HLAfloat64Time" &&
         logicalTimeImplementationName != L"HLAinteger64Time") {
-      PyErr_SetCouldNotCreateLogicalTimeFactory("Unsupported logicalTimeImplementationName!");
+      PyErr_SetCouldNotCreateLogicalTimeFactory(state, "Unsupported logicalTimeImplementationName!");
       return 0;
     }
   }
 
   try {
 
-    self->ob_value->createFederationExecution(federationExecutionName, fomModuleList, logicalTimeImplementationName);
+    self->_federateAmbassador.ob_value->createFederationExecution(federationExecutionName, fomModuleList, logicalTimeImplementationName);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -2975,6 +3302,8 @@ PyRTIambassador_createFederationExecution(PyRTIambassadorObject *self, PyObject 
 static PyObject *
 PyRTIambassador_createFederationExecutionWithMIM(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0, *arg4 = 0;
   if (!PyArg_UnpackTuple(args, "createFederationExecutionWithMIM", 3, 4, &arg1, &arg2, &arg3, &arg3))
     return 0;
@@ -3007,14 +3336,14 @@ PyRTIambassador_createFederationExecutionWithMIM(PyRTIambassadorObject *self, Py
 
     if (logicalTimeImplementationName != L"HLAfloat64Time" &&
         logicalTimeImplementationName != L"HLAinteger64Time") {
-      PyErr_SetCouldNotCreateLogicalTimeFactory("Unsupported logicalTimeImplementationName!");
+      PyErr_SetCouldNotCreateLogicalTimeFactory(state, "Unsupported logicalTimeImplementationName!");
       return 0;
     }
   }
 
   try {
 
-    self->ob_value->createFederationExecutionWithMIM(federationExecutionName, fomModuleList, mimModule, logicalTimeImplementationName);
+    self->_federateAmbassador.ob_value->createFederationExecutionWithMIM(federationExecutionName, fomModuleList, mimModule, logicalTimeImplementationName);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3046,7 +3375,7 @@ PyRTIambassador_destroyFederationExecution(PyRTIambassadorObject *self, PyObject
 
   try {
 
-    self->ob_value->destroyFederationExecution(federationExecutionName);
+    self->_federateAmbassador.ob_value->destroyFederationExecution(federationExecutionName);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3063,7 +3392,7 @@ PyRTIambassador_listFederationExecutions(PyRTIambassadorObject *self, PyObject *
   if (!PyArg_UnpackTuple(args, "listFederationExecutions", 0, 0))
     return 0;
   try {
-    self->ob_value->listFederationExecutions();
+    self->_federateAmbassador.ob_value->listFederationExecutions();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3076,6 +3405,8 @@ PyRTIambassador_listFederationExecutions(PyRTIambassadorObject *self, PyObject *
 static PyObject *
 PyRTIambassador_joinFederationExecution(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0, *arg4 = 0;
   if (!PyArg_UnpackTuple(args, "joinFederationExecution", 2, 4, &arg1, &arg2, &arg3, &arg4))
     return 0;
@@ -3151,19 +3482,19 @@ PyRTIambassador_joinFederationExecution(PyRTIambassadorObject *self, PyObject *a
 
     rti1516e::FederateHandle federateHandle;
     if (useFederateName)
-      federateHandle = self->ob_value->joinFederationExecution(federateName, federateType, federationExecutionName, additionalFomModules);
+      federateHandle = self->_federateAmbassador.ob_value->joinFederationExecution(federateName, federateType, federationExecutionName, additionalFomModules);
     else
-      federateHandle = self->ob_value->joinFederationExecution(federateType, federationExecutionName, additionalFomModules);
+      federateHandle = self->_federateAmbassador.ob_value->joinFederationExecution(federateType, federationExecutionName, additionalFomModules);
 
-    std::wstring logicaltimeFactoryName = self->ob_value->getTimeFactory()->getName();
+    std::wstring logicaltimeFactoryName = self->_federateAmbassador.ob_value->getTimeFactory()->getName();
     if (logicaltimeFactoryName != L"HLAfloat64Time" && logicaltimeFactoryName != L"HLAinteger64Time") {
-      self->ob_value->resignFederationExecution(rti1516e::CANCEL_THEN_DELETE_THEN_DIVEST);
-      self->_logicaltimeFactoryName.clear();
+      self->_federateAmbassador.ob_value->resignFederationExecution(rti1516e::CANCEL_THEN_DELETE_THEN_DIVEST);
+      self->_federateAmbassador._logicaltimeFactoryName.clear();
       throw rti1516e::CouldNotCreateLogicalTimeFactory(logicaltimeFactoryName);
     }
-    self->_logicaltimeFactoryName = logicaltimeFactoryName;
+    self->_federateAmbassador._logicaltimeFactoryName = logicaltimeFactoryName;
 
-    return PyObject_NewFederateHandle(federateHandle);
+    return PyObject_NewFederateHandle(state, federateHandle);
   }
   CATCH_C_EXCEPTION(CouldNotCreateLogicalTimeFactory)
   CATCH_C_EXCEPTION(FederationExecutionDoesNotExist)
@@ -3194,8 +3525,8 @@ PyRTIambassador_resignFederationExecution(PyRTIambassadorObject *self, PyObject 
 
   try {
 
-    self->ob_value->resignFederationExecution(resignAction);
-    self->_logicaltimeFactoryName.clear();
+    self->_federateAmbassador.ob_value->resignFederationExecution(resignAction);
+    self->_federateAmbassador._logicaltimeFactoryName.clear();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3212,6 +3543,8 @@ PyRTIambassador_resignFederationExecution(PyRTIambassadorObject *self, PyObject 
 static PyObject *
 PyRTIambassador_registerFederationSynchronizationPoint(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "registerFederationSynchronizationPoint", 2, 3, &arg1, &arg2, &arg3))
     return 0;
@@ -3229,14 +3562,14 @@ PyRTIambassador_registerFederationSynchronizationPoint(PyRTIambassadorObject *se
   }
 
   rti1516e::FederateHandleSet federateHandleSet;
-  if (arg3 && !PyObject_GetFederateHandleSet(federateHandleSet, arg3)) {
+  if (arg3 && !PyObject_GetFederateHandleSet(state, federateHandleSet, arg3)) {
     PyErr_SetString(PyExc_TypeError, "syncSet needs to be a set of FederateHandles!");
     return 0;
   }
 
   try {
 
-    self->ob_value->registerFederationSynchronizationPoint(label, tag, federateHandleSet);
+    self->_federateAmbassador.ob_value->registerFederationSynchronizationPoint(label, tag, federateHandleSet);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3270,7 +3603,7 @@ PyRTIambassador_synchronizationPointAchieved(PyRTIambassadorObject *self, PyObje
 
   try {
 
-    self->ob_value->synchronizationPointAchieved(label, successful);
+    self->_federateAmbassador.ob_value->synchronizationPointAchieved(label, successful);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3297,7 +3630,7 @@ PyRTIambassador_requestFederationSave(PyRTIambassadorObject *self, PyObject *arg
   }
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (arg2 && !PyObject_GetLogicalTime(logicalTime, arg2, self->_logicaltimeFactoryName)) {
+  if (arg2 && !PyObject_GetLogicalTime(logicalTime, arg2, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be a LogicalTime!");
     return 0;
   }
@@ -3305,9 +3638,9 @@ PyRTIambassador_requestFederationSave(PyRTIambassadorObject *self, PyObject *arg
   try {
 
     if (logicalTime.get())
-      self->ob_value->requestFederationSave(label, *logicalTime);
+      self->_federateAmbassador.ob_value->requestFederationSave(label, *logicalTime);
     else
-      self->ob_value->requestFederationSave(label);
+      self->_federateAmbassador.ob_value->requestFederationSave(label);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3330,7 +3663,7 @@ PyRTIambassador_federateSaveBegun(PyRTIambassadorObject *self, PyObject *args)
 
   try {
 
-    self->ob_value->federateSaveBegun();
+    self->_federateAmbassador.ob_value->federateSaveBegun();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3350,7 +3683,7 @@ PyRTIambassador_federateSaveComplete(PyRTIambassadorObject *self, PyObject *args
 
   try {
 
-    self->ob_value->federateSaveComplete();
+    self->_federateAmbassador.ob_value->federateSaveComplete();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3370,7 +3703,7 @@ PyRTIambassador_federateSaveNotComplete(PyRTIambassadorObject *self, PyObject *a
 
   try {
 
-    self->ob_value->federateSaveNotComplete();
+    self->_federateAmbassador.ob_value->federateSaveNotComplete();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3390,7 +3723,7 @@ PyRTIambassador_abortFederationSave(PyRTIambassadorObject *self, PyObject *args)
 
   try {
 
-    self->ob_value->abortFederationSave();
+    self->_federateAmbassador.ob_value->abortFederationSave();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3409,7 +3742,7 @@ PyRTIambassador_queryFederationSaveStatus(PyRTIambassadorObject *self, PyObject 
 
   try {
 
-    self->ob_value->queryFederationSaveStatus();
+    self->_federateAmbassador.ob_value->queryFederationSaveStatus();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3435,7 +3768,7 @@ PyRTIambassador_requestFederationRestore(PyRTIambassadorObject *self, PyObject *
 
   try {
 
-    self->ob_value->requestFederationRestore(label);
+    self->_federateAmbassador.ob_value->requestFederationRestore(label);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3455,7 +3788,7 @@ PyRTIambassador_federateRestoreComplete(PyRTIambassadorObject *self, PyObject *a
 
   try {
 
-    self->ob_value->federateRestoreComplete();
+    self->_federateAmbassador.ob_value->federateRestoreComplete();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3475,7 +3808,7 @@ PyRTIambassador_federateRestoreNotComplete(PyRTIambassadorObject *self, PyObject
 
   try {
 
-    self->ob_value->federateRestoreNotComplete();
+    self->_federateAmbassador.ob_value->federateRestoreNotComplete();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3495,7 +3828,7 @@ PyRTIambassador_abortFederationRestore(PyRTIambassadorObject *self, PyObject *ar
 
   try {
 
-    self->ob_value->abortFederationRestore();
+    self->_federateAmbassador.ob_value->abortFederationRestore();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3514,7 +3847,7 @@ PyRTIambassador_queryFederationRestoreStatus(PyRTIambassadorObject *self, PyObje
 
   try {
 
-    self->ob_value->queryFederationRestoreStatus();
+    self->_federateAmbassador.ob_value->queryFederationRestoreStatus();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3528,25 +3861,27 @@ PyRTIambassador_queryFederationRestoreStatus(PyRTIambassadorObject *self, PyObje
 static PyObject *
 PyRTIambassador_publishObjectClassAttributes(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "publishObjectClassAttributes", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
 
   try {
 
-    self->ob_value->publishObjectClassAttributes(objectClassHandle, attributeHandleSet);
+    self->_federateAmbassador.ob_value->publishObjectClassAttributes(objectClassHandle, attributeHandleSet);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3563,19 +3898,21 @@ PyRTIambassador_publishObjectClassAttributes(PyRTIambassadorObject *self, PyObje
 static PyObject *
 PyRTIambassador_unpublishObjectClass(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "unpublishObjectClass", 1, 1, &arg1))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->unpublishObjectClass(objectClassHandle);
+    self->_federateAmbassador.ob_value->unpublishObjectClass(objectClassHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3592,25 +3929,27 @@ PyRTIambassador_unpublishObjectClass(PyRTIambassadorObject *self, PyObject *args
 static PyObject *
 PyRTIambassador_unpublishObjectClassAttributes(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "unpublishObjectClassAttributes", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
 
   try {
 
-    self->ob_value->unpublishObjectClassAttributes(objectClassHandle, attributeHandleSet);
+    self->_federateAmbassador.ob_value->unpublishObjectClassAttributes(objectClassHandle, attributeHandleSet);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3628,19 +3967,21 @@ PyRTIambassador_unpublishObjectClassAttributes(PyRTIambassadorObject *self, PyOb
 static PyObject *
 PyRTIambassador_publishInteractionClass(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "publishInteractionClass", 1, 1, &arg1))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an InteractionClassHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->publishInteractionClass(interactionClassHandle);
+    self->_federateAmbassador.ob_value->publishInteractionClass(interactionClassHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3656,19 +3997,21 @@ PyRTIambassador_publishInteractionClass(PyRTIambassadorObject *self, PyObject *a
 static PyObject *
 PyRTIambassador_unpublishInteractionClass(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "unpublishInteractionClass", 1, 1, &arg1))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an InteractionClassHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->unpublishInteractionClass(interactionClassHandle);
+    self->_federateAmbassador.ob_value->unpublishInteractionClass(interactionClassHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3684,18 +4027,20 @@ PyRTIambassador_unpublishInteractionClass(PyRTIambassadorObject *self, PyObject 
 static PyObject *
 PyRTIambassador_subscribeObjectClassAttributes(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0, *arg4 = 0;
   if (!PyArg_UnpackTuple(args, "subscribeObjectClassAttributes", 2, 4, &arg1, &arg2, &arg3, &arg4))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
@@ -3718,7 +4063,7 @@ PyRTIambassador_subscribeObjectClassAttributes(PyRTIambassadorObject *self, PyOb
 
   try {
 
-    self->ob_value->subscribeObjectClassAttributes(objectClassHandle, attributeHandleSet, active, updateRateDesignator);
+    self->_federateAmbassador.ob_value->subscribeObjectClassAttributes(objectClassHandle, attributeHandleSet, active, updateRateDesignator);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3736,19 +4081,21 @@ PyRTIambassador_subscribeObjectClassAttributes(PyRTIambassadorObject *self, PyOb
 static PyObject *
 PyRTIambassador_unsubscribeObjectClass(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "unsubscribeObjectClass", 1, 1, &arg1))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->unsubscribeObjectClass(objectClassHandle);
+    self->_federateAmbassador.ob_value->unsubscribeObjectClass(objectClassHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3764,25 +4111,27 @@ PyRTIambassador_unsubscribeObjectClass(PyRTIambassadorObject *self, PyObject *ar
 static PyObject *
 PyRTIambassador_unsubscribeObjectClassAttributes(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "unsubscribeObjectClassAttributes", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
 
   try {
 
-    self->ob_value->unsubscribeObjectClassAttributes(objectClassHandle, attributeHandleSet);
+    self->_federateAmbassador.ob_value->unsubscribeObjectClassAttributes(objectClassHandle, attributeHandleSet);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3799,12 +4148,14 @@ PyRTIambassador_unsubscribeObjectClassAttributes(PyRTIambassadorObject *self, Py
 static PyObject *
 PyRTIambassador_subscribeInteractionClass(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "subscribeInteractionClass", 1, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an InteractionClassHandle!");
     return 0;
   }
@@ -3821,7 +4172,7 @@ PyRTIambassador_subscribeInteractionClass(PyRTIambassadorObject *self, PyObject 
 
   try {
 
-    self->ob_value->subscribeInteractionClass(interactionClassHandle, active);
+    self->_federateAmbassador.ob_value->subscribeInteractionClass(interactionClassHandle, active);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3838,19 +4189,21 @@ PyRTIambassador_subscribeInteractionClass(PyRTIambassadorObject *self, PyObject 
 static PyObject *
 PyRTIambassador_unsubscribeInteractionClass(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "unsubscribeInteractionClass", 1, 1, &arg1))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an InteractionClassHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->unsubscribeInteractionClass(interactionClassHandle);
+    self->_federateAmbassador.ob_value->unsubscribeInteractionClass(interactionClassHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3878,7 +4231,7 @@ PyRTIambassador_reserveObjectInstanceName(PyRTIambassadorObject *self, PyObject 
 
   try {
 
-    self->ob_value->reserveObjectInstanceName(objectInstanceName);
+    self->_federateAmbassador.ob_value->reserveObjectInstanceName(objectInstanceName);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3906,7 +4259,7 @@ PyRTIambassador_releaseObjectInstanceName(PyRTIambassadorObject *self, PyObject 
 
   try {
 
-    self->ob_value->releaseObjectInstanceName(objectInstanceName);
+    self->_federateAmbassador.ob_value->releaseObjectInstanceName(objectInstanceName);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3934,7 +4287,7 @@ PyRTIambassador_reserveMultipleObjectInstanceName(PyRTIambassadorObject *self, P
 
   try {
 
-    self->ob_value->reserveMultipleObjectInstanceName(objectInstanceNames);
+    self->_federateAmbassador.ob_value->reserveMultipleObjectInstanceName(objectInstanceNames);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3963,7 +4316,7 @@ PyRTIambassador_releaseMultipleObjectInstanceName(PyRTIambassadorObject *self, P
 
   try {
 
-    self->ob_value->releaseMultipleObjectInstanceName(objectInstanceNames);
+    self->_federateAmbassador.ob_value->releaseMultipleObjectInstanceName(objectInstanceNames);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -3979,12 +4332,14 @@ PyRTIambassador_releaseMultipleObjectInstanceName(PyRTIambassadorObject *self, P
 static PyObject *
 PyRTIambassador_registerObjectInstance(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "registerObjectInstance", 1, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle!");
     return 0;
   }
@@ -3999,11 +4354,11 @@ PyRTIambassador_registerObjectInstance(PyRTIambassadorObject *self, PyObject *ar
 
     rti1516e::ObjectInstanceHandle objectInstanceHandle;
     if (!arg2)
-      objectInstanceHandle = self->ob_value->registerObjectInstance(objectClassHandle);
+      objectInstanceHandle = self->_federateAmbassador.ob_value->registerObjectInstance(objectClassHandle);
     else
-      objectInstanceHandle = self->ob_value->registerObjectInstance(objectClassHandle, objectInstanceName);
+      objectInstanceHandle = self->_federateAmbassador.ob_value->registerObjectInstance(objectClassHandle, objectInstanceName);
 
-    return PyObject_NewObjectInstanceHandle(objectInstanceHandle);
+    return PyObject_NewObjectInstanceHandle(state, objectInstanceHandle);
   }
   CATCH_C_EXCEPTION(ObjectInstanceNameInUse)
   CATCH_C_EXCEPTION(ObjectInstanceNameNotReserved)
@@ -4019,18 +4374,20 @@ PyRTIambassador_registerObjectInstance(PyRTIambassadorObject *self, PyObject *ar
 static PyObject *
 PyRTIambassador_updateAttributeValues(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0, *arg4 = 0;
   if (!PyArg_UnpackTuple(args, "updateAttributeValues", 3, 4, &arg1, &arg2, &arg3, &arg4))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleValueMap attributeHandleValueMap;
-  if (!PyObject_GetAttributeHandleValueMap(attributeHandleValueMap, arg2)) {
+  if (!PyObject_GetAttributeHandleValueMap(state, attributeHandleValueMap, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleValueMap!");
     return 0;
   }
@@ -4042,7 +4399,7 @@ PyRTIambassador_updateAttributeValues(PyRTIambassadorObject *self, PyObject *arg
   }
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (arg4 && !PyObject_GetLogicalTime(logicalTime, arg4, self->_logicaltimeFactoryName)) {
+  if (arg4 && !PyObject_GetLogicalTime(logicalTime, arg4, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Fourth argument needs to be a LogicalTime!");
     return 0;
   }
@@ -4051,11 +4408,11 @@ PyRTIambassador_updateAttributeValues(PyRTIambassadorObject *self, PyObject *arg
 
     if (logicalTime.get()) {
       rti1516e::MessageRetractionHandle messageRetractionHandle;
-      messageRetractionHandle = self->ob_value->updateAttributeValues(objectInstanceHandle, attributeHandleValueMap, tag, *logicalTime);
+      messageRetractionHandle = self->_federateAmbassador.ob_value->updateAttributeValues(objectInstanceHandle, attributeHandleValueMap, tag, *logicalTime);
 
-      return PyObject_NewMessageRetractionHandle(messageRetractionHandle);
+      return PyObject_NewMessageRetractionHandle(state, messageRetractionHandle);
     } else {
-      self->ob_value->updateAttributeValues(objectInstanceHandle, attributeHandleValueMap, tag);
+      self->_federateAmbassador.ob_value->updateAttributeValues(objectInstanceHandle, attributeHandleValueMap, tag);
 
       Py_IncRef(Py_None);
       return Py_None;
@@ -4075,18 +4432,20 @@ PyRTIambassador_updateAttributeValues(PyRTIambassadorObject *self, PyObject *arg
 static PyObject *
 PyRTIambassador_sendInteraction(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0, *arg4 = 0;
   if (!PyArg_UnpackTuple(args, "sendInteraction", 3, 4, &arg1, &arg2, &arg3, &arg4))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an InteractionClassHandle!");
     return 0;
   }
 
   rti1516e::ParameterHandleValueMap parameterHandleValueMap;
-  if (!PyObject_GetParameterHandleValueMap(parameterHandleValueMap, arg2)) {
+  if (!PyObject_GetParameterHandleValueMap(state, parameterHandleValueMap, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an ParameterHandleValueMap!");
     return 0;
   }
@@ -4098,7 +4457,7 @@ PyRTIambassador_sendInteraction(PyRTIambassadorObject *self, PyObject *args)
   }
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (arg4 && !PyObject_GetLogicalTime(logicalTime, arg4, self->_logicaltimeFactoryName)) {
+  if (arg4 && !PyObject_GetLogicalTime(logicalTime, arg4, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Fourth argument needs to be a LogicalTime!");
     return 0;
   }
@@ -4107,11 +4466,11 @@ PyRTIambassador_sendInteraction(PyRTIambassadorObject *self, PyObject *args)
 
     if (logicalTime.get()) {
       rti1516e::MessageRetractionHandle messageRetractionHandle;
-      messageRetractionHandle = self->ob_value->sendInteraction(interactionClassHandle, parameterHandleValueMap, tag, *logicalTime);
+      messageRetractionHandle = self->_federateAmbassador.ob_value->sendInteraction(interactionClassHandle, parameterHandleValueMap, tag, *logicalTime);
 
-      return PyObject_NewMessageRetractionHandle(messageRetractionHandle);
+      return PyObject_NewMessageRetractionHandle(state, messageRetractionHandle);
     } else {
-      self->ob_value->sendInteraction(interactionClassHandle, parameterHandleValueMap, tag);
+      self->_federateAmbassador.ob_value->sendInteraction(interactionClassHandle, parameterHandleValueMap, tag);
 
       Py_IncRef(Py_None);
       return Py_None;
@@ -4131,12 +4490,14 @@ PyRTIambassador_sendInteraction(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_deleteObjectInstance(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "deleteObjectInstance", 2, 3, &arg1, &arg2, &arg3))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
@@ -4148,7 +4509,7 @@ PyRTIambassador_deleteObjectInstance(PyRTIambassadorObject *self, PyObject *args
   }
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (arg3 && !PyObject_GetLogicalTime(logicalTime, arg3, self->_logicaltimeFactoryName)) {
+  if (arg3 && !PyObject_GetLogicalTime(logicalTime, arg3, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Third argument needs to be a LogicalTime!");
     return 0;
   }
@@ -4157,11 +4518,11 @@ PyRTIambassador_deleteObjectInstance(PyRTIambassadorObject *self, PyObject *args
 
     if (logicalTime.get()) {
       rti1516e::MessageRetractionHandle messageRetractionHandle;
-      messageRetractionHandle = self->ob_value->deleteObjectInstance(objectInstanceHandle, tag, *logicalTime);
+      messageRetractionHandle = self->_federateAmbassador.ob_value->deleteObjectInstance(objectInstanceHandle, tag, *logicalTime);
 
-      return PyObject_NewMessageRetractionHandle(messageRetractionHandle);
+      return PyObject_NewMessageRetractionHandle(state, messageRetractionHandle);
     } else {
-      self->ob_value->deleteObjectInstance(objectInstanceHandle, tag);
+      self->_federateAmbassador.ob_value->deleteObjectInstance(objectInstanceHandle, tag);
 
       Py_IncRef(Py_None);
       return Py_None;
@@ -4180,19 +4541,21 @@ PyRTIambassador_deleteObjectInstance(PyRTIambassadorObject *self, PyObject *args
 static PyObject *
 PyRTIambassador_localDeleteObjectInstance(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "localDeleteObjectInstance", 1, 1, &arg1))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->localDeleteObjectInstance(objectInstanceHandle);
+    self->_federateAmbassador.ob_value->localDeleteObjectInstance(objectInstanceHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4210,6 +4573,8 @@ PyRTIambassador_localDeleteObjectInstance(PyRTIambassadorObject *self, PyObject 
 static PyObject *
 PyRTIambassador_requestAttributeValueUpdate(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "requestAttributeValueUpdate", 3, 3, &arg1, &arg2, &arg3))
     return 0;
@@ -4217,9 +4582,9 @@ PyRTIambassador_requestAttributeValueUpdate(PyRTIambassadorObject *self, PyObjec
   bool isClassHandle;
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     isClassHandle = true;
-  } else if (PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  } else if (PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     isClassHandle = false;
   } else {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle or ObjectInstanceHandle!");
@@ -4227,7 +4592,7 @@ PyRTIambassador_requestAttributeValueUpdate(PyRTIambassadorObject *self, PyObjec
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
@@ -4241,9 +4606,9 @@ PyRTIambassador_requestAttributeValueUpdate(PyRTIambassadorObject *self, PyObjec
   try {
 
     if (isClassHandle)
-      self->ob_value->requestAttributeValueUpdate(objectClassHandle, attributeHandleSet, tag);
+      self->_federateAmbassador.ob_value->requestAttributeValueUpdate(objectClassHandle, attributeHandleSet, tag);
     else
-      self->ob_value->requestAttributeValueUpdate(objectInstanceHandle, attributeHandleSet, tag);
+      self->_federateAmbassador.ob_value->requestAttributeValueUpdate(objectInstanceHandle, attributeHandleSet, tag);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4261,18 +4626,20 @@ PyRTIambassador_requestAttributeValueUpdate(PyRTIambassadorObject *self, PyObjec
 static PyObject *
 PyRTIambassador_requestAttributeTransportationTypeChange(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "requestAttributeTransportationTypeChange", 3, 3, &arg1, &arg2, &arg3))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
@@ -4285,7 +4652,7 @@ PyRTIambassador_requestAttributeTransportationTypeChange(PyRTIambassadorObject *
 
   try {
 
-    self->ob_value->requestAttributeTransportationTypeChange(objectInstanceHandle, attributeHandleSet, transportationType);
+    self->_federateAmbassador.ob_value->requestAttributeTransportationTypeChange(objectInstanceHandle, attributeHandleSet, transportationType);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4305,25 +4672,27 @@ PyRTIambassador_requestAttributeTransportationTypeChange(PyRTIambassadorObject *
 static PyObject *
 PyRTIambassador_queryAttributeTransportationType(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "queryAttributeTransportationType", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandle attributeHandle;
-  if (!PyObject_GetAttributeHandle(attributeHandle, arg2)) {
+  if (!PyObject_GetAttributeHandle(state, attributeHandle, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->queryAttributeTransportationType(objectInstanceHandle, attributeHandle);
+    self->_federateAmbassador.ob_value->queryAttributeTransportationType(objectInstanceHandle, attributeHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4340,12 +4709,14 @@ PyRTIambassador_queryAttributeTransportationType(PyRTIambassadorObject *self, Py
 static PyObject *
 PyRTIambassador_requestInteractionTransportationTypeChange(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "requestInteractionTransportationTypeChange", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an InteractionClassHandle!");
     return 0;
   }
@@ -4358,7 +4729,7 @@ PyRTIambassador_requestInteractionTransportationTypeChange(PyRTIambassadorObject
 
   try {
 
-    self->ob_value->requestInteractionTransportationTypeChange(interactionClassHandle, transportationType);
+    self->_federateAmbassador.ob_value->requestInteractionTransportationTypeChange(interactionClassHandle, transportationType);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4377,25 +4748,27 @@ PyRTIambassador_requestInteractionTransportationTypeChange(PyRTIambassadorObject
 static PyObject *
 PyRTIambassador_queryInteractionTransportationType(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "queryInteractionTransportationType", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::FederateHandle federateHandle;
-  if (!PyObject_GetFederateHandle(federateHandle, arg1)) {
+  if (!PyObject_GetFederateHandle(state, federateHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an FederateHandle!");
     return 0;
   }
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg2)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an InteractionClassHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->queryInteractionTransportationType(federateHandle, interactionClassHandle);
+    self->_federateAmbassador.ob_value->queryInteractionTransportationType(federateHandle, interactionClassHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4411,25 +4784,27 @@ PyRTIambassador_queryInteractionTransportationType(PyRTIambassadorObject *self, 
 static PyObject *
 PyRTIambassador_unconditionalAttributeOwnershipDivestiture(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "unconditionalAttributeOwnershipDivestiture", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
 
   try {
 
-    self->ob_value->unconditionalAttributeOwnershipDivestiture(objectInstanceHandle, attributeHandleSet);
+    self->_federateAmbassador.ob_value->unconditionalAttributeOwnershipDivestiture(objectInstanceHandle, attributeHandleSet);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4447,18 +4822,20 @@ PyRTIambassador_unconditionalAttributeOwnershipDivestiture(PyRTIambassadorObject
 static PyObject *
 PyRTIambassador_negotiatedAttributeOwnershipDivestiture(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "negotiatedAttributeOwnershipDivestiture", 3, 3, &arg1, &arg2, &arg3))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
@@ -4471,7 +4848,7 @@ PyRTIambassador_negotiatedAttributeOwnershipDivestiture(PyRTIambassadorObject *s
 
   try {
 
-    self->ob_value->negotiatedAttributeOwnershipDivestiture(objectInstanceHandle, attributeHandleSet, tag);
+    self->_federateAmbassador.ob_value->negotiatedAttributeOwnershipDivestiture(objectInstanceHandle, attributeHandleSet, tag);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4490,18 +4867,20 @@ PyRTIambassador_negotiatedAttributeOwnershipDivestiture(PyRTIambassadorObject *s
 static PyObject *
 PyRTIambassador_confirmDivestiture(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "confirmDivestiture", 3, 3, &arg1, &arg2, &arg3))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
@@ -4514,7 +4893,7 @@ PyRTIambassador_confirmDivestiture(PyRTIambassadorObject *self, PyObject *args)
 
   try {
 
-    self->ob_value->confirmDivestiture(objectInstanceHandle, attributeHandleSet, tag);
+    self->_federateAmbassador.ob_value->confirmDivestiture(objectInstanceHandle, attributeHandleSet, tag);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4534,18 +4913,20 @@ PyRTIambassador_confirmDivestiture(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_attributeOwnershipAcquisition(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "attributeOwnershipAcquisition", 3, 3, &arg1, &arg2, &arg3))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
@@ -4558,7 +4939,7 @@ PyRTIambassador_attributeOwnershipAcquisition(PyRTIambassadorObject *self, PyObj
 
   try {
 
-    self->ob_value->attributeOwnershipAcquisition(objectInstanceHandle, attributeHandleSet, tag);
+    self->_federateAmbassador.ob_value->attributeOwnershipAcquisition(objectInstanceHandle, attributeHandleSet, tag);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4578,25 +4959,27 @@ PyRTIambassador_attributeOwnershipAcquisition(PyRTIambassadorObject *self, PyObj
 static PyObject *
 PyRTIambassador_attributeOwnershipAcquisitionIfAvailable(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "attributeOwnershipAcquisitionIfAvailable", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
 
   try {
 
-    self->ob_value->attributeOwnershipAcquisitionIfAvailable(objectInstanceHandle, attributeHandleSet);
+    self->_federateAmbassador.ob_value->attributeOwnershipAcquisitionIfAvailable(objectInstanceHandle, attributeHandleSet);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4617,25 +5000,27 @@ PyRTIambassador_attributeOwnershipAcquisitionIfAvailable(PyRTIambassadorObject *
 static PyObject *
 PyRTIambassador_attributeOwnershipReleaseDenied(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "attributeOwnershipReleaseDenied", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
 
   try {
 
-    self->ob_value->attributeOwnershipReleaseDenied(objectInstanceHandle, attributeHandleSet);
+    self->_federateAmbassador.ob_value->attributeOwnershipReleaseDenied(objectInstanceHandle, attributeHandleSet);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4653,18 +5038,20 @@ PyRTIambassador_attributeOwnershipReleaseDenied(PyRTIambassadorObject *self, PyO
 static PyObject *
 PyRTIambassador_attributeOwnershipDivestitureIfWanted(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "attributeOwnershipDivestitureIfWanted", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
@@ -4672,9 +5059,9 @@ PyRTIambassador_attributeOwnershipDivestitureIfWanted(PyRTIambassadorObject *sel
   try {
 
     rti1516e::AttributeHandleSet divestedAttributeHandleSet;
-    self->ob_value->attributeOwnershipDivestitureIfWanted(objectInstanceHandle, attributeHandleSet, divestedAttributeHandleSet);
+    self->_federateAmbassador.ob_value->attributeOwnershipDivestitureIfWanted(objectInstanceHandle, attributeHandleSet, divestedAttributeHandleSet);
 
-    return PyObject_NewAttributeHandleSet(divestedAttributeHandleSet);
+    return PyObject_NewAttributeHandleSet(state, divestedAttributeHandleSet);
   }
   CATCH_C_EXCEPTION(AttributeNotOwned)
   CATCH_C_EXCEPTION(AttributeNotDefined)
@@ -4689,25 +5076,27 @@ PyRTIambassador_attributeOwnershipDivestitureIfWanted(PyRTIambassadorObject *sel
 static PyObject *
 PyRTIambassador_cancelNegotiatedAttributeOwnershipDivestiture(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "cancelNegotiatedAttributeOwnershipDivestiture", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
 
   try {
 
-    self->ob_value->cancelNegotiatedAttributeOwnershipDivestiture(objectInstanceHandle, attributeHandleSet);
+    self->_federateAmbassador.ob_value->cancelNegotiatedAttributeOwnershipDivestiture(objectInstanceHandle, attributeHandleSet);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4726,25 +5115,27 @@ PyRTIambassador_cancelNegotiatedAttributeOwnershipDivestiture(PyRTIambassadorObj
 static PyObject *
 PyRTIambassador_cancelAttributeOwnershipAcquisition(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "cancelAttributeOwnershipAcquisition", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
 
   try {
 
-    self->ob_value->cancelAttributeOwnershipAcquisition(objectInstanceHandle, attributeHandleSet);
+    self->_federateAmbassador.ob_value->cancelAttributeOwnershipAcquisition(objectInstanceHandle, attributeHandleSet);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4763,25 +5154,27 @@ PyRTIambassador_cancelAttributeOwnershipAcquisition(PyRTIambassadorObject *self,
 static PyObject *
 PyRTIambassador_queryAttributeOwnership(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "queryAttributeOwnership", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandle attributeHandle;
-  if (!PyObject_GetAttributeHandle(attributeHandle, arg2)) {
+  if (!PyObject_GetAttributeHandle(state, attributeHandle, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->queryAttributeOwnership(objectInstanceHandle, attributeHandle);
+    self->_federateAmbassador.ob_value->queryAttributeOwnership(objectInstanceHandle, attributeHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4798,25 +5191,27 @@ PyRTIambassador_queryAttributeOwnership(PyRTIambassadorObject *self, PyObject *a
 static PyObject *
 PyRTIambassador_isAttributeOwnedByFederate(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "isAttributeOwnedByFederate", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandle attributeHandle;
-  if (!PyObject_GetAttributeHandle(attributeHandle, arg2)) {
+  if (!PyObject_GetAttributeHandle(state, attributeHandle, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandle!");
     return 0;
   }
 
   try {
 
-    bool owned = self->ob_value->isAttributeOwnedByFederate(objectInstanceHandle, attributeHandle);
+    bool owned = self->_federateAmbassador.ob_value->isAttributeOwnedByFederate(objectInstanceHandle, attributeHandle);
 
     return PyBool_FromLong(owned);
   }
@@ -4837,14 +5232,14 @@ PyRTIambassador_enableTimeRegulation(PyRTIambassadorObject *self, PyObject *args
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTimeInterval> logicalTimeInterval;
-  if (!PyObject_GetLogicalTimeInterval(logicalTimeInterval, arg1, self->_logicaltimeFactoryName)) {
+  if (!PyObject_GetLogicalTimeInterval(logicalTimeInterval, arg1, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Argument needs to be a LogicalTimeInterval!");
     return 0;
   }
 
   try {
 
-    self->ob_value->enableTimeRegulation(*logicalTimeInterval);
+    self->_federateAmbassador.ob_value->enableTimeRegulation(*logicalTimeInterval);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4868,7 +5263,7 @@ PyRTIambassador_disableTimeRegulation(PyRTIambassadorObject *self, PyObject *arg
 
   try {
 
-    self->ob_value->disableTimeRegulation();
+    self->_federateAmbassador.ob_value->disableTimeRegulation();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4889,7 +5284,7 @@ PyRTIambassador_enableTimeConstrained(PyRTIambassadorObject *self, PyObject *arg
 
   try {
 
-    self->ob_value->enableTimeConstrained();
+    self->_federateAmbassador.ob_value->enableTimeConstrained();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4912,7 +5307,7 @@ PyRTIambassador_disableTimeConstrained(PyRTIambassadorObject *self, PyObject *ar
 
   try {
 
-    self->ob_value->disableTimeConstrained();
+    self->_federateAmbassador.ob_value->disableTimeConstrained();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4933,14 +5328,14 @@ PyRTIambassador_timeAdvanceRequest(PyRTIambassadorObject *self, PyObject *args)
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (!PyObject_GetLogicalTime(logicalTime, arg1, self->_logicaltimeFactoryName)) {
+  if (!PyObject_GetLogicalTime(logicalTime, arg1, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Argument needs to be a LogicalTime!");
     return 0;
   }
 
   try {
 
-    self->ob_value->timeAdvanceRequest(*logicalTime);
+    self->_federateAmbassador.ob_value->timeAdvanceRequest(*logicalTime);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4965,14 +5360,14 @@ PyRTIambassador_timeAdvanceRequestAvailable(PyRTIambassadorObject *self, PyObjec
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (!PyObject_GetLogicalTime(logicalTime, arg1, self->_logicaltimeFactoryName)) {
+  if (!PyObject_GetLogicalTime(logicalTime, arg1, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Argument needs to be a LogicalTime!");
     return 0;
   }
 
   try {
 
-    self->ob_value->timeAdvanceRequestAvailable(*logicalTime);
+    self->_federateAmbassador.ob_value->timeAdvanceRequestAvailable(*logicalTime);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -4997,14 +5392,14 @@ PyRTIambassador_nextMessageRequest(PyRTIambassadorObject *self, PyObject *args)
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (!PyObject_GetLogicalTime(logicalTime, arg1, self->_logicaltimeFactoryName)) {
+  if (!PyObject_GetLogicalTime(logicalTime, arg1, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Argument needs to be a LogicalTime!");
     return 0;
   }
 
   try {
 
-    self->ob_value->nextMessageRequest(*logicalTime);
+    self->_federateAmbassador.ob_value->nextMessageRequest(*logicalTime);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5029,14 +5424,14 @@ PyRTIambassador_nextMessageRequestAvailable(PyRTIambassadorObject *self, PyObjec
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (!PyObject_GetLogicalTime(logicalTime, arg1, self->_logicaltimeFactoryName)) {
+  if (!PyObject_GetLogicalTime(logicalTime, arg1, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Argument needs to be a LogicalTime!");
     return 0;
   }
 
   try {
 
-    self->ob_value->nextMessageRequestAvailable(*logicalTime);
+    self->_federateAmbassador.ob_value->nextMessageRequestAvailable(*logicalTime);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5061,14 +5456,14 @@ PyRTIambassador_flushQueueRequest(PyRTIambassadorObject *self, PyObject *args)
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (!PyObject_GetLogicalTime(logicalTime, arg1, self->_logicaltimeFactoryName)) {
+  if (!PyObject_GetLogicalTime(logicalTime, arg1, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Argument needs to be a LogicalTime!");
     return 0;
   }
 
   try {
 
-    self->ob_value->flushQueueRequest(*logicalTime);
+    self->_federateAmbassador.ob_value->flushQueueRequest(*logicalTime);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5093,7 +5488,7 @@ PyRTIambassador_enableAsynchronousDelivery(PyRTIambassadorObject *self, PyObject
 
   try {
 
-    self->ob_value->enableAsynchronousDelivery();
+    self->_federateAmbassador.ob_value->enableAsynchronousDelivery();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5114,7 +5509,7 @@ PyRTIambassador_disableAsynchronousDelivery(PyRTIambassadorObject *self, PyObjec
 
   try {
 
-    self->ob_value->disableAsynchronousDelivery();
+    self->_federateAmbassador.ob_value->disableAsynchronousDelivery();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5134,14 +5529,14 @@ PyRTIambassador_queryGALT(PyRTIambassadorObject *self, PyObject *args)
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (!PyObject_GetLogicalTime(logicalTime, self->_logicaltimeFactoryName)) {
+  if (!PyObject_GetLogicalTime(logicalTime, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Cannot get LogicalTime for given factory!");
     return 0;
   }
 
   try {
 
-    if (self->ob_value->queryGALT(*logicalTime))
+    if (self->_federateAmbassador.ob_value->queryGALT(*logicalTime))
       return PyObject_NewLogicalTime(*logicalTime);
 
     Py_IncRef(Py_None);
@@ -5161,14 +5556,14 @@ PyRTIambassador_queryLogicalTime(PyRTIambassadorObject *self, PyObject *args)
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (!PyObject_GetLogicalTime(logicalTime, self->_logicaltimeFactoryName)) {
+  if (!PyObject_GetLogicalTime(logicalTime, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Cannot get LogicalTime for given factory!");
     return 0;
   }
 
   try {
 
-    self->ob_value->queryLogicalTime(*logicalTime);
+    self->_federateAmbassador.ob_value->queryLogicalTime(*logicalTime);
 
     return PyObject_NewLogicalTime(*logicalTime);
   }
@@ -5186,14 +5581,14 @@ PyRTIambassador_queryLITS(PyRTIambassadorObject *self, PyObject *args)
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (!PyObject_GetLogicalTime(logicalTime, self->_logicaltimeFactoryName)) {
+  if (!PyObject_GetLogicalTime(logicalTime, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Cannot get LogicalTime for given factory!");
     return 0;
   }
 
   try {
 
-    if (self->ob_value->queryLITS(*logicalTime))
+    if (self->_federateAmbassador.ob_value->queryLITS(*logicalTime))
       return PyObject_NewLogicalTime(*logicalTime);
 
     Py_IncRef(Py_None);
@@ -5214,14 +5609,14 @@ PyRTIambassador_modifyLookahead(PyRTIambassadorObject *self, PyObject *args)
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTimeInterval> logicalTimeInterval;
-  if (!PyObject_GetLogicalTimeInterval(logicalTimeInterval, arg1, self->_logicaltimeFactoryName)) {
+  if (!PyObject_GetLogicalTimeInterval(logicalTimeInterval, arg1, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Argument needs to be a LogicalTimeInterval!");
     return 0;
   }
 
   try {
 
-    self->ob_value->modifyLookahead(*logicalTimeInterval);
+    self->_federateAmbassador.ob_value->modifyLookahead(*logicalTimeInterval);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5243,14 +5638,14 @@ PyRTIambassador_queryLookahead(PyRTIambassadorObject *self, PyObject *args)
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTimeInterval> logicalTimeInterval;
-  if (!PyObject_GetLogicalTimeInterval(logicalTimeInterval, self->_logicaltimeFactoryName)) {
+  if (!PyObject_GetLogicalTimeInterval(logicalTimeInterval, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Cannot get LogicalTimeInterval for given factory!");
     return 0;
   }
 
   try {
 
-    self->ob_value->queryLookahead(*logicalTimeInterval);
+    self->_federateAmbassador.ob_value->queryLookahead(*logicalTimeInterval);
 
     return PyObject_NewLogicalTimeInterval(*logicalTimeInterval);
   }
@@ -5265,19 +5660,21 @@ PyRTIambassador_queryLookahead(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_retract(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "retract", 1, 1, &arg1))
     return 0;
 
   rti1516e::MessageRetractionHandle messageRetractionHandle;
-  if (!PyObject_GetMessageRetractionHandle(messageRetractionHandle, arg1)) {
+  if (!PyObject_GetMessageRetractionHandle(state, messageRetractionHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an MessageRetractionHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->retract(messageRetractionHandle);
+    self->_federateAmbassador.ob_value->retract(messageRetractionHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5295,18 +5692,20 @@ PyRTIambassador_retract(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_changeAttributeOrderType(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "changeAttributeOrderType", 3, 3, &arg1, &arg2, &arg3))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSet attributeHandleSet;
-  if (!PyObject_GetAttributeHandleSet(attributeHandleSet, arg2)) {
+  if (!PyObject_GetAttributeHandleSet(state, attributeHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSet!");
     return 0;
   }
@@ -5319,7 +5718,7 @@ PyRTIambassador_changeAttributeOrderType(PyRTIambassadorObject *self, PyObject *
 
   try {
 
-    self->ob_value->changeAttributeOrderType(objectInstanceHandle, attributeHandleSet, orderType);
+    self->_federateAmbassador.ob_value->changeAttributeOrderType(objectInstanceHandle, attributeHandleSet, orderType);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5337,12 +5736,14 @@ PyRTIambassador_changeAttributeOrderType(PyRTIambassadorObject *self, PyObject *
 static PyObject *
 PyRTIambassador_changeInteractionOrderType(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "changeInteractionOrderType", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an InteractionClassHandle!");
     return 0;
   }
@@ -5355,7 +5756,7 @@ PyRTIambassador_changeInteractionOrderType(PyRTIambassadorObject *self, PyObject
 
   try {
 
-    self->ob_value->changeInteractionOrderType(interactionClassHandle, orderType);
+    self->_federateAmbassador.ob_value->changeInteractionOrderType(interactionClassHandle, orderType);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5372,12 +5773,14 @@ PyRTIambassador_changeInteractionOrderType(PyRTIambassadorObject *self, PyObject
 static PyObject *
 PyRTIambassador_createRegion(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "createRegion", 1, 1, &arg1))
     return 0;
 
   rti1516e::DimensionHandleSet dimensionHandleSet;
-  if (!PyObject_GetDimensionHandleSet(dimensionHandleSet, arg1)) {
+  if (!PyObject_GetDimensionHandleSet(state, dimensionHandleSet, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be a DimensionHandleSet!");
     return 0;
   }
@@ -5385,9 +5788,9 @@ PyRTIambassador_createRegion(PyRTIambassadorObject *self, PyObject *args)
   try {
 
     rti1516e::RegionHandle regionHandle;
-    regionHandle = self->ob_value->createRegion(dimensionHandleSet);
+    regionHandle = self->_federateAmbassador.ob_value->createRegion(dimensionHandleSet);
 
-    return PyObject_NewRegionHandle(regionHandle);
+    return PyObject_NewRegionHandle(state, regionHandle);
   }
   CATCH_C_EXCEPTION(InvalidDimensionHandle)
   CATCH_C_EXCEPTION(SaveInProgress)
@@ -5400,19 +5803,21 @@ PyRTIambassador_createRegion(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_commitRegionModifications(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "commitRegionModifications", 1, 1, &arg1))
     return 0;
 
   rti1516e::RegionHandleSet regionHandleSet;
-  if (!PyObject_GetRegionHandleSet(regionHandleSet, arg1)) {
+  if (!PyObject_GetRegionHandleSet(state, regionHandleSet, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be a RegionHandleSet!");
     return 0;
   }
 
   try {
 
-    self->ob_value->commitRegionModifications(regionHandleSet);
+    self->_federateAmbassador.ob_value->commitRegionModifications(regionHandleSet);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5429,19 +5834,21 @@ PyRTIambassador_commitRegionModifications(PyRTIambassadorObject *self, PyObject 
 static PyObject *
 PyRTIambassador_deleteRegion(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "deleteRegion", 1, 1, &arg1))
     return 0;
 
   rti1516e::RegionHandle regionHandle;
-  if (!PyObject_GetRegionHandle(regionHandle, arg1)) {
+  if (!PyObject_GetRegionHandle(state, regionHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be a RegionHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->deleteRegion(regionHandle);
+    self->_federateAmbassador.ob_value->deleteRegion(regionHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5459,18 +5866,20 @@ PyRTIambassador_deleteRegion(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_registerObjectInstanceWithRegions(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "registerObjectInstanceWithRegions", 2, 3, &arg1, &arg2, &arg3))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSetRegionHandleSetPairVector attributeHandleSetRegionHandleSetPairVector;
-  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(attributeHandleSetRegionHandleSetPairVector, arg2)) {
+  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(state, attributeHandleSetRegionHandleSetPairVector, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSetRegionHandleSetPairVector!");
     return 0;
   }
@@ -5485,11 +5894,11 @@ PyRTIambassador_registerObjectInstanceWithRegions(PyRTIambassadorObject *self, P
 
     rti1516e::ObjectInstanceHandle objectInstanceHandle;
     if (!arg3)
-      objectInstanceHandle = self->ob_value->registerObjectInstanceWithRegions(objectClassHandle, attributeHandleSetRegionHandleSetPairVector);
+      objectInstanceHandle = self->_federateAmbassador.ob_value->registerObjectInstanceWithRegions(objectClassHandle, attributeHandleSetRegionHandleSetPairVector);
     else
-      objectInstanceHandle = self->ob_value->registerObjectInstanceWithRegions(objectClassHandle, attributeHandleSetRegionHandleSetPairVector, objectInstanceName);
+      objectInstanceHandle = self->_federateAmbassador.ob_value->registerObjectInstanceWithRegions(objectClassHandle, attributeHandleSetRegionHandleSetPairVector, objectInstanceName);
 
-    return PyObject_NewObjectInstanceHandle(objectInstanceHandle);
+    return PyObject_NewObjectInstanceHandle(state, objectInstanceHandle);
   }
   CATCH_C_EXCEPTION(ObjectInstanceNameInUse)
   CATCH_C_EXCEPTION(ObjectInstanceNameNotReserved)
@@ -5510,25 +5919,27 @@ PyRTIambassador_registerObjectInstanceWithRegions(PyRTIambassadorObject *self, P
 static PyObject *
 PyRTIambassador_associateRegionsForUpdates(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "associateRegionsForUpdates", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSetRegionHandleSetPairVector attributeHandleSetRegionHandleSetPairVector;
-  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(attributeHandleSetRegionHandleSetPairVector, arg2)) {
+  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(state, attributeHandleSetRegionHandleSetPairVector, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSetRegionHandleSetPairVector!");
     return 0;
   }
 
   try {
 
-    self->ob_value->associateRegionsForUpdates(objectInstanceHandle, attributeHandleSetRegionHandleSetPairVector);
+    self->_federateAmbassador.ob_value->associateRegionsForUpdates(objectInstanceHandle, attributeHandleSetRegionHandleSetPairVector);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5548,25 +5959,27 @@ PyRTIambassador_associateRegionsForUpdates(PyRTIambassadorObject *self, PyObject
 static PyObject *
 PyRTIambassador_unassociateRegionsForUpdates(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "unassociateRegionsForUpdates", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSetRegionHandleSetPairVector attributeHandleSetRegionHandleSetPairVector;
-  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(attributeHandleSetRegionHandleSetPairVector, arg2)) {
+  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(state, attributeHandleSetRegionHandleSetPairVector, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSetRegionHandleSetPairVector!");
     return 0;
   }
 
   try {
 
-    self->ob_value->unassociateRegionsForUpdates(objectInstanceHandle, attributeHandleSetRegionHandleSetPairVector);
+    self->_federateAmbassador.ob_value->unassociateRegionsForUpdates(objectInstanceHandle, attributeHandleSetRegionHandleSetPairVector);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5585,18 +5998,20 @@ PyRTIambassador_unassociateRegionsForUpdates(PyRTIambassadorObject *self, PyObje
 static PyObject *
 PyRTIambassador_subscribeObjectClassAttributesWithRegions(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0, *arg4 = 0;
   if (!PyArg_UnpackTuple(args, "subscribeObjectClassAttributesWithRegions", 2, 4, &arg1, &arg2, &arg3, &arg4))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSetRegionHandleSetPairVector attributeHandleSetRegionHandleSetPairVector;
-  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(attributeHandleSetRegionHandleSetPairVector, arg2)) {
+  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(state, attributeHandleSetRegionHandleSetPairVector, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSetRegionHandleSetPairVector!");
     return 0;
   }
@@ -5619,7 +6034,7 @@ PyRTIambassador_subscribeObjectClassAttributesWithRegions(PyRTIambassadorObject 
 
   try {
 
-    self->ob_value->subscribeObjectClassAttributesWithRegions(objectClassHandle, attributeHandleSetRegionHandleSetPairVector, active, updateRateDesignator);
+    self->_federateAmbassador.ob_value->subscribeObjectClassAttributesWithRegions(objectClassHandle, attributeHandleSetRegionHandleSetPairVector, active, updateRateDesignator);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5640,25 +6055,27 @@ PyRTIambassador_subscribeObjectClassAttributesWithRegions(PyRTIambassadorObject 
 static PyObject *
 PyRTIambassador_unsubscribeObjectClassAttributesWithRegions(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "unsubscribeObjectClassAttributesWithRegions", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSetRegionHandleSetPairVector attributeHandleSetRegionHandleSetPairVector;
-  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(attributeHandleSetRegionHandleSetPairVector, arg2)) {
+  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(state, attributeHandleSetRegionHandleSetPairVector, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSetRegionHandleSetPairVector!");
     return 0;
   }
 
   try {
 
-    self->ob_value->unsubscribeObjectClassAttributesWithRegions(objectClassHandle, attributeHandleSetRegionHandleSetPairVector);
+    self->_federateAmbassador.ob_value->unsubscribeObjectClassAttributesWithRegions(objectClassHandle, attributeHandleSetRegionHandleSetPairVector);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5677,18 +6094,20 @@ PyRTIambassador_unsubscribeObjectClassAttributesWithRegions(PyRTIambassadorObjec
 static PyObject *
 PyRTIambassador_subscribeInteractionClassWithRegions(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "subscribeInteractionClassAttributesWithRegions", 2, 3, &arg1, &arg2, &arg3))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an InteractionClassHandle!");
     return 0;
   }
 
   rti1516e::RegionHandleSet regionHandleSet;
-  if (!PyObject_GetRegionHandleSet(regionHandleSet, arg2)) {
+  if (!PyObject_GetRegionHandleSet(state, regionHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be a RegionHandleSet!");
     return 0;
   }
@@ -5705,7 +6124,7 @@ PyRTIambassador_subscribeInteractionClassWithRegions(PyRTIambassadorObject *self
 
   try {
 
-    self->ob_value->subscribeInteractionClassWithRegions(interactionClassHandle, regionHandleSet, active);
+    self->_federateAmbassador.ob_value->subscribeInteractionClassWithRegions(interactionClassHandle, regionHandleSet, active);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5725,25 +6144,27 @@ PyRTIambassador_subscribeInteractionClassWithRegions(PyRTIambassadorObject *self
 static PyObject *
 PyRTIambassador_unsubscribeInteractionClassWithRegions(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "unsubscribeInteractionClassAttributesWithRegions", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an InteractionClassHandle!");
     return 0;
   }
 
   rti1516e::RegionHandleSet regionHandleSet;
-  if (!PyObject_GetRegionHandleSet(regionHandleSet, arg2)) {
+  if (!PyObject_GetRegionHandleSet(state, regionHandleSet, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be a RegionHandleSet!");
     return 0;
   }
 
   try {
 
-    self->ob_value->unsubscribeInteractionClassWithRegions(interactionClassHandle, regionHandleSet);
+    self->_federateAmbassador.ob_value->unsubscribeInteractionClassWithRegions(interactionClassHandle, regionHandleSet);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5761,24 +6182,26 @@ PyRTIambassador_unsubscribeInteractionClassWithRegions(PyRTIambassadorObject *se
 static PyObject *
 PyRTIambassador_sendInteractionWithRegions(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0, *arg4 = 0, *arg5 = 0;
   if (!PyArg_UnpackTuple(args, "sendInteractionWithRegions", 4, 5, &arg1, &arg2, &arg3, &arg4, &arg5))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an InteractionClassHandle!");
     return 0;
   }
 
   rti1516e::ParameterHandleValueMap parameterHandleValueMap;
-  if (!PyObject_GetParameterHandleValueMap(parameterHandleValueMap, arg2)) {
+  if (!PyObject_GetParameterHandleValueMap(state, parameterHandleValueMap, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an ParameterHandleValueMap!");
     return 0;
   }
 
   rti1516e::RegionHandleSet regionHandleSet;
-  if (!PyObject_GetRegionHandleSet(regionHandleSet, arg3)) {
+  if (!PyObject_GetRegionHandleSet(state, regionHandleSet, arg3)) {
     PyErr_SetString(PyExc_TypeError, "Third argument needs to be a RegionHandleSet!");
     return 0;
   }
@@ -5790,7 +6213,7 @@ PyRTIambassador_sendInteractionWithRegions(PyRTIambassadorObject *self, PyObject
   }
 
   RTI_UNIQUE_PTR<rti1516e::LogicalTime> logicalTime;
-  if (arg5 && !PyObject_GetLogicalTime(logicalTime, arg5, self->_logicaltimeFactoryName)) {
+  if (arg5 && !PyObject_GetLogicalTime(logicalTime, arg5, self->_federateAmbassador._logicaltimeFactoryName)) {
     PyErr_SetString(PyExc_TypeError, "Fifth argument needs to be a LogicalTime!");
     return 0;
   }
@@ -5799,11 +6222,11 @@ PyRTIambassador_sendInteractionWithRegions(PyRTIambassadorObject *self, PyObject
 
     if (logicalTime.get()) {
       rti1516e::MessageRetractionHandle messageRetractionHandle;
-      messageRetractionHandle = self->ob_value->sendInteractionWithRegions(interactionClassHandle, parameterHandleValueMap, regionHandleSet, tag, *logicalTime);
+      messageRetractionHandle = self->_federateAmbassador.ob_value->sendInteractionWithRegions(interactionClassHandle, parameterHandleValueMap, regionHandleSet, tag, *logicalTime);
 
-      return PyObject_NewMessageRetractionHandle(messageRetractionHandle);
+      return PyObject_NewMessageRetractionHandle(state, messageRetractionHandle);
     } else {
-      self->ob_value->sendInteractionWithRegions(interactionClassHandle, parameterHandleValueMap, regionHandleSet, tag);
+      self->_federateAmbassador.ob_value->sendInteractionWithRegions(interactionClassHandle, parameterHandleValueMap, regionHandleSet, tag);
 
       Py_IncRef(Py_None);
       return Py_None;
@@ -5826,18 +6249,20 @@ PyRTIambassador_sendInteractionWithRegions(PyRTIambassadorObject *self, PyObject
 static PyObject *
 PyRTIambassador_requestAttributeValueUpdateWithRegions(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "requestAttributeValueUpdateWithRegions", 3, 3, &arg1, &arg2, &arg3))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectClassHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandleSetRegionHandleSetPairVector attributeHandleSetRegionHandleSetPairVector;
-  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(attributeHandleSetRegionHandleSetPairVector, arg2)) {
+  if (!PyObject_GetAttributeHandleSetRegionHandleSetPairVector(state, attributeHandleSetRegionHandleSetPairVector, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandleSetRegionHandleSetPairVector!");
     return 0;
   }
@@ -5850,7 +6275,7 @@ PyRTIambassador_requestAttributeValueUpdateWithRegions(PyRTIambassadorObject *se
 
   try {
 
-    self->ob_value->requestAttributeValueUpdateWithRegions(objectClassHandle, attributeHandleSetRegionHandleSetPairVector, tag);
+    self->_federateAmbassador.ob_value->requestAttributeValueUpdateWithRegions(objectClassHandle, attributeHandleSetRegionHandleSetPairVector, tag);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5875,7 +6300,7 @@ PyRTIambassador_getAutomaticResignDirective(PyRTIambassadorObject *self, PyObjec
 
   try {
     rti1516e::ResignAction resignAction;
-    resignAction = self->ob_value->getAutomaticResignDirective();
+    resignAction = self->_federateAmbassador.ob_value->getAutomaticResignDirective();
     return PyObject_NewResignAction(resignAction);
   }
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -5898,7 +6323,7 @@ PyRTIambassador_setAutomaticResignDirective(PyRTIambassadorObject *self, PyObjec
 
   try {
 
-    self->ob_value->setAutomaticResignDirective(resignAction);
+    self->_federateAmbassador.ob_value->setAutomaticResignDirective(resignAction);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -5912,6 +6337,8 @@ PyRTIambassador_setAutomaticResignDirective(PyRTIambassadorObject *self, PyObjec
 static PyObject *
 PyRTIambassador_getFederateHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getFederateHandle", 1, 1, &arg1))
     return 0;
@@ -5923,8 +6350,8 @@ PyRTIambassador_getFederateHandle(PyRTIambassadorObject *self, PyObject *args)
   }
 
   try {
-    rti1516e::FederateHandle federateHandle = self->ob_value->getFederateHandle(theName);
-    return PyObject_NewFederateHandle(federateHandle);
+    rti1516e::FederateHandle federateHandle = self->_federateAmbassador.ob_value->getFederateHandle(theName);
+    return PyObject_NewFederateHandle(state, federateHandle);
   }
   CATCH_C_EXCEPTION(NameNotFound)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -5935,18 +6362,20 @@ PyRTIambassador_getFederateHandle(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_getFederateName(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getFederateName", 1, 1, &arg1))
     return 0;
 
   rti1516e::FederateHandle federateHandle;
-  if (!PyObject_GetFederateHandle(federateHandle, arg1)) {
+  if (!PyObject_GetFederateHandle(state, federateHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theHandle needs to be an FederateHandle!");
     return 0;
   }
 
   try {
-    std::wstring federateName = self->ob_value->getFederateName(federateHandle);
+    std::wstring federateName = self->_federateAmbassador.ob_value->getFederateName(federateHandle);
     return PyObject_NewString(federateName);
   }
   CATCH_C_EXCEPTION(InvalidFederateHandle)
@@ -5959,6 +6388,8 @@ PyRTIambassador_getFederateName(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_getObjectClassHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getObjectClassHandle", 1, 1, &arg1))
     return 0;
@@ -5970,8 +6401,8 @@ PyRTIambassador_getObjectClassHandle(PyRTIambassadorObject *self, PyObject *args
   }
 
   try {
-    rti1516e::ObjectClassHandle objectClassHandle = self->ob_value->getObjectClassHandle(theName);
-    return PyObject_NewObjectClassHandle(objectClassHandle);
+    rti1516e::ObjectClassHandle objectClassHandle = self->_federateAmbassador.ob_value->getObjectClassHandle(theName);
+    return PyObject_NewObjectClassHandle(state, objectClassHandle);
   }
   CATCH_C_EXCEPTION(NameNotFound)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -5982,18 +6413,20 @@ PyRTIambassador_getObjectClassHandle(PyRTIambassadorObject *self, PyObject *args
 static PyObject *
 PyRTIambassador_getObjectClassName(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getObjectClassName", 1, 1, &arg1))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theHandle needs to be an ObjectClassHandle!");
     return 0;
   }
 
   try {
-    std::wstring objectClassName = self->ob_value->getObjectClassName(objectClassHandle);
+    std::wstring objectClassName = self->_federateAmbassador.ob_value->getObjectClassName(objectClassHandle);
     return PyObject_NewString(objectClassName);
   }
   CATCH_C_EXCEPTION(InvalidObjectClassHandle)
@@ -6016,7 +6449,7 @@ PyRTIambassador_getUpdateRateValue(PyRTIambassadorObject *self, PyObject *args)
   }
 
   try {
-    double updateRate = self->ob_value->getUpdateRateValue(updateRateDesignator);
+    double updateRate = self->_federateAmbassador.ob_value->getUpdateRateValue(updateRateDesignator);
     return PyFloat_FromDouble(updateRate);
   }
   CATCH_C_EXCEPTION(InvalidUpdateRateDesignator)
@@ -6028,25 +6461,27 @@ PyRTIambassador_getUpdateRateValue(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_getUpdateRateValueForAttribute(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "getUpdateRateValueForAttribute", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "First Argument needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandle attributeHandle;
-  if (!PyObject_GetAttributeHandle(attributeHandle, arg2)) {
+  if (!PyObject_GetAttributeHandle(state, attributeHandle, arg2)) {
     PyErr_SetString(PyExc_TypeError, "Second argument needs to be an AttributeHandle!");
     return 0;
   }
 
   try {
 
-    self->ob_value->getUpdateRateValueForAttribute(objectInstanceHandle, attributeHandle);
+    self->_federateAmbassador.ob_value->getUpdateRateValueForAttribute(objectInstanceHandle, attributeHandle);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6061,12 +6496,14 @@ PyRTIambassador_getUpdateRateValueForAttribute(PyRTIambassadorObject *self, PyOb
 static PyObject *
 PyRTIambassador_getAttributeHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "getAttributeHandle", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "whichClass needs to be an ObjectClassHandle!");
     return 0;
   }
@@ -6078,8 +6515,8 @@ PyRTIambassador_getAttributeHandle(PyRTIambassadorObject *self, PyObject *args)
   }
 
   try {
-    rti1516e::AttributeHandle attributeHandle = self->ob_value->getAttributeHandle(objectClassHandle, theAttributeName);
-    return PyObject_NewAttributeHandle(attributeHandle);
+    rti1516e::AttributeHandle attributeHandle = self->_federateAmbassador.ob_value->getAttributeHandle(objectClassHandle, theAttributeName);
+    return PyObject_NewAttributeHandle(state, attributeHandle);
   }
   CATCH_C_EXCEPTION(NameNotFound)
   CATCH_C_EXCEPTION(InvalidObjectClassHandle)
@@ -6091,24 +6528,26 @@ PyRTIambassador_getAttributeHandle(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_getAttributeName(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "getAttributeName", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "whichClass needs to be an ObjectClassHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandle attributeHandle;
-  if (!PyObject_GetAttributeHandle(attributeHandle, arg2)) {
+  if (!PyObject_GetAttributeHandle(state, attributeHandle, arg2)) {
     PyErr_SetString(PyExc_TypeError, "theHandle needs to be an AttributeHandle!");
     return 0;
   }
 
   try {
-    std::wstring attributeName = self->ob_value->getAttributeName(objectClassHandle, attributeHandle);
+    std::wstring attributeName = self->_federateAmbassador.ob_value->getAttributeName(objectClassHandle, attributeHandle);
     return PyObject_NewString(attributeName);
   }
   CATCH_C_EXCEPTION(InvalidObjectClassHandle)
@@ -6122,6 +6561,8 @@ PyRTIambassador_getAttributeName(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_getInteractionClassHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getInteractionClassHandle", 1, 1, &arg1))
     return 0;
@@ -6133,8 +6574,8 @@ PyRTIambassador_getInteractionClassHandle(PyRTIambassadorObject *self, PyObject 
   }
 
   try {
-    rti1516e::InteractionClassHandle interactionClassHandle = self->ob_value->getInteractionClassHandle(theName);
-    return PyObject_NewInteractionClassHandle(interactionClassHandle);
+    rti1516e::InteractionClassHandle interactionClassHandle = self->_federateAmbassador.ob_value->getInteractionClassHandle(theName);
+    return PyObject_NewInteractionClassHandle(state, interactionClassHandle);
   }
   CATCH_C_EXCEPTION(NameNotFound)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -6145,18 +6586,20 @@ PyRTIambassador_getInteractionClassHandle(PyRTIambassadorObject *self, PyObject 
 static PyObject *
 PyRTIambassador_getInteractionClassName(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getInteractionClassName", 1, 1, &arg1))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theHandle needs to be an InteractionClassHandle!");
     return 0;
   }
 
   try {
-    std::wstring interactionClassName = self->ob_value->getInteractionClassName(interactionClassHandle);
+    std::wstring interactionClassName = self->_federateAmbassador.ob_value->getInteractionClassName(interactionClassHandle);
     return PyObject_NewString(interactionClassName);
   }
   CATCH_C_EXCEPTION(InvalidInteractionClassHandle)
@@ -6168,12 +6611,14 @@ PyRTIambassador_getInteractionClassName(PyRTIambassadorObject *self, PyObject *a
 static PyObject *
 PyRTIambassador_getParameterHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "getParameterHandle", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "whichClass needs to be an InteractionClassHandle!");
     return 0;
   }
@@ -6185,8 +6630,8 @@ PyRTIambassador_getParameterHandle(PyRTIambassadorObject *self, PyObject *args)
   }
 
   try {
-    rti1516e::ParameterHandle parameterHandle = self->ob_value->getParameterHandle(interactionClassHandle, theParameterName);
-    return PyObject_NewParameterHandle(parameterHandle);
+    rti1516e::ParameterHandle parameterHandle = self->_federateAmbassador.ob_value->getParameterHandle(interactionClassHandle, theParameterName);
+    return PyObject_NewParameterHandle(state, parameterHandle);
   }
   CATCH_C_EXCEPTION(InvalidInteractionClassHandle)
   CATCH_C_EXCEPTION(NameNotFound)
@@ -6198,24 +6643,26 @@ PyRTIambassador_getParameterHandle(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_getParameterName(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "getParameterName", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "whichClass needs to be an InteractionClassHandle!");
     return 0;
   }
 
   rti1516e::ParameterHandle parameterHandle;
-  if (!PyObject_GetParameterHandle(parameterHandle, arg2)) {
+  if (!PyObject_GetParameterHandle(state, parameterHandle, arg2)) {
     PyErr_SetString(PyExc_TypeError, "theHandle needs to be an ParameterHandle!");
     return 0;
   }
 
   try {
-    std::wstring parameterName = self->ob_value->getParameterName(interactionClassHandle, parameterHandle);
+    std::wstring parameterName = self->_federateAmbassador.ob_value->getParameterName(interactionClassHandle, parameterHandle);
     return PyObject_NewString(parameterName);
   }
   CATCH_C_EXCEPTION(InvalidInteractionClassHandle)
@@ -6229,6 +6676,8 @@ PyRTIambassador_getParameterName(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_getObjectInstanceHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getObjectInstanceHandle", 1, 1, &arg1))
     return 0;
@@ -6240,8 +6689,8 @@ PyRTIambassador_getObjectInstanceHandle(PyRTIambassadorObject *self, PyObject *a
   }
 
   try {
-    rti1516e::ObjectInstanceHandle objectInstanceHandle = self->ob_value->getObjectInstanceHandle(theName);
-    return PyObject_NewObjectInstanceHandle(objectInstanceHandle);
+    rti1516e::ObjectInstanceHandle objectInstanceHandle = self->_federateAmbassador.ob_value->getObjectInstanceHandle(theName);
+    return PyObject_NewObjectInstanceHandle(state, objectInstanceHandle);
   }
   CATCH_C_EXCEPTION(ObjectInstanceNotKnown)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -6252,18 +6701,20 @@ PyRTIambassador_getObjectInstanceHandle(PyRTIambassadorObject *self, PyObject *a
 static PyObject *
 PyRTIambassador_getObjectInstanceName(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getObjectInstanceName", 1, 1, &arg1))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theHandle needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   try {
-    std::wstring objectInstanceName = self->ob_value->getObjectInstanceName(objectInstanceHandle);
+    std::wstring objectInstanceName = self->_federateAmbassador.ob_value->getObjectInstanceName(objectInstanceHandle);
     return PyObject_NewString(objectInstanceName);
   }
   CATCH_C_EXCEPTION(ObjectInstanceNotKnown)
@@ -6275,6 +6726,8 @@ PyRTIambassador_getObjectInstanceName(PyRTIambassadorObject *self, PyObject *arg
 static PyObject *
 PyRTIambassador_getDimensionHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getDimensionHandle", 1, 1, &arg1))
     return 0;
@@ -6286,8 +6739,8 @@ PyRTIambassador_getDimensionHandle(PyRTIambassadorObject *self, PyObject *args)
   }
 
   try {
-    rti1516e::DimensionHandle dimensionHandle = self->ob_value->getDimensionHandle(theName);
-    return PyObject_NewDimensionHandle(dimensionHandle);
+    rti1516e::DimensionHandle dimensionHandle = self->_federateAmbassador.ob_value->getDimensionHandle(theName);
+    return PyObject_NewDimensionHandle(state, dimensionHandle);
   }
   CATCH_C_EXCEPTION(NameNotFound)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -6298,18 +6751,20 @@ PyRTIambassador_getDimensionHandle(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_getDimensionName(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getDimensionName", 1, 1, &arg1))
     return 0;
 
   rti1516e::DimensionHandle dimensionHandle;
-  if (!PyObject_GetDimensionHandle(dimensionHandle, arg1)) {
+  if (!PyObject_GetDimensionHandle(state, dimensionHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theHandle needs to be an DimensionHandle!");
     return 0;
   }
 
   try {
-    std::wstring dimensionName = self->ob_value->getDimensionName(dimensionHandle);
+    std::wstring dimensionName = self->_federateAmbassador.ob_value->getDimensionName(dimensionHandle);
     return PyObject_NewString(dimensionName);
   }
   CATCH_C_EXCEPTION(InvalidDimensionHandle)
@@ -6321,18 +6776,20 @@ PyRTIambassador_getDimensionName(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_getDimensionUpperBound(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getDimensionUpperBound", 1, 1, &arg1))
     return 0;
 
   rti1516e::DimensionHandle dimensionHandle;
-  if (!PyObject_GetDimensionHandle(dimensionHandle, arg1)) {
+  if (!PyObject_GetDimensionHandle(state, dimensionHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theHandle needs to be an DimensionHandle!");
     return 0;
   }
 
   try {
-    unsigned long upperBound = self->ob_value->getDimensionUpperBound(dimensionHandle);
+    unsigned long upperBound = self->_federateAmbassador.ob_value->getDimensionUpperBound(dimensionHandle);
     return PyLong_FromUnsignedLong(upperBound);
   }
   CATCH_C_EXCEPTION(InvalidDimensionHandle)
@@ -6344,19 +6801,21 @@ PyRTIambassador_getDimensionUpperBound(PyRTIambassadorObject *self, PyObject *ar
 static PyObject *
 PyRTIambassador_getKnownObjectClassHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getKnownObjectClassHandle", 1, 1, &arg1))
     return 0;
 
   rti1516e::ObjectInstanceHandle objectInstanceHandle;
-  if (!PyObject_GetObjectInstanceHandle(objectInstanceHandle, arg1)) {
+  if (!PyObject_GetObjectInstanceHandle(state, objectInstanceHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theObject needs to be an ObjectInstanceHandle!");
     return 0;
   }
 
   try {
-    rti1516e::ObjectClassHandle objectClassHandle = self->ob_value->getKnownObjectClassHandle(objectInstanceHandle);
-    return PyObject_NewObjectClassHandle(objectClassHandle);
+    rti1516e::ObjectClassHandle objectClassHandle = self->_federateAmbassador.ob_value->getKnownObjectClassHandle(objectInstanceHandle);
+    return PyObject_NewObjectClassHandle(state, objectClassHandle);
   }
   CATCH_C_EXCEPTION(ObjectInstanceNotKnown)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -6378,7 +6837,7 @@ PyRTIambassador_getTransportationType(PyRTIambassadorObject *self, PyObject *arg
   }
 
   try {
-    rti1516e::TransportationType transportationType = self->ob_value->getTransportationType(theName);
+    rti1516e::TransportationType transportationType = self->_federateAmbassador.ob_value->getTransportationType(theName);
     return PyObject_NewTransportationType(transportationType);
   }
   CATCH_C_EXCEPTION(InvalidTransportationName)
@@ -6401,7 +6860,7 @@ PyRTIambassador_getTransportationName(PyRTIambassadorObject *self, PyObject *arg
   }
 
   try {
-    std::wstring transportationName = self->ob_value->getTransportationName(transportationType);
+    std::wstring transportationName = self->_federateAmbassador.ob_value->getTransportationName(transportationType);
     return PyObject_NewString(transportationName);
   }
   CATCH_C_EXCEPTION(InvalidTransportationType)
@@ -6413,26 +6872,28 @@ PyRTIambassador_getTransportationName(PyRTIambassadorObject *self, PyObject *arg
 static PyObject *
 PyRTIambassador_getAvailableDimensionsForClassAttribute(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "getAvailableDimensionsForClassAttribute", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::ObjectClassHandle objectClassHandle;
-  if (!PyObject_GetObjectClassHandle(objectClassHandle, arg1)) {
+  if (!PyObject_GetObjectClassHandle(state, objectClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theClass needs to be an ObjectClassHandle!");
     return 0;
   }
 
   rti1516e::AttributeHandle attributeHandle;
-  if (!PyObject_GetAttributeHandle(attributeHandle, arg2)) {
+  if (!PyObject_GetAttributeHandle(state, attributeHandle, arg2)) {
     PyErr_SetString(PyExc_TypeError, "theHandle needs to be an AttributeHandle!");
     return 0;
   }
 
   try {
     rti1516e::DimensionHandleSet dimensionHandleSet;
-    dimensionHandleSet = self->ob_value->getAvailableDimensionsForClassAttribute(objectClassHandle, attributeHandle);
-    return PyObject_NewDimensionHandleSet(dimensionHandleSet);
+    dimensionHandleSet = self->_federateAmbassador.ob_value->getAvailableDimensionsForClassAttribute(objectClassHandle, attributeHandle);
+    return PyObject_NewDimensionHandleSet(state, dimensionHandleSet);
   }
   CATCH_C_EXCEPTION(AttributeNotDefined)
   CATCH_C_EXCEPTION(InvalidAttributeHandle)
@@ -6445,20 +6906,22 @@ PyRTIambassador_getAvailableDimensionsForClassAttribute(PyRTIambassadorObject *s
 static PyObject *
 PyRTIambassador_getAvailableDimensionsForInteractionClass(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getAvailableDimensionsForInteractionClass", 1, 1, &arg1))
     return 0;
 
   rti1516e::InteractionClassHandle interactionClassHandle;
-  if (!PyObject_GetInteractionClassHandle(interactionClassHandle, arg1)) {
+  if (!PyObject_GetInteractionClassHandle(state, interactionClassHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theClass needs to be an InteractionClassHandle!");
     return 0;
   }
 
   try {
     rti1516e::DimensionHandleSet dimensionHandleSet;
-    dimensionHandleSet = self->ob_value->getAvailableDimensionsForInteractionClass(interactionClassHandle);
-    return PyObject_NewDimensionHandleSet(dimensionHandleSet);
+    dimensionHandleSet = self->_federateAmbassador.ob_value->getAvailableDimensionsForInteractionClass(interactionClassHandle);
+    return PyObject_NewDimensionHandleSet(state, dimensionHandleSet);
   }
   CATCH_C_EXCEPTION(InvalidInteractionClassHandle)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -6480,7 +6943,7 @@ PyRTIambassador_getOrderType(PyRTIambassadorObject *self, PyObject *args)
   }
 
   try {
-    rti1516e::OrderType transportationType = self->ob_value->getOrderType(theName);
+    rti1516e::OrderType transportationType = self->_federateAmbassador.ob_value->getOrderType(theName);
     return PyObject_NewOrderType(transportationType);
   }
   CATCH_C_EXCEPTION(InvalidOrderName)
@@ -6503,7 +6966,7 @@ PyRTIambassador_getOrderName(PyRTIambassadorObject *self, PyObject *args)
   }
 
   try {
-    std::wstring transportationName = self->ob_value->getOrderName(transportationType);
+    std::wstring transportationName = self->_federateAmbassador.ob_value->getOrderName(transportationType);
     return PyObject_NewString(transportationName);
   }
   CATCH_C_EXCEPTION(InvalidOrderType)
@@ -6520,7 +6983,7 @@ PyRTIambassador_enableObjectClassRelevanceAdvisorySwitch(PyRTIambassadorObject *
 
   try {
 
-    self->ob_value->enableObjectClassRelevanceAdvisorySwitch();
+    self->_federateAmbassador.ob_value->enableObjectClassRelevanceAdvisorySwitch();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6541,7 +7004,7 @@ PyRTIambassador_disableObjectClassRelevanceAdvisorySwitch(PyRTIambassadorObject 
 
   try {
 
-    self->ob_value->disableObjectClassRelevanceAdvisorySwitch();
+    self->_federateAmbassador.ob_value->disableObjectClassRelevanceAdvisorySwitch();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6562,7 +7025,7 @@ PyRTIambassador_enableAttributeRelevanceAdvisorySwitch(PyRTIambassadorObject *se
 
   try {
 
-    self->ob_value->enableAttributeRelevanceAdvisorySwitch();
+    self->_federateAmbassador.ob_value->enableAttributeRelevanceAdvisorySwitch();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6583,7 +7046,7 @@ PyRTIambassador_disableAttributeRelevanceAdvisorySwitch(PyRTIambassadorObject *s
 
   try {
 
-    self->ob_value->disableAttributeRelevanceAdvisorySwitch();
+    self->_federateAmbassador.ob_value->disableAttributeRelevanceAdvisorySwitch();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6604,7 +7067,7 @@ PyRTIambassador_enableAttributeScopeAdvisorySwitch(PyRTIambassadorObject *self, 
 
   try {
 
-    self->ob_value->enableAttributeScopeAdvisorySwitch();
+    self->_federateAmbassador.ob_value->enableAttributeScopeAdvisorySwitch();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6625,7 +7088,7 @@ PyRTIambassador_disableAttributeScopeAdvisorySwitch(PyRTIambassadorObject *self,
 
   try {
 
-    self->ob_value->disableAttributeScopeAdvisorySwitch();
+    self->_federateAmbassador.ob_value->disableAttributeScopeAdvisorySwitch();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6646,7 +7109,7 @@ PyRTIambassador_enableInteractionRelevanceAdvisorySwitch(PyRTIambassadorObject *
 
   try {
 
-    self->ob_value->enableInteractionRelevanceAdvisorySwitch();
+    self->_federateAmbassador.ob_value->enableInteractionRelevanceAdvisorySwitch();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6667,7 +7130,7 @@ PyRTIambassador_disableInteractionRelevanceAdvisorySwitch(PyRTIambassadorObject 
 
   try {
 
-    self->ob_value->disableInteractionRelevanceAdvisorySwitch();
+    self->_federateAmbassador.ob_value->disableInteractionRelevanceAdvisorySwitch();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6683,20 +7146,22 @@ PyRTIambassador_disableInteractionRelevanceAdvisorySwitch(PyRTIambassadorObject 
 static PyObject *
 PyRTIambassador_getDimensionHandleSet(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "getDimensionHandleSet", 1, 1, &arg1))
     return 0;
 
   rti1516e::RegionHandle regionHandle;
-  if (!PyObject_GetRegionHandle(regionHandle, arg1)) {
+  if (!PyObject_GetRegionHandle(state, regionHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theRegionHandle needs to be an RegionHandle!");
     return 0;
   }
 
   try {
     rti1516e::DimensionHandleSet dimensionHandleSet;
-    dimensionHandleSet = self->ob_value->getDimensionHandleSet(regionHandle);
-    return PyObject_NewDimensionHandleSet(dimensionHandleSet);
+    dimensionHandleSet = self->_federateAmbassador.ob_value->getDimensionHandleSet(regionHandle);
+    return PyObject_NewDimensionHandleSet(state, dimensionHandleSet);
   }
   CATCH_C_EXCEPTION(InvalidRegion)
   CATCH_C_EXCEPTION(SaveInProgress)
@@ -6709,24 +7174,26 @@ PyRTIambassador_getDimensionHandleSet(PyRTIambassadorObject *self, PyObject *arg
 static PyObject *
 PyRTIambassador_getRangeBounds(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0;
   if (!PyArg_UnpackTuple(args, "getRangeBounds", 2, 2, &arg1, &arg2))
     return 0;
 
   rti1516e::RegionHandle regionHandle;
-  if (!PyObject_GetRegionHandle(regionHandle, arg1)) {
+  if (!PyObject_GetRegionHandle(state, regionHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theRegionHandle needs to be an RegionHandle!");
     return 0;
   }
 
   rti1516e::DimensionHandle dimensionHandle;
-  if (!PyObject_GetDimensionHandle(dimensionHandle, arg2)) {
+  if (!PyObject_GetDimensionHandle(state, dimensionHandle, arg2)) {
     PyErr_SetString(PyExc_TypeError, "theDimensionHandle needs to be an DimensionHandle!");
     return 0;
   }
 
   try {
-    rti1516e::RangeBounds rangeBounds = self->ob_value->getRangeBounds(regionHandle, dimensionHandle);
+    rti1516e::RangeBounds rangeBounds = self->_federateAmbassador.ob_value->getRangeBounds(regionHandle, dimensionHandle);
     return PyObject_NewRangeBounds(rangeBounds);
   }
   CATCH_C_EXCEPTION(InvalidRegion)
@@ -6741,18 +7208,20 @@ PyRTIambassador_getRangeBounds(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_setRangeBounds(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0, *arg2 = 0, *arg3 = 0;
   if (!PyArg_UnpackTuple(args, "setRangeBounds", 3, 3, &arg1, &arg2, &arg3))
     return 0;
 
   rti1516e::RegionHandle regionHandle;
-  if (!PyObject_GetRegionHandle(regionHandle, arg1)) {
+  if (!PyObject_GetRegionHandle(state, regionHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theRegionHandle needs to be an RegionHandle!");
     return 0;
   }
 
   rti1516e::DimensionHandle dimensionHandle;
-  if (!PyObject_GetDimensionHandle(dimensionHandle, arg2)) {
+  if (!PyObject_GetDimensionHandle(state, dimensionHandle, arg2)) {
     PyErr_SetString(PyExc_TypeError, "theDimensionHandle needs to be an DimensionHandle!");
     return 0;
   }
@@ -6764,7 +7233,7 @@ PyRTIambassador_setRangeBounds(PyRTIambassadorObject *self, PyObject *args)
   }
 
   try {
-    self->ob_value->setRangeBounds(regionHandle, dimensionHandle, rangeBounds);
+    self->_federateAmbassador.ob_value->setRangeBounds(regionHandle, dimensionHandle, rangeBounds);
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6782,18 +7251,20 @@ PyRTIambassador_setRangeBounds(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_normalizeFederateHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "normalizeFederateHandle", 1, 1, &arg1))
     return 0;
 
   rti1516e::FederateHandle federateHandle;
-  if (!PyObject_GetFederateHandle(federateHandle, arg1)) {
+  if (!PyObject_GetFederateHandle(state, federateHandle, arg1)) {
     PyErr_SetString(PyExc_TypeError, "theFederateHandle needs to be a FederateHandle!");
     return 0;
   }
 
   try {
-    unsigned long normalized = self->ob_value->normalizeFederateHandle(federateHandle);
+    unsigned long normalized = self->_federateAmbassador.ob_value->normalizeFederateHandle(federateHandle);
     return PyLong_FromLongLong(normalized);
   }
   CATCH_C_EXCEPTION(InvalidFederateHandle)
@@ -6816,7 +7287,7 @@ PyRTIambassador_normalizeServiceGroup(PyRTIambassadorObject *self, PyObject *arg
   }
 
   try {
-    unsigned long normalized = self->ob_value->normalizeServiceGroup(serviceGroup);
+    unsigned long normalized = self->_federateAmbassador.ob_value->normalizeServiceGroup(serviceGroup);
     return PyLong_FromLongLong(normalized);
   }
   CATCH_C_EXCEPTION(InvalidFederateHandle)
@@ -6842,7 +7313,7 @@ PyRTIambassador_evokeCallback(PyRTIambassadorObject *self, PyObject *args)
     bool more = false;
     {
       PyRTI1516EFederateAmbassador::ReleaseGILScope releaseGILScope(self->_federateAmbassador);
-      more = self->ob_value->evokeCallback(approximateMinimumTimeInSeconds);
+      more = self->_federateAmbassador.ob_value->evokeCallback(approximateMinimumTimeInSeconds);
     }
 
     return PyBool_FromLong(more);
@@ -6874,7 +7345,7 @@ PyRTIambassador_evokeMultipleCallbacks(PyRTIambassadorObject *self, PyObject *ar
     bool more = false;
     {
       PyRTI1516EFederateAmbassador::ReleaseGILScope releaseGILScope(self->_federateAmbassador);
-      more = self->ob_value->evokeMultipleCallbacks(approximateMinimumTimeInSeconds,
+      more = self->_federateAmbassador.ob_value->evokeMultipleCallbacks(approximateMinimumTimeInSeconds,
                                                     approximateMaximumTimeInSeconds);
     }
 
@@ -6891,7 +7362,7 @@ PyRTIambassador_enableCallbacks(PyRTIambassadorObject *self, PyObject *args)
     return 0;
 
   try {
-    self->ob_value->enableCallbacks();
+    self->_federateAmbassador.ob_value->enableCallbacks();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6908,7 +7379,7 @@ PyRTIambassador_disableCallbacks(PyRTIambassadorObject *self, PyObject *args)
     return 0;
 
   try {
-    self->ob_value->disableCallbacks();
+    self->_federateAmbassador.ob_value->disableCallbacks();
 
     Py_IncRef(Py_None);
     return Py_None;
@@ -6926,7 +7397,7 @@ PyRTIambassador_getTimeFactory(PyRTIambassadorObject *self, PyObject *args)
 
   try {
     RTI_UNIQUE_PTR<rti1516e::LogicalTimeFactory> logicalTimeFactory;
-    logicalTimeFactory = self->ob_value->getTimeFactory();
+    logicalTimeFactory = self->_federateAmbassador.ob_value->getTimeFactory();
     // FIXME need a time factory object
     return 0;
   }
@@ -6939,6 +7410,8 @@ PyRTIambassador_getTimeFactory(PyRTIambassadorObject *self, PyObject *args)
 static PyObject *
 PyRTIambassador_decodeFederateHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "decodeFederateHandle", 1, 1, &arg1))
     return 0;
@@ -6951,8 +7424,8 @@ PyRTIambassador_decodeFederateHandle(PyRTIambassadorObject *self, PyObject *args
 
   try {
     rti1516e::FederateHandle federateHandle;
-    federateHandle = self->ob_value->decodeFederateHandle(variableLengthData);
-    return PyObject_NewFederateHandle(federateHandle);
+    federateHandle = self->_federateAmbassador.ob_value->decodeFederateHandle(variableLengthData);
+    return PyObject_NewFederateHandle(state, federateHandle);
   }
   CATCH_C_EXCEPTION(CouldNotDecode)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -6963,6 +7436,8 @@ PyRTIambassador_decodeFederateHandle(PyRTIambassadorObject *self, PyObject *args
 static PyObject *
 PyRTIambassador_decodeObjectClassHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "decodeObjectClassHandle", 1, 1, &arg1))
     return 0;
@@ -6975,8 +7450,8 @@ PyRTIambassador_decodeObjectClassHandle(PyRTIambassadorObject *self, PyObject *a
 
   try {
     rti1516e::ObjectClassHandle objectClassHandle;
-    objectClassHandle = self->ob_value->decodeObjectClassHandle(variableLengthData);
-    return PyObject_NewObjectClassHandle(objectClassHandle);
+    objectClassHandle = self->_federateAmbassador.ob_value->decodeObjectClassHandle(variableLengthData);
+    return PyObject_NewObjectClassHandle(state, objectClassHandle);
   }
   CATCH_C_EXCEPTION(CouldNotDecode)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -6987,6 +7462,8 @@ PyRTIambassador_decodeObjectClassHandle(PyRTIambassadorObject *self, PyObject *a
 static PyObject *
 PyRTIambassador_decodeInteractionClassHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "decodeInteractionClassHandle", 1, 1, &arg1))
     return 0;
@@ -6999,8 +7476,8 @@ PyRTIambassador_decodeInteractionClassHandle(PyRTIambassadorObject *self, PyObje
 
   try {
     rti1516e::InteractionClassHandle interactionClassHandle;
-    interactionClassHandle = self->ob_value->decodeInteractionClassHandle(variableLengthData);
-    return PyObject_NewInteractionClassHandle(interactionClassHandle);
+    interactionClassHandle = self->_federateAmbassador.ob_value->decodeInteractionClassHandle(variableLengthData);
+    return PyObject_NewInteractionClassHandle(state, interactionClassHandle);
   }
   CATCH_C_EXCEPTION(CouldNotDecode)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -7011,6 +7488,8 @@ PyRTIambassador_decodeInteractionClassHandle(PyRTIambassadorObject *self, PyObje
 static PyObject *
 PyRTIambassador_decodeObjectInstanceHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "decodeObjectInstanceHandle", 1, 1, &arg1))
     return 0;
@@ -7023,8 +7502,8 @@ PyRTIambassador_decodeObjectInstanceHandle(PyRTIambassadorObject *self, PyObject
 
   try {
     rti1516e::ObjectInstanceHandle objectInstanceHandle;
-    objectInstanceHandle = self->ob_value->decodeObjectInstanceHandle(variableLengthData);
-    return PyObject_NewObjectInstanceHandle(objectInstanceHandle);
+    objectInstanceHandle = self->_federateAmbassador.ob_value->decodeObjectInstanceHandle(variableLengthData);
+    return PyObject_NewObjectInstanceHandle(state, objectInstanceHandle);
   }
   CATCH_C_EXCEPTION(CouldNotDecode)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -7035,6 +7514,8 @@ PyRTIambassador_decodeObjectInstanceHandle(PyRTIambassadorObject *self, PyObject
 static PyObject *
 PyRTIambassador_decodeAttributeHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "decodeAttributeHandle", 1, 1, &arg1))
     return 0;
@@ -7047,8 +7528,8 @@ PyRTIambassador_decodeAttributeHandle(PyRTIambassadorObject *self, PyObject *arg
 
   try {
     rti1516e::AttributeHandle attributeHandle;
-    attributeHandle = self->ob_value->decodeAttributeHandle(variableLengthData);
-    return PyObject_NewAttributeHandle(attributeHandle);
+    attributeHandle = self->_federateAmbassador.ob_value->decodeAttributeHandle(variableLengthData);
+    return PyObject_NewAttributeHandle(state, attributeHandle);
   }
   CATCH_C_EXCEPTION(CouldNotDecode)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -7059,6 +7540,8 @@ PyRTIambassador_decodeAttributeHandle(PyRTIambassadorObject *self, PyObject *arg
 static PyObject *
 PyRTIambassador_decodeParameterHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "decodeParameterHandle", 1, 1, &arg1))
     return 0;
@@ -7071,8 +7554,8 @@ PyRTIambassador_decodeParameterHandle(PyRTIambassadorObject *self, PyObject *arg
 
   try {
     rti1516e::ParameterHandle parameterHandle;
-    parameterHandle = self->ob_value->decodeParameterHandle(variableLengthData);
-    return PyObject_NewParameterHandle(parameterHandle);
+    parameterHandle = self->_federateAmbassador.ob_value->decodeParameterHandle(variableLengthData);
+    return PyObject_NewParameterHandle(state, parameterHandle);
   }
   CATCH_C_EXCEPTION(CouldNotDecode)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -7083,6 +7566,8 @@ PyRTIambassador_decodeParameterHandle(PyRTIambassadorObject *self, PyObject *arg
 static PyObject *
 PyRTIambassador_decodeDimensionHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "decodeDimensionHandle", 1, 1, &arg1))
     return 0;
@@ -7095,8 +7580,8 @@ PyRTIambassador_decodeDimensionHandle(PyRTIambassadorObject *self, PyObject *arg
 
   try {
     rti1516e::DimensionHandle dimensionHandle;
-    dimensionHandle = self->ob_value->decodeDimensionHandle(variableLengthData);
-    return PyObject_NewDimensionHandle(dimensionHandle);
+    dimensionHandle = self->_federateAmbassador.ob_value->decodeDimensionHandle(variableLengthData);
+    return PyObject_NewDimensionHandle(state, dimensionHandle);
   }
   CATCH_C_EXCEPTION(CouldNotDecode)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -7107,6 +7592,8 @@ PyRTIambassador_decodeDimensionHandle(PyRTIambassadorObject *self, PyObject *arg
 static PyObject *
 PyRTIambassador_decodeMessageRetractionHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "decodeMessageRetractionHandle", 1, 1, &arg1))
     return 0;
@@ -7119,8 +7606,8 @@ PyRTIambassador_decodeMessageRetractionHandle(PyRTIambassadorObject *self, PyObj
 
   try {
     rti1516e::MessageRetractionHandle messageRetractionHandle;
-    messageRetractionHandle = self->ob_value->decodeMessageRetractionHandle(variableLengthData);
-    return PyObject_NewMessageRetractionHandle(messageRetractionHandle);
+    messageRetractionHandle = self->_federateAmbassador.ob_value->decodeMessageRetractionHandle(variableLengthData);
+    return PyObject_NewMessageRetractionHandle(state, messageRetractionHandle);
   }
   CATCH_C_EXCEPTION(CouldNotDecode)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -7131,6 +7618,8 @@ PyRTIambassador_decodeMessageRetractionHandle(PyRTIambassadorObject *self, PyObj
 static PyObject *
 PyRTIambassador_decodeRegionHandle(PyRTIambassadorObject *self, PyObject *args)
 {
+  const PyRTI1516EModuleState& state = PyRTIambassador_GetModuleState(self);
+
   PyObject *arg1 = 0;
   if (!PyArg_UnpackTuple(args, "decodeRegionHandle", 1, 1, &arg1))
     return 0;
@@ -7143,8 +7632,8 @@ PyRTIambassador_decodeRegionHandle(PyRTIambassadorObject *self, PyObject *args)
 
   try {
     rti1516e::RegionHandle regionHandle;
-    regionHandle = self->ob_value->decodeRegionHandle(variableLengthData);
-    return PyObject_NewRegionHandle(regionHandle);
+    regionHandle = self->_federateAmbassador.ob_value->decodeRegionHandle(variableLengthData);
+    return PyObject_NewRegionHandle(state, regionHandle);
   }
   CATCH_C_EXCEPTION(CouldNotDecode)
   CATCH_C_EXCEPTION(FederateNotExecutionMember)
@@ -7301,34 +7790,38 @@ static PyMethodDef PyRTIambassador_methods[] =
 static PyObject*
 PyObject_NewRTIambassador(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
+  PyRTI1516EModuleState* state = PyRTI1516EType_GetModuleState(type);
+  if (!state) {
+    PyErr_SetString(PyExc_RuntimeError, "Cannot find module state!");
+    return 0;
+  }
+
   if (!PyArg_UnpackTuple(args, "RTIambassador", 0, 0))
     return 0;
 
   RTI_UNIQUE_PTR<rti1516e::RTIambassador> ambassador;
   ambassador = rti1516e::RTIambassadorFactory().createRTIambassador();
   if (!ambassador.get()) {
-    PyErr_SetRTIinternalError("Cannot create RTIambassador!");
+    PyErr_SetRTIinternalError(*state, "Cannot create RTIambassador!");
     return 0;
   }
 
-  PyRTIambassadorObject *self = PyObject_GC_New(PyRTIambassadorObject, type);
+  PyRTIambassadorObject *self;
+  self = (PyRTIambassadorObject*)PyType_GenericNew(type, NULL, NULL);
   if (!self)
     return 0;
-  new (self) PyRTIambassadorObject;
-  self->ob_value.reset(ambassador.release());
 
-  PyObject_GC_Track(self);
+  new (&self->_federateAmbassador) PyRTI1516EFederateAmbassador(*state);
+  self->_federateAmbassador.ob_value.reset(ambassador.release());
 
   return (PyObject*)self;
 }
 
 static void
-PyRTIambassadorObject_dealloc(PyRTIambassadorObject *o)
+PyRTIambassadorObject_dealloc(PyRTIambassadorObject *self)
 {
-  PyObject_GC_UnTrack(o);
-
-  o->PyRTIambassadorObject::~PyRTIambassadorObject();
-  Py_TYPE(o)->tp_free(o);
+  self->_federateAmbassador.~PyRTI1516EFederateAmbassador();
+  PyRTI1516EObject_Dealloc((PyObject*)self);
 }
 
 static int
@@ -7345,219 +7838,36 @@ PyRTIambassadorObject_clear(PyRTIambassadorObject *o)
   return 0;
 }
 
-static PyTypeObject PyRTIambassadorType = {
-  PyVarObject_HEAD_INIT(&PyType_Type, 0)
-  "RTIambassador",                  /* tp_name */
-  sizeof(PyRTIambassadorObject),    /* tp_basicsize */
-  0,                                /* tp_itemsize */
-  (destructor)PyRTIambassadorObject_dealloc, /* tp_dealloc */
-  0,                                /* tp_print */
-  0,                                /* tp_getattr */
-  0,                                /* tp_setattr */
-  0,                                /* tp_compare */
-  0,                                /* tp_repr */
-  0,                                /* tp_as_number */
-  0,                                /* tp_as_sequence */
-  0,                                /* tp_as_mapping */
-  0,                                /* tp_hash */
-  0,                                /* tp_call */
-  0,                                /* tp_str */
-  0,                                /* tp_getattro */
-  0,                                /* tp_setattro */
-  0,                                /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_BASETYPE, /* tp_flags */
-  PyDoc_STR("RTIambassador"),       /* tp_doc */
-  (traverseproc)PyRTIambassadorObject_traverse, /* tp_traverse */
-  (inquiry)PyRTIambassadorObject_clear, /* tp_clear */
-  0,                                /* tp_richcompare */
-  0,                                /* tp_weaklistoffset */
-  0,                                /* tp_iter */
-  0,                                /* tp_iternext */
-  PyRTIambassador_methods,          /* tp_methods */
-  0,                                /* tp_members */
-  0,                                /* tp_getset */
-  0,                                /* tp_base */
-  0,                                /* tp_dict */
-  0,                                /* tp_descr_get */
-  0,                                /* tp_descr_set */
-  0,                                /* tp_dictoffset */
-  0,                                /* tp_init */
-  0,                                /* tp_alloc */
-  PyObject_NewRTIambassador,        /* tp_new */
+static PyRTIType_Slot PyRTIambassadorType_Type_slots[] = {
+  {PyRTI_tp_doc, (void*)PyDoc_STR("RTIambassador")},
+  {PyRTI_tp_new, (void*)PyObject_NewRTIambassador},
+  {PyRTI_tp_dealloc, (void*)PyRTIambassadorObject_dealloc},
+  {PyRTI_tp_traverse, (void*)PyRTIambassadorObject_traverse},
+  {PyRTI_tp_clear, (void*)PyRTIambassadorObject_clear},
+  {PyRTI_tp_methods, (void*)PyRTIambassador_methods},
+  {0, NULL}
 };
 
-static int PyRTIambassadorType_Ready()
-{
-  return PyTypeObject_Ready(&PyRTIambassadorType);
-}
+static PyRTIType_Spec PyRTIambassadorType_Type_spec = {
+  "rti1516e.RTIambassador",                                              /* name */
+  sizeof(PyRTIambassadorObject),                                         /* basicsize */
+  0,                                                                     /* itemsize */
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_BASETYPE,         /* flags */
+  PyRTIambassadorType_Type_slots,
+};
 
 static int PyModule_AddRTIambassadorType(PyObject* m)
 {
-  return PyModule_AddTypeObject(m, "RTIambassador", &PyRTIambassadorType);
+  return PyRTI1516EModule_AddType(m, "RTIambassador", RTIambassadorIndex, &PyRTIambassadorType_Type_spec);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // building blocks for module initialization
 
-static PyMethodDef rti1516e_methods[] = {
-    {NULL, NULL}
-};
-
-static int
-type_ready(void)
+static int rti1516e_mod_exec(PyObject *m)
 {
 #define RTI_EXCEPTION(ExceptionKind)                                          \
-  if (Py ## ExceptionKind ## Type_Ready() < 0)                                \
-    return -1
-
-  RTI_EXCEPTION(Exception);
-  RTI_EXCEPTION(AlreadyConnected);
-  RTI_EXCEPTION(AsynchronousDeliveryAlreadyDisabled);
-  RTI_EXCEPTION(AsynchronousDeliveryAlreadyEnabled);
-  RTI_EXCEPTION(AttributeAcquisitionWasNotCanceled);
-  RTI_EXCEPTION(AttributeAcquisitionWasNotRequested);
-  RTI_EXCEPTION(AttributeAlreadyBeingAcquired);
-  RTI_EXCEPTION(AttributeAlreadyBeingChanged);
-  RTI_EXCEPTION(AttributeAlreadyBeingDivested);
-  RTI_EXCEPTION(AttributeAlreadyOwned);
-  RTI_EXCEPTION(AttributeDivestitureWasNotRequested);
-  RTI_EXCEPTION(AttributeNotDefined);
-  RTI_EXCEPTION(AttributeNotOwned);
-  RTI_EXCEPTION(AttributeNotPublished);
-  RTI_EXCEPTION(AttributeNotRecognized);
-  RTI_EXCEPTION(AttributeNotSubscribed);
-  RTI_EXCEPTION(AttributeRelevanceAdvisorySwitchIsOff);
-  RTI_EXCEPTION(AttributeRelevanceAdvisorySwitchIsOn);
-  RTI_EXCEPTION(AttributeScopeAdvisorySwitchIsOff);
-  RTI_EXCEPTION(AttributeScopeAdvisorySwitchIsOn);
-  RTI_EXCEPTION(BadInitializationParameter);
-  RTI_EXCEPTION(CallNotAllowedFromWithinCallback);
-  RTI_EXCEPTION(ConnectionFailed);
-  RTI_EXCEPTION(CouldNotCreateLogicalTimeFactory);
-  RTI_EXCEPTION(CouldNotDecode);
-  RTI_EXCEPTION(CouldNotDiscover);
-  RTI_EXCEPTION(CouldNotEncode);
-  RTI_EXCEPTION(CouldNotOpenFDD);
-  RTI_EXCEPTION(CouldNotOpenMIM);
-  RTI_EXCEPTION(CouldNotInitiateRestore);
-  RTI_EXCEPTION(DeletePrivilegeNotHeld);
-  RTI_EXCEPTION(DesignatorIsHLAstandardMIM);
-  RTI_EXCEPTION(ErrorReadingMIM);
-  RTI_EXCEPTION(RequestForTimeConstrainedPending);
-  RTI_EXCEPTION(NoRequestToEnableTimeConstrainedWasPending);
-  RTI_EXCEPTION(RequestForTimeRegulationPending);
-  RTI_EXCEPTION(NoRequestToEnableTimeRegulationWasPending);
-  RTI_EXCEPTION(ErrorReadingFDD);
-  RTI_EXCEPTION(FederateAlreadyExecutionMember);
-  RTI_EXCEPTION(FederateHasNotBegunSave);
-  RTI_EXCEPTION(FederateInternalError);
-  RTI_EXCEPTION(FederateIsExecutionMember);
-  RTI_EXCEPTION(FederateNameAlreadyInUse);
-  RTI_EXCEPTION(FederateNotExecutionMember);
-  RTI_EXCEPTION(FederateHandleNotKnown);
-  RTI_EXCEPTION(FederateOwnsAttributes);
-  RTI_EXCEPTION(FederateServiceInvocationsAreBeingReportedViaMOM);
-  RTI_EXCEPTION(FederateUnableToUseTime);
-  RTI_EXCEPTION(FederatesCurrentlyJoined);
-  RTI_EXCEPTION(FederationExecutionAlreadyExists);
-  RTI_EXCEPTION(FederationExecutionDoesNotExist);
-  RTI_EXCEPTION(IllegalName);
-  RTI_EXCEPTION(IllegalTimeArithmetic);
-  RTI_EXCEPTION(InconsistentFDD);
-  RTI_EXCEPTION(InteractionClassAlreadyBeingChanged);
-  RTI_EXCEPTION(InteractionClassNotDefined);
-  RTI_EXCEPTION(InteractionClassNotPublished);
-  RTI_EXCEPTION(InteractionClassNotRecognized);
-  RTI_EXCEPTION(InteractionClassNotSubscribed);
-  RTI_EXCEPTION(InteractionParameterNotDefined);
-  RTI_EXCEPTION(InteractionParameterNotRecognized);
-  RTI_EXCEPTION(InteractionRelevanceAdvisorySwitchIsOff);
-  RTI_EXCEPTION(InteractionRelevanceAdvisorySwitchIsOn);
-  RTI_EXCEPTION(InTimeAdvancingState);
-  RTI_EXCEPTION(InvalidAttributeHandle);
-  RTI_EXCEPTION(InvalidDimensionHandle);
-  RTI_EXCEPTION(InvalidFederateHandle);
-  RTI_EXCEPTION(InvalidInteractionClassHandle);
-  RTI_EXCEPTION(InvalidLocalSettingsDesignator);
-  RTI_EXCEPTION(InvalidLogicalTime);
-  RTI_EXCEPTION(InvalidLogicalTimeInterval);
-  RTI_EXCEPTION(InvalidLookahead);
-  RTI_EXCEPTION(InvalidObjectClassHandle);
-  RTI_EXCEPTION(InvalidOrderName);
-  RTI_EXCEPTION(InvalidOrderType);
-  RTI_EXCEPTION(InvalidParameterHandle);
-  RTI_EXCEPTION(InvalidRangeBound);
-  RTI_EXCEPTION(InvalidRegion);
-  RTI_EXCEPTION(InvalidRegionContext);
-  RTI_EXCEPTION(InvalidResignAction);
-  RTI_EXCEPTION(InvalidUpdateRateDesignator);
-  RTI_EXCEPTION(InvalidMessageRetractionHandle);
-  RTI_EXCEPTION(InvalidServiceGroup);
-  RTI_EXCEPTION(InvalidTransportationName);
-  RTI_EXCEPTION(InvalidTransportationType);
-  RTI_EXCEPTION(JoinedFederateIsNotInTimeAdvancingState);
-  RTI_EXCEPTION(LogicalTimeAlreadyPassed);
-  RTI_EXCEPTION(MessageCanNoLongerBeRetracted);
-  RTI_EXCEPTION(NameNotFound);
-  RTI_EXCEPTION(NameSetWasEmpty);
-  RTI_EXCEPTION(NoAcquisitionPending);
-  RTI_EXCEPTION(NotConnected);
-  RTI_EXCEPTION(ObjectClassNotDefined);
-  RTI_EXCEPTION(ObjectClassNotKnown);
-  RTI_EXCEPTION(ObjectClassNotPublished);
-  RTI_EXCEPTION(ObjectClassRelevanceAdvisorySwitchIsOff);
-  RTI_EXCEPTION(ObjectClassRelevanceAdvisorySwitchIsOn);
-  RTI_EXCEPTION(ObjectInstanceNameInUse);
-  RTI_EXCEPTION(ObjectInstanceNameNotReserved);
-  RTI_EXCEPTION(ObjectInstanceNotKnown);
-  RTI_EXCEPTION(OwnershipAcquisitionPending);
-  RTI_EXCEPTION(RTIinternalError);
-  RTI_EXCEPTION(RegionDoesNotContainSpecifiedDimension);
-  RTI_EXCEPTION(RegionInUseForUpdateOrSubscription);
-  RTI_EXCEPTION(RegionNotCreatedByThisFederate);
-  RTI_EXCEPTION(RestoreInProgress);
-  RTI_EXCEPTION(RestoreNotInProgress);
-  RTI_EXCEPTION(RestoreNotRequested);
-  RTI_EXCEPTION(SaveInProgress);
-  RTI_EXCEPTION(SaveNotInProgress);
-  RTI_EXCEPTION(SaveNotInitiated);
-  RTI_EXCEPTION(SpecifiedSaveLabelDoesNotExist);
-  RTI_EXCEPTION(SynchronizationPointLabelNotAnnounced);
-  RTI_EXCEPTION(TimeConstrainedAlreadyEnabled);
-  RTI_EXCEPTION(TimeConstrainedIsNotEnabled);
-  RTI_EXCEPTION(TimeRegulationAlreadyEnabled);
-  RTI_EXCEPTION(TimeRegulationIsNotEnabled);
-  RTI_EXCEPTION(UnableToPerformSave);
-  RTI_EXCEPTION(UnknownName);
-  RTI_EXCEPTION(UnsupportedCallbackModel);
-  RTI_EXCEPTION(InternalError);
-#undef RTI_EXCEPTION
-
-#define RTI_HANDLE(HandleKind)                                             \
-  if (Py ## HandleKind ## Type_Ready() < 0)                                \
-    return -1
-
-  RTI_HANDLE(FederateHandle);
-  RTI_HANDLE(ObjectClassHandle);
-  RTI_HANDLE(InteractionClassHandle);
-  RTI_HANDLE(ObjectInstanceHandle);
-  RTI_HANDLE(AttributeHandle);
-  RTI_HANDLE(ParameterHandle);
-  RTI_HANDLE(DimensionHandle);
-  RTI_HANDLE(RegionHandle);
-  RTI_HANDLE(MessageRetractionHandle);
-#undef RTI_HANDLE
-
-  if (PyRTIambassadorType_Ready() < 0)
-    return -1;
-
-  return 0;
-}
-
-static int exec_module(PyObject *m)
-{
-#define RTI_EXCEPTION(ExceptionKind)                                          \
-  if (PyModule_Add ## ExceptionKind ## Type(m) < 0)                           \
+  if (PyModule_Add ## ExceptionKind ## Type(m) < 0)                          \
     return -1
 
   RTI_EXCEPTION(Exception);
@@ -7771,58 +8081,20 @@ static int exec_module(PyObject *m)
 PyMODINIT_FUNC
 initrti1516e(void)
 {
-  if (type_ready() < 0)
-    return;
-
   PyObject* m = Py_InitModule3("rti1516e", rti1516e_methods, "rti1516e RTI/HLA backend implementation.");
   if (!m)
     return;
 
-  exec_module(m);
+  rti1516e_mod_exec(m);
 }
 
 #else
 
 // python 3 initialization
 
-#ifdef Py_mod_exec
-static PyModuleDef_Slot rti1516e_moduledef_slots[] = {
-#ifdef Py_mod_exec
-        { Py_mod_exec, (void*)exec_module },
-#endif
-#ifdef Py_mod_multiple_interpreters
-        { Py_mod_multiple_interpreters, Py_MOD_PER_INTERPRETER_GIL_SUPPORTED },
-#endif
-#if PY_VERSION_HEX >= 0x030D0000
-        { Py_mod_gil, Py_MOD_GIL_NOT_USED },
-#endif
-        { 0/*id*/, NULL/*value*/ }
-};
-#endif
-
-
-static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "rti1516e",               /* m_name */
-        NULL,                     /* m_doc */
-        0,                        /* m_size */
-        rti1516e_methods,         /* m_methods */
-#ifdef Py_mod_exec
-        rti1516e_moduledef_slots, /* m_slots */
-#else
-        NULL,                     /* m_reload */
-#endif
-        NULL,                     /* m_traverse */
-        NULL,                     /* m_clear */
-        NULL                      /* m_free */
-};
-
 PyMODINIT_FUNC
 PyInit_rti1516e(void)
 {
-  if (type_ready() < 0)
-    return NULL;
-
 #ifdef Py_mod_exec
   PyObject *m = PyModuleDef_Init(&moduledef);
 #else
@@ -7830,9 +8102,8 @@ PyInit_rti1516e(void)
   if (!m)
     return NULL;
 
-  exec_module(m);
+  rti1516e_mod_exec(m);
 #endif
-
   return m;
 }
 
