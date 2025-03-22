@@ -288,7 +288,14 @@ PyRTI1516Module_AddObject(PyObject *m, const char* name, TypeObjectIndex index, 
 {
   PyRTI1516ModuleState* state = PyRTI1516Module_GetState(m);
   state->types[index] = type;
-  return PyModule_AddObject(m, name, type);
+#if 0x030D0000 <= PY_VERSION_HEX
+  return PyModule_Add(m, name, type);
+#else
+  int ret = PyModule_AddObject(m, name, type);
+  if (ret < 0)
+      Py_XDECREF(obj);
+  return ret;
+#endif
 }
 
 static PyObject*
