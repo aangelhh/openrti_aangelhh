@@ -358,6 +358,10 @@ class AttributeUpdateMessage;
 class TimeStampedAttributeUpdateMessage;
 class RequestAttributeUpdateMessage;
 class RequestClassAttributeUpdateMessage;
+class AttributeOwnershipAcquisitionRequestMessage;
+class RequestAttributeOwnershipReleaseMessage;
+class UnconditionalAttributeOwnershipDivestitureMessage;
+class AttributeOwnershipAcquisitionNotificationMessage;
 
 typedef bool Bool;
 
@@ -6763,6 +6767,362 @@ private:
   VariableLengthData _tag;
 };
 
+class OPENRTI_API AttributeOwnershipAcquisitionRequestMessage : public AbstractMessage {
+public:
+  AttributeOwnershipAcquisitionRequestMessage();
+  virtual ~AttributeOwnershipAcquisitionRequestMessage();
+
+  virtual const char* getTypeName() const;
+  virtual void out(std::ostream& os) const;
+  virtual void dispatch(const AbstractMessageDispatcher& dispatcher) const;
+
+  virtual bool operator==(const AbstractMessage& rhs) const;
+  bool operator==(const AttributeOwnershipAcquisitionRequestMessage& rhs) const;
+  bool operator<(const AttributeOwnershipAcquisitionRequestMessage& rhs) const;
+  bool operator!=(const AttributeOwnershipAcquisitionRequestMessage& rhs) const
+  { return !operator==(rhs); }
+  bool operator>(const AttributeOwnershipAcquisitionRequestMessage& rhs) const
+  { return rhs.operator<(*this); }
+  bool operator>=(const AttributeOwnershipAcquisitionRequestMessage& rhs) const
+  { return !operator<(rhs); }
+  bool operator<=(const AttributeOwnershipAcquisitionRequestMessage& rhs) const
+  { return !operator>(rhs); }
+
+  virtual ObjectInstanceHandle getObjectInstanceHandleForMessage() const;
+
+  void setFederationHandle(const FederationHandle& value)
+  { _federationHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setFederationHandle(FederationHandle&& value)
+  { _federationHandle = std::move(value); }
+#endif
+  FederationHandle& getFederationHandle()
+  { return _federationHandle; }
+  const FederationHandle& getFederationHandle() const
+  { return _federationHandle; }
+
+  void setFederateHandle(const FederateHandle& value)
+  { _federateHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setFederateHandle(FederateHandle&& value)
+  { _federateHandle = std::move(value); }
+#endif
+  FederateHandle& getFederateHandle()
+  { return _federateHandle; }
+  const FederateHandle& getFederateHandle() const
+  { return _federateHandle; }
+
+  void setObjectInstanceHandle(const ObjectInstanceHandle& value)
+  { _objectInstanceHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setObjectInstanceHandle(ObjectInstanceHandle&& value)
+  { _objectInstanceHandle = std::move(value); }
+#endif
+  ObjectInstanceHandle& getObjectInstanceHandle()
+  { return _objectInstanceHandle; }
+  const ObjectInstanceHandle& getObjectInstanceHandle() const
+  { return _objectInstanceHandle; }
+
+  void setAttributeHandles(const AttributeHandleVector& value)
+  { _attributeHandles = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setAttributeHandles(AttributeHandleVector&& value)
+  { _attributeHandles = std::move(value); }
+#endif
+  AttributeHandleVector& getAttributeHandles()
+  { return _attributeHandles; }
+  const AttributeHandleVector& getAttributeHandles() const
+  { return _attributeHandles; }
+
+  void setTag(const VariableLengthData& value)
+  { _tag = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setTag(VariableLengthData&& value)
+  { _tag = std::move(value); }
+#endif
+  VariableLengthData& getTag()
+  { return _tag; }
+  const VariableLengthData& getTag() const
+  { return _tag; }
+
+private:
+  FederationHandle _federationHandle;
+  FederateHandle _federateHandle;
+  ObjectInstanceHandle _objectInstanceHandle;
+  AttributeHandleVector _attributeHandles;
+  VariableLengthData _tag;
+};
+
+class OPENRTI_API RequestAttributeOwnershipReleaseMessage : public AbstractMessage {
+public:
+  RequestAttributeOwnershipReleaseMessage();
+  virtual ~RequestAttributeOwnershipReleaseMessage();
+
+  virtual const char* getTypeName() const;
+  virtual void out(std::ostream& os) const;
+  virtual void dispatch(const AbstractMessageDispatcher& dispatcher) const;
+
+  virtual bool operator==(const AbstractMessage& rhs) const;
+  bool operator==(const RequestAttributeOwnershipReleaseMessage& rhs) const;
+  bool operator<(const RequestAttributeOwnershipReleaseMessage& rhs) const;
+  bool operator!=(const RequestAttributeOwnershipReleaseMessage& rhs) const
+  { return !operator==(rhs); }
+  bool operator>(const RequestAttributeOwnershipReleaseMessage& rhs) const
+  { return rhs.operator<(*this); }
+  bool operator>=(const RequestAttributeOwnershipReleaseMessage& rhs) const
+  { return !operator<(rhs); }
+  bool operator<=(const RequestAttributeOwnershipReleaseMessage& rhs) const
+  { return !operator>(rhs); }
+
+  virtual ObjectInstanceHandle getObjectInstanceHandleForMessage() const;
+
+  void setFederationHandle(const FederationHandle& value)
+  { _federationHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setFederationHandle(FederationHandle&& value)
+  { _federationHandle = std::move(value); }
+#endif
+  FederationHandle& getFederationHandle()
+  { return _federationHandle; }
+  const FederationHandle& getFederationHandle() const
+  { return _federationHandle; }
+
+  void setFederateHandle(const FederateHandle& value)
+  { _federateHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setFederateHandle(FederateHandle&& value)
+  { _federateHandle = std::move(value); }
+#endif
+  FederateHandle& getFederateHandle()
+  { return _federateHandle; }
+  const FederateHandle& getFederateHandle() const
+  { return _federateHandle; }
+
+  void setObjectInstanceHandle(const ObjectInstanceHandle& value)
+  { _objectInstanceHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setObjectInstanceHandle(ObjectInstanceHandle&& value)
+  { _objectInstanceHandle = std::move(value); }
+#endif
+  ObjectInstanceHandle& getObjectInstanceHandle()
+  { return _objectInstanceHandle; }
+  const ObjectInstanceHandle& getObjectInstanceHandle() const
+  { return _objectInstanceHandle; }
+
+  void setAttributeHandles(const AttributeHandleVector& value)
+  { _attributeHandles = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setAttributeHandles(AttributeHandleVector&& value)
+  { _attributeHandles = std::move(value); }
+#endif
+  AttributeHandleVector& getAttributeHandles()
+  { return _attributeHandles; }
+  const AttributeHandleVector& getAttributeHandles() const
+  { return _attributeHandles; }
+
+  void setTag(const VariableLengthData& value)
+  { _tag = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setTag(VariableLengthData&& value)
+  { _tag = std::move(value); }
+#endif
+  VariableLengthData& getTag()
+  { return _tag; }
+  const VariableLengthData& getTag() const
+  { return _tag; }
+
+private:
+  FederationHandle _federationHandle;
+  FederateHandle _federateHandle;
+  ObjectInstanceHandle _objectInstanceHandle;
+  AttributeHandleVector _attributeHandles;
+  VariableLengthData _tag;
+};
+
+class OPENRTI_API UnconditionalAttributeOwnershipDivestitureMessage : public AbstractMessage {
+public:
+  UnconditionalAttributeOwnershipDivestitureMessage();
+  virtual ~UnconditionalAttributeOwnershipDivestitureMessage();
+
+  virtual const char* getTypeName() const;
+  virtual void out(std::ostream& os) const;
+  virtual void dispatch(const AbstractMessageDispatcher& dispatcher) const;
+
+  virtual bool operator==(const AbstractMessage& rhs) const;
+  bool operator==(const UnconditionalAttributeOwnershipDivestitureMessage& rhs) const;
+  bool operator<(const UnconditionalAttributeOwnershipDivestitureMessage& rhs) const;
+  bool operator!=(const UnconditionalAttributeOwnershipDivestitureMessage& rhs) const
+  { return !operator==(rhs); }
+  bool operator>(const UnconditionalAttributeOwnershipDivestitureMessage& rhs) const
+  { return rhs.operator<(*this); }
+  bool operator>=(const UnconditionalAttributeOwnershipDivestitureMessage& rhs) const
+  { return !operator<(rhs); }
+  bool operator<=(const UnconditionalAttributeOwnershipDivestitureMessage& rhs) const
+  { return !operator>(rhs); }
+
+  virtual ObjectInstanceHandle getObjectInstanceHandleForMessage() const;
+
+  void setFederationHandle(const FederationHandle& value)
+  { _federationHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setFederationHandle(FederationHandle&& value)
+  { _federationHandle = std::move(value); }
+#endif
+  FederationHandle& getFederationHandle()
+  { return _federationHandle; }
+  const FederationHandle& getFederationHandle() const
+  { return _federationHandle; }
+
+  void setFederateHandle(const FederateHandle& value)
+  { _federateHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setFederateHandle(FederateHandle&& value)
+  { _federateHandle = std::move(value); }
+#endif
+  FederateHandle& getFederateHandle()
+  { return _federateHandle; }
+  const FederateHandle& getFederateHandle() const
+  { return _federateHandle; }
+
+  void setNewOwnerFederateHandle(const FederateHandle& value)
+  { _newOwnerFederateHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setNewOwnerFederateHandle(FederateHandle&& value)
+  { _newOwnerFederateHandle = std::move(value); }
+#endif
+  FederateHandle& getNewOwnerFederateHandle()
+  { return _newOwnerFederateHandle; }
+  const FederateHandle& getNewOwnerFederateHandle() const
+  { return _newOwnerFederateHandle; }
+
+  void setObjectInstanceHandle(const ObjectInstanceHandle& value)
+  { _objectInstanceHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setObjectInstanceHandle(ObjectInstanceHandle&& value)
+  { _objectInstanceHandle = std::move(value); }
+#endif
+  ObjectInstanceHandle& getObjectInstanceHandle()
+  { return _objectInstanceHandle; }
+  const ObjectInstanceHandle& getObjectInstanceHandle() const
+  { return _objectInstanceHandle; }
+
+  void setAttributeHandles(const AttributeHandleVector& value)
+  { _attributeHandles = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setAttributeHandles(AttributeHandleVector&& value)
+  { _attributeHandles = std::move(value); }
+#endif
+  AttributeHandleVector& getAttributeHandles()
+  { return _attributeHandles; }
+  const AttributeHandleVector& getAttributeHandles() const
+  { return _attributeHandles; }
+
+  void setTag(const VariableLengthData& value)
+  { _tag = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setTag(VariableLengthData&& value)
+  { _tag = std::move(value); }
+#endif
+  VariableLengthData& getTag()
+  { return _tag; }
+  const VariableLengthData& getTag() const
+  { return _tag; }
+
+private:
+  FederationHandle _federationHandle;
+  FederateHandle _federateHandle;
+  FederateHandle _newOwnerFederateHandle;
+  ObjectInstanceHandle _objectInstanceHandle;
+  AttributeHandleVector _attributeHandles;
+  VariableLengthData _tag;
+};
+
+class OPENRTI_API AttributeOwnershipAcquisitionNotificationMessage : public AbstractMessage {
+public:
+  AttributeOwnershipAcquisitionNotificationMessage();
+  virtual ~AttributeOwnershipAcquisitionNotificationMessage();
+
+  virtual const char* getTypeName() const;
+  virtual void out(std::ostream& os) const;
+  virtual void dispatch(const AbstractMessageDispatcher& dispatcher) const;
+
+  virtual bool operator==(const AbstractMessage& rhs) const;
+  bool operator==(const AttributeOwnershipAcquisitionNotificationMessage& rhs) const;
+  bool operator<(const AttributeOwnershipAcquisitionNotificationMessage& rhs) const;
+  bool operator!=(const AttributeOwnershipAcquisitionNotificationMessage& rhs) const
+  { return !operator==(rhs); }
+  bool operator>(const AttributeOwnershipAcquisitionNotificationMessage& rhs) const
+  { return rhs.operator<(*this); }
+  bool operator>=(const AttributeOwnershipAcquisitionNotificationMessage& rhs) const
+  { return !operator<(rhs); }
+  bool operator<=(const AttributeOwnershipAcquisitionNotificationMessage& rhs) const
+  { return !operator>(rhs); }
+
+  virtual ObjectInstanceHandle getObjectInstanceHandleForMessage() const;
+
+  void setFederationHandle(const FederationHandle& value)
+  { _federationHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setFederationHandle(FederationHandle&& value)
+  { _federationHandle = std::move(value); }
+#endif
+  FederationHandle& getFederationHandle()
+  { return _federationHandle; }
+  const FederationHandle& getFederationHandle() const
+  { return _federationHandle; }
+
+  void setFederateHandle(const FederateHandle& value)
+  { _federateHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setFederateHandle(FederateHandle&& value)
+  { _federateHandle = std::move(value); }
+#endif
+  FederateHandle& getFederateHandle()
+  { return _federateHandle; }
+  const FederateHandle& getFederateHandle() const
+  { return _federateHandle; }
+
+  void setObjectInstanceHandle(const ObjectInstanceHandle& value)
+  { _objectInstanceHandle = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setObjectInstanceHandle(ObjectInstanceHandle&& value)
+  { _objectInstanceHandle = std::move(value); }
+#endif
+  ObjectInstanceHandle& getObjectInstanceHandle()
+  { return _objectInstanceHandle; }
+  const ObjectInstanceHandle& getObjectInstanceHandle() const
+  { return _objectInstanceHandle; }
+
+  void setAttributeHandles(const AttributeHandleVector& value)
+  { _attributeHandles = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setAttributeHandles(AttributeHandleVector&& value)
+  { _attributeHandles = std::move(value); }
+#endif
+  AttributeHandleVector& getAttributeHandles()
+  { return _attributeHandles; }
+  const AttributeHandleVector& getAttributeHandles() const
+  { return _attributeHandles; }
+
+  void setTag(const VariableLengthData& value)
+  { _tag = value; }
+#if 201103L <= __cplusplus || 200610L <= __cpp_rvalue_reference
+  void setTag(VariableLengthData&& value)
+  { _tag = std::move(value); }
+#endif
+  VariableLengthData& getTag()
+  { return _tag; }
+  const VariableLengthData& getTag() const
+  { return _tag; }
+
+private:
+  FederationHandle _federationHandle;
+  FederateHandle _federateHandle;
+  ObjectInstanceHandle _objectInstanceHandle;
+  AttributeHandleVector _attributeHandles;
+  VariableLengthData _tag;
+};
+
 
 template<typename char_type, typename traits_type>
 std::basic_ostream<char_type, traits_type>&
@@ -9034,6 +9394,80 @@ operator<<(std::basic_ostream<char_type, traits_type>& os, const RequestClassAtt
   os << "federationHandle: " << value.getFederationHandle();
   os << ", ";
   os << "objectClassHandle: " << value.getObjectClassHandle();
+  os << ", ";
+  os << "attributeHandles: " << value.getAttributeHandles();
+  os << ", ";
+  os << "tag: " << value.getTag();
+  os << " }";
+  return os;
+}
+
+template<typename char_type, typename traits_type>
+std::basic_ostream<char_type, traits_type>&
+operator<<(std::basic_ostream<char_type, traits_type>& os, const AttributeOwnershipAcquisitionRequestMessage& value)
+{
+  os << "{ ";
+  os << "federationHandle: " << value.getFederationHandle();
+  os << ", ";
+  os << "federateHandle: " << value.getFederateHandle();
+  os << ", ";
+  os << "objectInstanceHandle: " << value.getObjectInstanceHandle();
+  os << ", ";
+  os << "attributeHandles: " << value.getAttributeHandles();
+  os << ", ";
+  os << "tag: " << value.getTag();
+  os << " }";
+  return os;
+}
+
+template<typename char_type, typename traits_type>
+std::basic_ostream<char_type, traits_type>&
+operator<<(std::basic_ostream<char_type, traits_type>& os, const RequestAttributeOwnershipReleaseMessage& value)
+{
+  os << "{ ";
+  os << "federationHandle: " << value.getFederationHandle();
+  os << ", ";
+  os << "federateHandle: " << value.getFederateHandle();
+  os << ", ";
+  os << "objectInstanceHandle: " << value.getObjectInstanceHandle();
+  os << ", ";
+  os << "attributeHandles: " << value.getAttributeHandles();
+  os << ", ";
+  os << "tag: " << value.getTag();
+  os << " }";
+  return os;
+}
+
+template<typename char_type, typename traits_type>
+std::basic_ostream<char_type, traits_type>&
+operator<<(std::basic_ostream<char_type, traits_type>& os, const UnconditionalAttributeOwnershipDivestitureMessage& value)
+{
+  os << "{ ";
+  os << "federationHandle: " << value.getFederationHandle();
+  os << ", ";
+  os << "federateHandle: " << value.getFederateHandle();
+  os << ", ";
+  os << "newOwnerFederateHandle: " << value.getNewOwnerFederateHandle();
+  os << ", ";
+  os << "objectInstanceHandle: " << value.getObjectInstanceHandle();
+  os << ", ";
+  os << "attributeHandles: " << value.getAttributeHandles();
+  os << ", ";
+  os << "tag: " << value.getTag();
+  os << " }";
+  return os;
+}
+
+template<typename char_type, typename traits_type>
+std::basic_ostream<char_type, traits_type>&
+operator<<(std::basic_ostream<char_type, traits_type>& os, const AttributeOwnershipAcquisitionNotificationMessage& value)
+{
+  os << "{ ";
+  os << "federationHandle: " << value.getFederationHandle();
+  os << ", ";
+  os << "federateHandle: " << value.getFederateHandle();
+  os << ", ";
+  os << "objectInstanceHandle: " << value.getObjectInstanceHandle();
   os << ", ";
   os << "attributeHandles: " << value.getAttributeHandles();
   os << ", ";

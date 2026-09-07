@@ -87,6 +87,10 @@ class AttributeUpdateMessage;
 class TimeStampedAttributeUpdateMessage;
 class RequestAttributeUpdateMessage;
 class RequestClassAttributeUpdateMessage;
+class AttributeOwnershipAcquisitionRequestMessage;
+class RequestAttributeOwnershipReleaseMessage;
+class UnconditionalAttributeOwnershipDivestitureMessage;
+class AttributeOwnershipAcquisitionNotificationMessage;
 
 class OPENRTI_LOCAL AbstractMessageDispatcher {
 public:
@@ -152,6 +156,10 @@ public:
   virtual void accept(const TimeStampedAttributeUpdateMessage&) const = 0;
   virtual void accept(const RequestAttributeUpdateMessage&) const = 0;
   virtual void accept(const RequestClassAttributeUpdateMessage&) const = 0;
+  virtual void accept(const AttributeOwnershipAcquisitionRequestMessage&) const = 0;
+  virtual void accept(const RequestAttributeOwnershipReleaseMessage&) const = 0;
+  virtual void accept(const UnconditionalAttributeOwnershipDivestitureMessage&) const = 0;
+  virtual void accept(const AttributeOwnershipAcquisitionNotificationMessage&) const = 0;
 };
 
 template<typename T>
@@ -220,6 +228,10 @@ public:
   virtual void accept(const TimeStampedAttributeUpdateMessage& message) const { _t(message); }
   virtual void accept(const RequestAttributeUpdateMessage& message) const { _t(message); }
   virtual void accept(const RequestClassAttributeUpdateMessage& message) const { _t(message); }
+  virtual void accept(const AttributeOwnershipAcquisitionRequestMessage& message) const { _t(message); }
+  virtual void accept(const RequestAttributeOwnershipReleaseMessage& message) const { _t(message); }
+  virtual void accept(const UnconditionalAttributeOwnershipDivestitureMessage& message) const { _t(message); }
+  virtual void accept(const AttributeOwnershipAcquisitionNotificationMessage& message) const { _t(message); }
 private:
   T& _t;
 };
@@ -290,6 +302,10 @@ public:
   virtual void accept(const TimeStampedAttributeUpdateMessage& message) const { _t(message); }
   virtual void accept(const RequestAttributeUpdateMessage& message) const { _t(message); }
   virtual void accept(const RequestClassAttributeUpdateMessage& message) const { _t(message); }
+  virtual void accept(const AttributeOwnershipAcquisitionRequestMessage& message) const { _t(message); }
+  virtual void accept(const RequestAttributeOwnershipReleaseMessage& message) const { _t(message); }
+  virtual void accept(const UnconditionalAttributeOwnershipDivestitureMessage& message) const { _t(message); }
+  virtual void accept(const AttributeOwnershipAcquisitionNotificationMessage& message) const { _t(message); }
 private:
   const T& _t;
 };

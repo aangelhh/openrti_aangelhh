@@ -3694,4 +3694,300 @@ RequestClassAttributeUpdateMessage::operator<(const RequestClassAttributeUpdateM
   return false;
 }
 
+AttributeOwnershipAcquisitionRequestMessage::AttributeOwnershipAcquisitionRequestMessage() :
+  _federationHandle(),
+  _federateHandle(),
+  _objectInstanceHandle(),
+  _attributeHandles(),
+  _tag()
+{
+}
+
+AttributeOwnershipAcquisitionRequestMessage::~AttributeOwnershipAcquisitionRequestMessage()
+{
+}
+
+const char*
+AttributeOwnershipAcquisitionRequestMessage::getTypeName() const
+{
+  return "AttributeOwnershipAcquisitionRequestMessage";
+}
+
+void
+AttributeOwnershipAcquisitionRequestMessage::out(std::ostream& os) const
+{
+  os << "AttributeOwnershipAcquisitionRequestMessage " << *this;
+}
+
+void
+AttributeOwnershipAcquisitionRequestMessage::dispatch(const AbstractMessageDispatcher& dispatcher) const
+{
+  dispatcher.accept(*this);
+}
+
+bool
+AttributeOwnershipAcquisitionRequestMessage::operator==(const AbstractMessage& rhs) const
+{
+  const AttributeOwnershipAcquisitionRequestMessage* message = dynamic_cast<const AttributeOwnershipAcquisitionRequestMessage*>(&rhs);
+  if (!message)
+    return false;
+  return operator==(*message);
+}
+
+bool
+AttributeOwnershipAcquisitionRequestMessage::operator==(const AttributeOwnershipAcquisitionRequestMessage& rhs) const
+{
+  if (getFederationHandle() != rhs.getFederationHandle()) return false;
+  if (getFederateHandle() != rhs.getFederateHandle()) return false;
+  if (getObjectInstanceHandle() != rhs.getObjectInstanceHandle()) return false;
+  if (getAttributeHandles() != rhs.getAttributeHandles()) return false;
+  if (getTag() != rhs.getTag()) return false;
+  return true;
+}
+
+bool
+AttributeOwnershipAcquisitionRequestMessage::operator<(const AttributeOwnershipAcquisitionRequestMessage& rhs) const
+{
+  if (getFederationHandle() < rhs.getFederationHandle()) return true;
+  if (rhs.getFederationHandle() < getFederationHandle()) return false;
+  if (getFederateHandle() < rhs.getFederateHandle()) return true;
+  if (rhs.getFederateHandle() < getFederateHandle()) return false;
+  if (getObjectInstanceHandle() < rhs.getObjectInstanceHandle()) return true;
+  if (rhs.getObjectInstanceHandle() < getObjectInstanceHandle()) return false;
+  if (getAttributeHandles() < rhs.getAttributeHandles()) return true;
+  if (rhs.getAttributeHandles() < getAttributeHandles()) return false;
+  if (getTag() < rhs.getTag()) return true;
+  if (rhs.getTag() < getTag()) return false;
+  return false;
+}
+
+ObjectInstanceHandle
+AttributeOwnershipAcquisitionRequestMessage::getObjectInstanceHandleForMessage() const
+{
+  return getObjectInstanceHandle();
+}
+
+RequestAttributeOwnershipReleaseMessage::RequestAttributeOwnershipReleaseMessage() :
+  _federationHandle(),
+  _federateHandle(),
+  _objectInstanceHandle(),
+  _attributeHandles(),
+  _tag()
+{
+}
+
+RequestAttributeOwnershipReleaseMessage::~RequestAttributeOwnershipReleaseMessage()
+{
+}
+
+const char*
+RequestAttributeOwnershipReleaseMessage::getTypeName() const
+{
+  return "RequestAttributeOwnershipReleaseMessage";
+}
+
+void
+RequestAttributeOwnershipReleaseMessage::out(std::ostream& os) const
+{
+  os << "RequestAttributeOwnershipReleaseMessage " << *this;
+}
+
+void
+RequestAttributeOwnershipReleaseMessage::dispatch(const AbstractMessageDispatcher& dispatcher) const
+{
+  dispatcher.accept(*this);
+}
+
+bool
+RequestAttributeOwnershipReleaseMessage::operator==(const AbstractMessage& rhs) const
+{
+  const RequestAttributeOwnershipReleaseMessage* message = dynamic_cast<const RequestAttributeOwnershipReleaseMessage*>(&rhs);
+  if (!message)
+    return false;
+  return operator==(*message);
+}
+
+bool
+RequestAttributeOwnershipReleaseMessage::operator==(const RequestAttributeOwnershipReleaseMessage& rhs) const
+{
+  if (getFederationHandle() != rhs.getFederationHandle()) return false;
+  if (getFederateHandle() != rhs.getFederateHandle()) return false;
+  if (getObjectInstanceHandle() != rhs.getObjectInstanceHandle()) return false;
+  if (getAttributeHandles() != rhs.getAttributeHandles()) return false;
+  if (getTag() != rhs.getTag()) return false;
+  return true;
+}
+
+bool
+RequestAttributeOwnershipReleaseMessage::operator<(const RequestAttributeOwnershipReleaseMessage& rhs) const
+{
+  if (getFederationHandle() < rhs.getFederationHandle()) return true;
+  if (rhs.getFederationHandle() < getFederationHandle()) return false;
+  if (getFederateHandle() < rhs.getFederateHandle()) return true;
+  if (rhs.getFederateHandle() < getFederateHandle()) return false;
+  if (getObjectInstanceHandle() < rhs.getObjectInstanceHandle()) return true;
+  if (rhs.getObjectInstanceHandle() < getObjectInstanceHandle()) return false;
+  if (getAttributeHandles() < rhs.getAttributeHandles()) return true;
+  if (rhs.getAttributeHandles() < getAttributeHandles()) return false;
+  if (getTag() < rhs.getTag()) return true;
+  if (rhs.getTag() < getTag()) return false;
+  return false;
+}
+
+ObjectInstanceHandle
+RequestAttributeOwnershipReleaseMessage::getObjectInstanceHandleForMessage() const
+{
+  return getObjectInstanceHandle();
+}
+
+UnconditionalAttributeOwnershipDivestitureMessage::UnconditionalAttributeOwnershipDivestitureMessage() :
+  _federationHandle(),
+  _federateHandle(),
+  _newOwnerFederateHandle(),
+  _objectInstanceHandle(),
+  _attributeHandles(),
+  _tag()
+{
+}
+
+UnconditionalAttributeOwnershipDivestitureMessage::~UnconditionalAttributeOwnershipDivestitureMessage()
+{
+}
+
+const char*
+UnconditionalAttributeOwnershipDivestitureMessage::getTypeName() const
+{
+  return "UnconditionalAttributeOwnershipDivestitureMessage";
+}
+
+void
+UnconditionalAttributeOwnershipDivestitureMessage::out(std::ostream& os) const
+{
+  os << "UnconditionalAttributeOwnershipDivestitureMessage " << *this;
+}
+
+void
+UnconditionalAttributeOwnershipDivestitureMessage::dispatch(const AbstractMessageDispatcher& dispatcher) const
+{
+  dispatcher.accept(*this);
+}
+
+bool
+UnconditionalAttributeOwnershipDivestitureMessage::operator==(const AbstractMessage& rhs) const
+{
+  const UnconditionalAttributeOwnershipDivestitureMessage* message = dynamic_cast<const UnconditionalAttributeOwnershipDivestitureMessage*>(&rhs);
+  if (!message)
+    return false;
+  return operator==(*message);
+}
+
+bool
+UnconditionalAttributeOwnershipDivestitureMessage::operator==(const UnconditionalAttributeOwnershipDivestitureMessage& rhs) const
+{
+  if (getFederationHandle() != rhs.getFederationHandle()) return false;
+  if (getFederateHandle() != rhs.getFederateHandle()) return false;
+  if (getNewOwnerFederateHandle() != rhs.getNewOwnerFederateHandle()) return false;
+  if (getObjectInstanceHandle() != rhs.getObjectInstanceHandle()) return false;
+  if (getAttributeHandles() != rhs.getAttributeHandles()) return false;
+  if (getTag() != rhs.getTag()) return false;
+  return true;
+}
+
+bool
+UnconditionalAttributeOwnershipDivestitureMessage::operator<(const UnconditionalAttributeOwnershipDivestitureMessage& rhs) const
+{
+  if (getFederationHandle() < rhs.getFederationHandle()) return true;
+  if (rhs.getFederationHandle() < getFederationHandle()) return false;
+  if (getFederateHandle() < rhs.getFederateHandle()) return true;
+  if (rhs.getFederateHandle() < getFederateHandle()) return false;
+  if (getNewOwnerFederateHandle() < rhs.getNewOwnerFederateHandle()) return true;
+  if (rhs.getNewOwnerFederateHandle() < getNewOwnerFederateHandle()) return false;
+  if (getObjectInstanceHandle() < rhs.getObjectInstanceHandle()) return true;
+  if (rhs.getObjectInstanceHandle() < getObjectInstanceHandle()) return false;
+  if (getAttributeHandles() < rhs.getAttributeHandles()) return true;
+  if (rhs.getAttributeHandles() < getAttributeHandles()) return false;
+  if (getTag() < rhs.getTag()) return true;
+  if (rhs.getTag() < getTag()) return false;
+  return false;
+}
+
+ObjectInstanceHandle
+UnconditionalAttributeOwnershipDivestitureMessage::getObjectInstanceHandleForMessage() const
+{
+  return getObjectInstanceHandle();
+}
+
+AttributeOwnershipAcquisitionNotificationMessage::AttributeOwnershipAcquisitionNotificationMessage() :
+  _federationHandle(),
+  _federateHandle(),
+  _objectInstanceHandle(),
+  _attributeHandles(),
+  _tag()
+{
+}
+
+AttributeOwnershipAcquisitionNotificationMessage::~AttributeOwnershipAcquisitionNotificationMessage()
+{
+}
+
+const char*
+AttributeOwnershipAcquisitionNotificationMessage::getTypeName() const
+{
+  return "AttributeOwnershipAcquisitionNotificationMessage";
+}
+
+void
+AttributeOwnershipAcquisitionNotificationMessage::out(std::ostream& os) const
+{
+  os << "AttributeOwnershipAcquisitionNotificationMessage " << *this;
+}
+
+void
+AttributeOwnershipAcquisitionNotificationMessage::dispatch(const AbstractMessageDispatcher& dispatcher) const
+{
+  dispatcher.accept(*this);
+}
+
+bool
+AttributeOwnershipAcquisitionNotificationMessage::operator==(const AbstractMessage& rhs) const
+{
+  const AttributeOwnershipAcquisitionNotificationMessage* message = dynamic_cast<const AttributeOwnershipAcquisitionNotificationMessage*>(&rhs);
+  if (!message)
+    return false;
+  return operator==(*message);
+}
+
+bool
+AttributeOwnershipAcquisitionNotificationMessage::operator==(const AttributeOwnershipAcquisitionNotificationMessage& rhs) const
+{
+  if (getFederationHandle() != rhs.getFederationHandle()) return false;
+  if (getFederateHandle() != rhs.getFederateHandle()) return false;
+  if (getObjectInstanceHandle() != rhs.getObjectInstanceHandle()) return false;
+  if (getAttributeHandles() != rhs.getAttributeHandles()) return false;
+  if (getTag() != rhs.getTag()) return false;
+  return true;
+}
+
+bool
+AttributeOwnershipAcquisitionNotificationMessage::operator<(const AttributeOwnershipAcquisitionNotificationMessage& rhs) const
+{
+  if (getFederationHandle() < rhs.getFederationHandle()) return true;
+  if (rhs.getFederationHandle() < getFederationHandle()) return false;
+  if (getFederateHandle() < rhs.getFederateHandle()) return true;
+  if (rhs.getFederateHandle() < getFederateHandle()) return false;
+  if (getObjectInstanceHandle() < rhs.getObjectInstanceHandle()) return true;
+  if (rhs.getObjectInstanceHandle() < getObjectInstanceHandle()) return false;
+  if (getAttributeHandles() < rhs.getAttributeHandles()) return true;
+  if (rhs.getAttributeHandles() < getAttributeHandles()) return false;
+  if (getTag() < rhs.getTag()) return true;
+  if (rhs.getTag() < getTag()) return false;
+  return false;
+}
+
+ObjectInstanceHandle
+AttributeOwnershipAcquisitionNotificationMessage::getObjectInstanceHandleForMessage() const
+{
+  return getObjectInstanceHandle();
+}
+
 } // namespace OpenRTI

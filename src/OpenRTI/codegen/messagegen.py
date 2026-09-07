@@ -1683,7 +1683,42 @@ class TypeMap(object):
 
 import sys
 import getopt
-import libxml2
+try:
+    import libxml2
+except ImportError:
+    libxml2 = None
+    import xml.etree.ElementTree as ElementTree
+
+
+class ElementTreeNode(object):
+    def __init__(self, element):
+        self.type = 'element'
+        self.name = element.tag
+        self._element = element
+        self.children = None
+        self.next = None
+        previous = None
+        for childElement in list(element):
+            child = ElementTreeNode(childElement)
+            if previous is None:
+                self.children = child
+            else:
+                previous.next = child
+            previous = child
+
+    def prop(self, name):
+        return self._element.get(name)
+
+
+class ElementTreeDocument(object):
+    def __init__(self, path):
+        self._root = ElementTreeNode(ElementTree.parse(path).getroot())
+
+    def getRootElement(self):
+        return self._root
+
+    def freeDoc(self):
+        pass
 
 messageDefinitionFile = 'codegen/Message.xml'
 outputMode = ''
@@ -1704,7 +1739,10 @@ for (arg, val) in args:
 #    libxml2.XML_PARSE_DTDLOAD +
 #    libxml2.XML_PARSE_DTDVALID +
 #    libxml2.XML_PARSE_NOBLANKS)
-doc = libxml2.readFile(messageDefinitionFile, None, libxml2.XML_PARSE_NOBLANKS)
+if libxml2 is None:
+    doc = ElementTreeDocument(messageDefinitionFile)
+else:
+    doc = libxml2.readFile(messageDefinitionFile, None, libxml2.XML_PARSE_NOBLANKS)
 rootElement = doc.getRootElement()
 typeMap = TypeMap(rootElement.children)
 doc.freeDoc()

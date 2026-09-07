@@ -21,6 +21,7 @@
 #define OpenRTI_Ambassador_h
 
 #include <algorithm>
+#include <map>
 #include <sstream>
 #include "Export.h"
 #include "OpenRTIConfig.h"
@@ -1736,7 +1737,36 @@ public:
       throw NotConnected();
     if (!_federate.valid())
       throw FederateNotExecutionMember();
-    throw RTIinternalError("Not implemented");
+    Federate::ObjectInstance* objectInstance = _federate->getObjectInstance(objectInstanceHandle);
+    if (!objectInstance)
+      throw ObjectInstanceNotKnown(objectInstanceHandle.toString());
+
+    for (AttributeHandleVector::const_iterator i = attributeHandleVector.begin(); i != attributeHandleVector.end(); ++i) {
+      Federate::InstanceAttribute* attribute = objectInstance->getInstanceAttribute(*i);
+      if (!attribute)
+        throw AttributeNotDefined(i->toString());
+      if (!attribute->getIsOwnedByFederate())
+        throw AttributeNotOwned(i->toString());
+    }
+
+    for (AttributeHandleVector::const_iterator i = attributeHandleVector.begin(); i != attributeHandleVector.end(); ++i) {
+      AttributeOwnershipKey key(objectInstanceHandle, *i);
+      typename PendingAttributeOwnershipMap::iterator pending = _pendingAttributeOwnershipMap.find(key);
+
+      SharedPtr<UnconditionalAttributeOwnershipDivestitureMessage> request;
+      request = new UnconditionalAttributeOwnershipDivestitureMessage;
+      request->setFederationHandle(getFederationHandle());
+      request->setFederateHandle(getFederateHandle());
+      request->setObjectInstanceHandle(objectInstanceHandle);
+      request->getAttributeHandles().push_back(*i);
+      if (pending != _pendingAttributeOwnershipMap.end()) {
+        request->setNewOwnerFederateHandle(pending->second.federateHandle);
+        request->setTag(pending->second.tag);
+        _pendingAttributeOwnershipMap.erase(pending);
+      }
+      send(request);
+      objectInstance->getInstanceAttribute(*i)->setIsOwnedByFederate(false);
+    }
   }
 
   void negotiatedAttributeOwnershipDivestiture(ObjectInstanceHandle objectInstanceHandle, AttributeHandleVector& attributeHandleVector, VariableLengthData& tag)
@@ -1792,7 +1822,31 @@ public:
       throw NotConnected();
     if (!_federate.valid())
       throw FederateNotExecutionMember();
-    throw RTIinternalError("Not implemented");
+    Federate::ObjectInstance* objectInstance = _federate->getObjectInstance(objectInstanceHandle);
+    if (!objectInstance)
+      throw ObjectInstanceNotKnown(objectInstanceHandle.toString());
+    Federate::ObjectClass* objectClass = _federate->getObjectClass(objectInstance->getObjectClassHandle());
+    if (!objectClass || !objectClass->isPublished())
+      throw ObjectClassNotPublished(objectInstance->getObjectClassHandle().toString());
+
+    for (AttributeHandleVector::const_iterator i = attributeHandleVector.begin(); i != attributeHandleVector.end(); ++i) {
+      Federate::InstanceAttribute* attribute = objectInstance->getInstanceAttribute(*i);
+      if (!attribute)
+        throw AttributeNotDefined(i->toString());
+      if (!objectClass->isAttributePublished(*i))
+        throw AttributeNotPublished(i->toString());
+      if (attribute->getIsOwnedByFederate())
+        throw FederateOwnsAttributes(i->toString());
+    }
+
+    SharedPtr<AttributeOwnershipAcquisitionRequestMessage> request;
+    request = new AttributeOwnershipAcquisitionRequestMessage;
+    request->setFederationHandle(getFederationHandle());
+    request->setFederateHandle(getFederateHandle());
+    request->setObjectInstanceHandle(objectInstanceHandle);
+    request->getAttributeHandles().swap(attributeHandleVector);
+    request->getTag().swap(tag);
+    send(request);
   }
 
   void attributeOwnershipAcquisitionIfAvailable(ObjectInstanceHandle objectInstanceHandle, AttributeHandleVector& attributeHandleVector)
@@ -3856,6 +3910,45 @@ public:
       return;
     provideAttributeValueUpdate(objectInstanceHandle, attributeHandleVector, message.getTag());
   }
+  void acceptCallbackMessage(const RequestAttributeOwnershipReleaseMessage& message)
+  {
+    if (!_federate.valid())
+      return;
+    Federate::ObjectInstance* objectInstance = _federate->getObjectInstance(message.getObjectInstanceHandle());
+    if (!objectInstance)
+      return;
+
+    AttributeHandleVector attributeHandleVector;
+    for (AttributeHandleVector::const_iterator i = message.getAttributeHandles().begin(); i != message.getAttributeHandles().end(); ++i) {
+      Federate::InstanceAttribute* attribute = objectInstance->getInstanceAttribute(*i);
+      if (!attribute || !attribute->getIsOwnedByFederate())
+        continue;
+      AttributeOwnershipKey key(message.getObjectInstanceHandle(), *i);
+      _pendingAttributeOwnershipMap[key] = PendingAttributeOwnership(message.getFederateHandle(), message.getTag());
+      attributeHandleVector.push_back(*i);
+    }
+    if (!attributeHandleVector.empty())
+      requestAttributeOwnershipRelease(message.getObjectInstanceHandle(), attributeHandleVector, message.getTag());
+  }
+  void acceptCallbackMessage(const AttributeOwnershipAcquisitionNotificationMessage& message)
+  {
+    if (!_federate.valid())
+      return;
+    Federate::ObjectInstance* objectInstance = _federate->getObjectInstance(message.getObjectInstanceHandle());
+    if (!objectInstance)
+      return;
+
+    AttributeHandleVector attributeHandleVector;
+    for (AttributeHandleVector::const_iterator i = message.getAttributeHandles().begin(); i != message.getAttributeHandles().end(); ++i) {
+      Federate::InstanceAttribute* attribute = objectInstance->getInstanceAttribute(*i);
+      if (!attribute)
+        continue;
+      attribute->setIsOwnedByFederate(true);
+      attributeHandleVector.push_back(*i);
+    }
+    if (!attributeHandleVector.empty())
+      attributeOwnershipAcquisitionNotification(message.getObjectInstanceHandle(), attributeHandleVector, message.getTag());
+  }
 
 
 
@@ -4007,12 +4100,26 @@ public:
   }
 
  private:
+  typedef std::pair<ObjectInstanceHandle, AttributeHandle> AttributeOwnershipKey;
+  struct PendingAttributeOwnership {
+    PendingAttributeOwnership()
+    { }
+    PendingAttributeOwnership(const FederateHandle& federateHandle_, const VariableLengthData& tag_) :
+      federateHandle(federateHandle_),
+      tag(tag_)
+    { }
+    FederateHandle federateHandle;
+    VariableLengthData tag;
+  };
+  typedef std::map<AttributeOwnershipKey, PendingAttributeOwnership> PendingAttributeOwnershipMap;
+
   // True if callbck dispatch is enabled or if callbacks are held back
   bool _callbacksEnabled;
   // The federate if available
   SharedPtr<Federate> _federate;
   // The timestamped queues
   SharedPtr<TimeManagement<Traits> > _timeManagement;
+  PendingAttributeOwnershipMap _pendingAttributeOwnershipMap;
 };
 
 } // namespace OpenRTI

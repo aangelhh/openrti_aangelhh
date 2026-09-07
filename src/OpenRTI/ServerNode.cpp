@@ -1553,6 +1553,111 @@ public:
     send(connectHandleSet, connectHandle, message);
   }
 
+  void accept(const ConnectHandle& connectHandle, const AttributeOwnershipAcquisitionRequestMessage* message)
+  {
+    typedef std::map<ConnectHandle, SharedPtr<RequestAttributeOwnershipReleaseMessage> > ConnectMessageMap;
+
+    ServerModel::ObjectInstance* objectInstance = getObjectInstance(message->getObjectInstanceHandle());
+    if (!objectInstance)
+      return;
+
+    ConnectMessageMap connectMessageMap;
+    for (AttributeHandleVector::const_iterator i = message->getAttributeHandles().begin(); i != message->getAttributeHandles().end(); ++i) {
+      ServerModel::InstanceAttribute* instanceAttribute = objectInstance->getInstanceAttribute(*i);
+      if (!instanceAttribute)
+        continue;
+      ConnectHandle ownerConnectHandle = instanceAttribute->getOwnerConnectHandle();
+      if (!ownerConnectHandle.valid() || ownerConnectHandle == connectHandle)
+        continue;
+      ConnectMessageMap::iterator j = connectMessageMap.find(ownerConnectHandle);
+      if (j == connectMessageMap.end()) {
+        SharedPtr<RequestAttributeOwnershipReleaseMessage> release = new RequestAttributeOwnershipReleaseMessage;
+        release->setFederationHandle(message->getFederationHandle());
+        release->setFederateHandle(message->getFederateHandle());
+        release->setObjectInstanceHandle(message->getObjectInstanceHandle());
+        release->setTag(message->getTag());
+        j = connectMessageMap.insert(ConnectMessageMap::value_type(ownerConnectHandle, release)).first;
+      }
+      j->second->getAttributeHandles().push_back(*i);
+    }
+    for (ConnectMessageMap::iterator i = connectMessageMap.begin(); i != connectMessageMap.end(); ++i)
+      send(i->first, i->second);
+  }
+
+  void accept(const ConnectHandle& connectHandle, const RequestAttributeOwnershipReleaseMessage* message)
+  {
+    ServerModel::ObjectInstance* objectInstance = getObjectInstance(message->getObjectInstanceHandle());
+    if (!objectInstance)
+      return;
+
+    typedef std::map<ConnectHandle, SharedPtr<RequestAttributeOwnershipReleaseMessage> > ConnectMessageMap;
+    ConnectMessageMap connectMessageMap;
+    for (AttributeHandleVector::const_iterator i = message->getAttributeHandles().begin(); i != message->getAttributeHandles().end(); ++i) {
+      ServerModel::InstanceAttribute* instanceAttribute = objectInstance->getInstanceAttribute(*i);
+      if (!instanceAttribute)
+        continue;
+      ConnectHandle ownerConnectHandle = instanceAttribute->getOwnerConnectHandle();
+      if (!ownerConnectHandle.valid() || ownerConnectHandle == connectHandle)
+        continue;
+      ConnectMessageMap::iterator j = connectMessageMap.find(ownerConnectHandle);
+      if (j == connectMessageMap.end()) {
+        SharedPtr<RequestAttributeOwnershipReleaseMessage> release = new RequestAttributeOwnershipReleaseMessage(*message);
+        release->getAttributeHandles().clear();
+        j = connectMessageMap.insert(ConnectMessageMap::value_type(ownerConnectHandle, release)).first;
+      }
+      j->second->getAttributeHandles().push_back(*i);
+    }
+    for (ConnectMessageMap::iterator i = connectMessageMap.begin(); i != connectMessageMap.end(); ++i)
+      send(i->first, i->second);
+  }
+
+  void accept(const ConnectHandle& connectHandle, const UnconditionalAttributeOwnershipDivestitureMessage* message)
+  {
+    ServerModel::ObjectInstance* objectInstance = getObjectInstance(message->getObjectInstanceHandle());
+    if (!objectInstance)
+      return;
+
+    ServerModel::Federate* newOwner = getFederate(message->getNewOwnerFederateHandle());
+    ConnectHandle newOwnerConnectHandle;
+    if (newOwner)
+      newOwnerConnectHandle = newOwner->getConnectHandle();
+
+    AttributeHandleVector transferredAttributes;
+    for (AttributeHandleVector::const_iterator i = message->getAttributeHandles().begin(); i != message->getAttributeHandles().end(); ++i) {
+      ServerModel::InstanceAttribute* instanceAttribute = objectInstance->getInstanceAttribute(*i);
+      if (!instanceAttribute || instanceAttribute->getOwnerConnectHandle() != connectHandle)
+        continue;
+      instanceAttribute->setOwnerConnectHandle(newOwnerConnectHandle);
+      if (newOwner)
+        transferredAttributes.push_back(*i);
+    }
+
+    if (!newOwner || transferredAttributes.empty())
+      return;
+    SharedPtr<AttributeOwnershipAcquisitionNotificationMessage> notification;
+    notification = new AttributeOwnershipAcquisitionNotificationMessage;
+    notification->setFederationHandle(message->getFederationHandle());
+    notification->setFederateHandle(message->getNewOwnerFederateHandle());
+    notification->setObjectInstanceHandle(message->getObjectInstanceHandle());
+    notification->getAttributeHandles().swap(transferredAttributes);
+    notification->setTag(message->getTag());
+    send(message->getNewOwnerFederateHandle(), notification);
+  }
+
+  void accept(const ConnectHandle&, const AttributeOwnershipAcquisitionNotificationMessage* message)
+  {
+    ServerModel::ObjectInstance* objectInstance = getObjectInstance(message->getObjectInstanceHandle());
+    ServerModel::Federate* newOwner = getFederate(message->getFederateHandle());
+    if (!objectInstance || !newOwner)
+      return;
+    for (AttributeHandleVector::const_iterator i = message->getAttributeHandles().begin(); i != message->getAttributeHandles().end(); ++i) {
+      ServerModel::InstanceAttribute* instanceAttribute = objectInstance->getInstanceAttribute(*i);
+      if (instanceAttribute)
+        instanceAttribute->setOwnerConnectHandle(newOwner->getConnectHandle());
+    }
+    send(message->getFederateHandle(), message);
+  }
+
   template<typename M>
   void acceptFederationMessage(const ConnectHandle& connectHandle, const M* message)
   {
@@ -2443,6 +2548,16 @@ public:
   void accept(const ConnectHandle& connectHandle, const RequestAttributeUpdateMessage* message)
   { acceptFederationMessage(connectHandle, message); }
   void accept(const ConnectHandle& connectHandle, const RequestClassAttributeUpdateMessage* message)
+  { acceptFederationMessage(connectHandle, message); }
+
+  // Attribute ownership management messages
+  void accept(const ConnectHandle& connectHandle, const AttributeOwnershipAcquisitionRequestMessage* message)
+  { acceptFederationMessage(connectHandle, message); }
+  void accept(const ConnectHandle& connectHandle, const RequestAttributeOwnershipReleaseMessage* message)
+  { acceptFederationMessage(connectHandle, message); }
+  void accept(const ConnectHandle& connectHandle, const UnconditionalAttributeOwnershipDivestitureMessage* message)
+  { acceptFederationMessage(connectHandle, message); }
+  void accept(const ConnectHandle& connectHandle, const AttributeOwnershipAcquisitionNotificationMessage* message)
   { acceptFederationMessage(connectHandle, message); }
 
   void accept(const ConnectHandle&, const AbstractMessage* message)

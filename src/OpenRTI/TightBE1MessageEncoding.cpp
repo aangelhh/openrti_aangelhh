@@ -1543,6 +1543,43 @@ public:
     writeVariableLengthData(value.getTag());
   }
 
+  void writeAttributeOwnershipAcquisitionRequestMessage(const AttributeOwnershipAcquisitionRequestMessage& value)
+  {
+    writeFederationHandle(value.getFederationHandle());
+    writeFederateHandle(value.getFederateHandle());
+    writeObjectInstanceHandle(value.getObjectInstanceHandle());
+    writeAttributeHandleVector(value.getAttributeHandles());
+    writeVariableLengthData(value.getTag());
+  }
+
+  void writeRequestAttributeOwnershipReleaseMessage(const RequestAttributeOwnershipReleaseMessage& value)
+  {
+    writeFederationHandle(value.getFederationHandle());
+    writeFederateHandle(value.getFederateHandle());
+    writeObjectInstanceHandle(value.getObjectInstanceHandle());
+    writeAttributeHandleVector(value.getAttributeHandles());
+    writeVariableLengthData(value.getTag());
+  }
+
+  void writeUnconditionalAttributeOwnershipDivestitureMessage(const UnconditionalAttributeOwnershipDivestitureMessage& value)
+  {
+    writeFederationHandle(value.getFederationHandle());
+    writeFederateHandle(value.getFederateHandle());
+    writeFederateHandle(value.getNewOwnerFederateHandle());
+    writeObjectInstanceHandle(value.getObjectInstanceHandle());
+    writeAttributeHandleVector(value.getAttributeHandles());
+    writeVariableLengthData(value.getTag());
+  }
+
+  void writeAttributeOwnershipAcquisitionNotificationMessage(const AttributeOwnershipAcquisitionNotificationMessage& value)
+  {
+    writeFederationHandle(value.getFederationHandle());
+    writeFederateHandle(value.getFederateHandle());
+    writeObjectInstanceHandle(value.getObjectInstanceHandle());
+    writeAttributeHandleVector(value.getAttributeHandles());
+    writeVariableLengthData(value.getTag());
+  }
+
   TightBE1MessageEncoding& _messageEncoding;
 };
 
@@ -3605,6 +3642,43 @@ public:
     readVariableLengthData(value.getTag());
   }
 
+  void readAttributeOwnershipAcquisitionRequestMessage(AttributeOwnershipAcquisitionRequestMessage& value)
+  {
+    readFederationHandle(value.getFederationHandle());
+    readFederateHandle(value.getFederateHandle());
+    readObjectInstanceHandle(value.getObjectInstanceHandle());
+    readAttributeHandleVector(value.getAttributeHandles());
+    readVariableLengthData(value.getTag());
+  }
+
+  void readRequestAttributeOwnershipReleaseMessage(RequestAttributeOwnershipReleaseMessage& value)
+  {
+    readFederationHandle(value.getFederationHandle());
+    readFederateHandle(value.getFederateHandle());
+    readObjectInstanceHandle(value.getObjectInstanceHandle());
+    readAttributeHandleVector(value.getAttributeHandles());
+    readVariableLengthData(value.getTag());
+  }
+
+  void readUnconditionalAttributeOwnershipDivestitureMessage(UnconditionalAttributeOwnershipDivestitureMessage& value)
+  {
+    readFederationHandle(value.getFederationHandle());
+    readFederateHandle(value.getFederateHandle());
+    readFederateHandle(value.getNewOwnerFederateHandle());
+    readObjectInstanceHandle(value.getObjectInstanceHandle());
+    readAttributeHandleVector(value.getAttributeHandles());
+    readVariableLengthData(value.getTag());
+  }
+
+  void readAttributeOwnershipAcquisitionNotificationMessage(AttributeOwnershipAcquisitionNotificationMessage& value)
+  {
+    readFederationHandle(value.getFederationHandle());
+    readFederateHandle(value.getFederateHandle());
+    readObjectInstanceHandle(value.getObjectInstanceHandle());
+    readAttributeHandleVector(value.getAttributeHandles());
+    readVariableLengthData(value.getTag());
+  }
+
 private:
   TightBE1MessageEncoding& _messageEncoding;
 };
@@ -3714,6 +3788,26 @@ public:
   }
 
   void readPayloadRequestClassAttributeUpdateMessage(RequestClassAttributeUpdateMessage& value)
+  {
+    readPayloadVariableLengthData(value.getTag());
+  }
+
+  void readPayloadAttributeOwnershipAcquisitionRequestMessage(AttributeOwnershipAcquisitionRequestMessage& value)
+  {
+    readPayloadVariableLengthData(value.getTag());
+  }
+
+  void readPayloadRequestAttributeOwnershipReleaseMessage(RequestAttributeOwnershipReleaseMessage& value)
+  {
+    readPayloadVariableLengthData(value.getTag());
+  }
+
+  void readPayloadUnconditionalAttributeOwnershipDivestitureMessage(UnconditionalAttributeOwnershipDivestitureMessage& value)
+  {
+    readPayloadVariableLengthData(value.getTag());
+  }
+
+  void readPayloadAttributeOwnershipAcquisitionNotificationMessage(AttributeOwnershipAcquisitionNotificationMessage& value)
   {
     readPayloadVariableLengthData(value.getTag());
   }

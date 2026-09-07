@@ -859,4 +859,39 @@
     <field name="Tag" type="VariableLengthData"/>
   </message>
 
+  <!-- Attribute ownership management (IEEE 1516e MVP). -->
+  <message type="AttributeOwnershipAcquisitionRequest">
+    <field name="FederationHandle" type="FederationHandle"/>
+    <field name="FederateHandle" type="FederateHandle"/>
+    <field name="ObjectInstanceHandle" type="ObjectInstanceHandle"/>
+    <field name="AttributeHandles" type="AttributeHandleVector"/>
+    <field name="Tag" type="VariableLengthData"/>
+    <objectInstance expression="getObjectInstanceHandle()"/>
+  </message>
+  <message type="RequestAttributeOwnershipRelease">
+    <field name="FederationHandle" type="FederationHandle"/>
+    <field name="FederateHandle" type="FederateHandle"/>
+    <field name="ObjectInstanceHandle" type="ObjectInstanceHandle"/>
+    <field name="AttributeHandles" type="AttributeHandleVector"/>
+    <field name="Tag" type="VariableLengthData"/>
+    <objectInstance expression="getObjectInstanceHandle()"/>
+  </message>
+  <message type="UnconditionalAttributeOwnershipDivestiture">
+    <field name="FederationHandle" type="FederationHandle"/>
+    <field name="FederateHandle" type="FederateHandle"/>
+    <field name="NewOwnerFederateHandle" type="FederateHandle"/>
+    <field name="ObjectInstanceHandle" type="ObjectInstanceHandle"/>
+    <field name="AttributeHandles" type="AttributeHandleVector"/>
+    <field name="Tag" type="VariableLengthData"/>
+    <objectInstance expression="getObjectInstanceHandle()"/>
+  </message>
+  <message type="AttributeOwnershipAcquisitionNotification">
+    <field name="FederationHandle" type="FederationHandle"/>
+    <field name="FederateHandle" type="FederateHandle"/>
+    <field name="ObjectInstanceHandle" type="ObjectInstanceHandle"/>
+    <field name="AttributeHandles" type="AttributeHandleVector"/>
+    <field name="Tag" type="VariableLengthData"/>
+    <objectInstance expression="getObjectInstanceHandle()"/>
+  </message>
+
 </messagelist>

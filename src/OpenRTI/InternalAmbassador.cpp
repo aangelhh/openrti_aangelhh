@@ -398,6 +398,18 @@ InternalAmbassador::acceptInternalMessage(const RequestAttributeUpdateMessage& m
 }
 
 void
+InternalAmbassador::acceptInternalMessage(const RequestAttributeOwnershipReleaseMessage& message)
+{
+  queueCallback(message);
+}
+
+void
+InternalAmbassador::acceptInternalMessage(const AttributeOwnershipAcquisitionNotificationMessage& message)
+{
+  queueCallback(message);
+}
+
+void
 InternalAmbassador::acceptInternalMessage(const RequestClassAttributeUpdateMessage& message)
 {
   Federate* federate = getFederate();

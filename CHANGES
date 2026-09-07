@@ -1,6 +1,10 @@
 OpenRTI-0.11.0 (development)
 ----------------------------
 
+ * Implement the IEEE 1516e attribute ownership acquisition and
+   unconditional divestiture lifecycle.
+ * Allow message code generation with Python's standard XML parser when the
+   optional libxml2 module is unavailable.
  * Increase minimum supported cmake version to 2.8.13.
  * Make python modules ready for subinterpreter private gil.
  * Clean up the server side object model.

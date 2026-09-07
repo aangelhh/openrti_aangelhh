@@ -105,6 +105,8 @@ public:
   void acceptInternalMessage(const TimeStampedAttributeUpdateMessage& message);
   void acceptInternalMessage(const RequestAttributeUpdateMessage& message);
   void acceptInternalMessage(const RequestClassAttributeUpdateMessage& message);
+  void acceptInternalMessage(const RequestAttributeOwnershipReleaseMessage& message);
+  void acceptInternalMessage(const AttributeOwnershipAcquisitionNotificationMessage& message);
 
 
   std::pair<CreateFederationExecutionResponseType, std::string>
